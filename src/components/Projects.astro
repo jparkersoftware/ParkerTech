@@ -1,0 +1,36 @@
+---
+import { projects } from '../data/projects';
+import ProjectCard from './ProjectCard.astro';
+---
+
+<section class="section section-soft projects" id="projects">
+  <div class="container">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow">02 — Projects</span>
+      <h2 class="section-title">Tools I've built for schools.</h2>
+      <p class="section-intro">
+        From products any school can pick up and use, to bespoke tools made for a
+        single school — here's a look at what I've built, and the problem each
+        one solves.
+      </p>
+    </div>
+
+    <div class="projects-grid">
+      {projects.map((project, i) => <ProjectCard project={project} index={i} />)}
+    </div>
+  </div>
+</section>
+
+<style>
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: clamp(1rem, 2.5vw, 1.5rem);
+  }
+
+  @media (max-width: 760px) {
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

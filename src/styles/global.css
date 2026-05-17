@@ -1,0 +1,283 @@
+/* ============================================================
+   ParkerTech — global styles
+   Design tokens, reset, base elements, and shared utilities.
+   Component-specific styles live in each .astro component.
+   ============================================================ */
+
+:root {
+  /* surfaces — warm, light, paper-like */
+  --bg: #faf8f3;
+  --bg-soft: #f2ede3;
+  --surface: #ffffff;
+  --surface-hover: #fbfaf6;
+
+  /* borders */
+  --border: #e7e0d3;
+  --border-strong: #d6cbb6;
+
+  /* text — warm near-black */
+  --text: #241f18;
+  --text-muted: #6a6155;
+  --text-dim: #9c9082;
+
+  /* accent — trustworthy teal, warm amber spark */
+  --accent: #0d9488;
+  --accent-bright: #14b8a6;
+  --accent-deep: #0c6f66;
+  --accent-2: #ea8a3c;
+  --grad: linear-gradient(118deg, #0c6f66 0%, #0d9488 48%, #14b8a6 100%);
+  --grad-soft: linear-gradient(118deg, #0d9488, #14b8a6);
+
+  /* tinted fills (used for inputs, tags, subtle hovers) */
+  --fill: rgba(36, 31, 24, 0.035);
+  --fill-strong: rgba(36, 31, 24, 0.065);
+  --accent-tint: rgba(13, 148, 136, 0.1);
+  --accent-line: rgba(13, 148, 136, 0.4);
+
+  /* shape & motion */
+  --maxw: 1120px;
+  --radius: 18px;
+  --radius-sm: 11px;
+  --radius-pill: 999px;
+  --shadow: 0 1px 3px rgba(36, 31, 24, 0.05), 0 18px 40px -22px rgba(36, 31, 24, 0.28);
+  --shadow-lg: 0 1px 3px rgba(36, 31, 24, 0.06), 0 30px 60px -28px rgba(36, 31, 24, 0.36);
+  --shadow-glow: 0 10px 28px -8px rgba(13, 148, 136, 0.5);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --nav-h: 72px;
+
+  /* type */
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Space Grotesk', var(--font-sans);
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  color-scheme: light;
+}
+
+/* ── reset ──────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--nav-h) + 24px);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+::selection {
+  background: rgba(13, 148, 136, 0.2);
+  color: var(--text);
+}
+
+/* ── focus visibility ───────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%) translateY(-120%);
+  z-index: 200;
+  background: var(--accent);
+  color: #fff;
+  padding: 0.7rem 1.2rem;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  font-weight: 600;
+  transition: transform 0.2s var(--ease);
+}
+.skip-link:focus {
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ── layout helpers ─────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 5vw, 2.5rem);
+}
+
+.section {
+  padding-block: clamp(4.5rem, 11vw, 8rem);
+  position: relative;
+}
+.section-soft {
+  background: var(--bg-soft);
+}
+
+/* ── headings ───────────────────────────────────────────────── */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.section-head {
+  max-width: 640px;
+  margin-bottom: clamp(2.5rem, 5vw, 3.75rem);
+}
+
+.section-title {
+  font-size: clamp(1.9rem, 4.5vw, 2.85rem);
+  margin-top: 0.85rem;
+}
+
+.section-intro {
+  color: var(--text-muted);
+  margin-top: 1rem;
+  font-size: 1.05rem;
+}
+
+/* eyebrow label — small monospace tag above headings */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+.eyebrow::before {
+  content: '';
+  width: 1.6rem;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+/* gradient text */
+.grad-text {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── buttons ────────────────────────────────────────────────── */
+.btn {
+  --btn-pad-y: 0.85rem;
+  --btn-pad-x: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: var(--btn-pad-y) var(--btn-pad-x);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease),
+    background-color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--accent-bright), var(--accent));
+  color: #fff;
+  box-shadow: var(--shadow-glow);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px -10px rgba(13, 148, 136, 0.6);
+}
+
+.btn-ghost {
+  background: var(--surface);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+.btn-ghost:hover {
+  transform: translateY(-2px);
+  background: var(--surface-hover);
+  border-color: var(--accent);
+  color: var(--accent-deep);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn .arrow {
+  transition: transform 0.2s var(--ease);
+}
+.btn:hover .arrow {
+  transform: translateX(3px);
+}
+
+/* ── reveal-on-scroll animation ─────────────────────────────── */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+}

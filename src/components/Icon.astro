@@ -1,0 +1,60 @@
+---
+/** Inline SVG icons. */
+interface Props {
+  name: 'email' | 'arrow-up-right' | 'arrow-right' | 'menu' | 'close' | 'check';
+  size?: number;
+  class?: string;
+}
+const { name, size = 20, class: className } = Astro.props;
+
+const common = {
+  width: size,
+  height: size,
+  viewBox: '0 0 24 24',
+  'aria-hidden': 'true',
+  class: className,
+};
+---
+
+{
+  name === 'email' && (
+    <svg {...common} fill="currentColor">
+      <path d="M3 5h18a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Zm1.86 2L12 11.99 19.14 7H4.86ZM20 8.42l-7.4 5.17a1 1 0 0 1-1.2 0L4 8.42V17h16V8.42Z" />
+    </svg>
+  )
+}
+{
+  name === 'arrow-up-right' && (
+    <svg {...common} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 17 17 7M8 7h9v9" />
+    </svg>
+  )
+}
+{
+  name === 'arrow-right' && (
+    <svg {...common} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 12h13M13 5l7 7-7 7" />
+    </svg>
+  )
+}
+{
+  name === 'menu' && (
+    <svg {...common} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 6h18M3 12h18M3 18h18" />
+    </svg>
+  )
+}
+{
+  name === 'close' && (
+    <svg {...common} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+  )
+}
+{
+  name === 'check' && (
+    <svg {...common} fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  )
+}

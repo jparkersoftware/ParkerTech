@@ -1,0 +1,175 @@
+---
+import { site } from '../data/site';
+import { projects } from '../data/projects';
+
+const year = new Date().getFullYear();
+const sections = [
+  { href: '#projects', label: 'Projects' },
+  { href: '#about', label: 'About' },
+  { href: '#contact', label: 'Contact' },
+];
+const tools = projects.filter((p) => p.liveUrl);
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="brand" href="#top" aria-label={`${site.brand} — home`}>
+          <span class="brand-mark" aria-hidden="true">P</span>
+          <span class="brand-word">Parker<span class="brand-accent">Tech</span></span>
+        </a>
+        <p class="footer-tagline">
+          Educational technology for schools — built by a developer who spent a
+          decade teaching in them.
+        </p>
+        <a class="footer-cta" href={`mailto:${site.email}`}>{site.email}</a>
+      </div>
+
+      <div class="footer-cols">
+        <nav class="footer-nav" aria-label="Footer">
+          <span class="footer-col-title">Site</span>
+          {sections.map((s) => <a href={s.href}>{s.label}</a>)}
+        </nav>
+        {
+          tools.length > 0 && (
+            <div class="footer-nav">
+              <span class="footer-col-title">Tools</span>
+              {tools.map((tool) => (
+                <a href={tool.liveUrl} target="_blank" rel="noopener noreferrer">
+                  {tool.title}
+                </a>
+              ))}
+            </div>
+          )
+        }
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© {year} {site.brand}. All rights reserved.</p>
+      <a class="footer-top-link" href="#top">
+        Back to top
+        <span class="footer-arrow" aria-hidden="true">↑</span>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    border-top: 1px solid var(--border);
+    background: var(--bg-soft);
+    padding-block: clamp(3rem, 6vw, 4.5rem) 2rem;
+  }
+
+  .footer-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 2.5rem;
+  }
+
+  .footer-brand {
+    max-width: 360px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.12rem;
+  }
+  .brand-mark {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--grad-soft);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.05rem;
+  }
+  .brand-accent {
+    color: var(--accent-deep);
+  }
+  .footer-tagline {
+    margin-top: 1rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .footer-cta {
+    display: inline-block;
+    margin-top: 1rem;
+    font-weight: 600;
+    color: var(--accent-deep);
+  }
+  .footer-cta:hover {
+    color: var(--accent-bright);
+  }
+
+  .footer-cols {
+    display: flex;
+    gap: clamp(2.5rem, 8vw, 5rem);
+  }
+  .footer-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .footer-col-title {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 0.3rem;
+  }
+  .footer-nav a {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    transition: color 0.2s var(--ease);
+  }
+  .footer-nav a:hover {
+    color: var(--accent-deep);
+  }
+
+  .footer-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    margin-top: clamp(2.5rem, 5vw, 3.5rem);
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.86rem;
+  }
+  .footer-top-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    transition: color 0.2s var(--ease);
+  }
+  .footer-top-link:hover {
+    color: var(--accent-deep);
+  }
+  .footer-arrow {
+    transition: transform 0.2s var(--ease);
+  }
+  .footer-top-link:hover .footer-arrow {
+    transform: translateY(-3px);
+  }
+
+  @media (max-width: 540px) {
+    .footer-cols {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+</style>

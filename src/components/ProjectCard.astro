@@ -1,0 +1,255 @@
+---
+import type { Project } from '../data/projects';
+import Icon from './Icon.astro';
+
+interface Props {
+  project: Project;
+  index: number;
+}
+
+const { project, index } = Astro.props;
+const num = String(index + 1).padStart(2, '0');
+---
+
+<article class:list={['project', { featured: project.featured }]} data-reveal>
+  <div class="project-body">
+    <div class="project-meta">
+      <span class="project-num">/{num}</span>
+      <span class="project-kind" data-kind={project.kind}>{project.kind}</span>
+      <span class="project-year">{project.year}</span>
+    </div>
+
+    <h3 class="project-title">{project.title}</h3>
+    <p class="project-blurb">{project.blurb}</p>
+    <p class="project-desc">{project.description}</p>
+
+    <ul class="project-tags">
+      {project.tags.map((tag) => <li>{tag}</li>)}
+    </ul>
+
+    <div class="project-foot">
+      {
+        project.liveUrl ? (
+          <a
+            class="project-link"
+            href={project.liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Visit {project.title}
+            <Icon name="arrow-up-right" size={15} />
+          </a>
+        ) : (
+          <p class="project-note">{project.note ?? 'Case study'}</p>
+        )
+      }
+    </div>
+  </div>
+
+  {
+    project.featured && (
+      <div class="project-art" aria-hidden="true">
+        <div class="project-art-grid" />
+        <span class="project-art-num grad-text">{num}</span>
+      </div>
+    )
+  }
+</article>
+
+<style>
+  .project {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: transform 0.3s var(--ease), border-color 0.3s var(--ease),
+      box-shadow 0.3s var(--ease);
+  }
+  .project::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(135deg, var(--accent), transparent 48%);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s var(--ease);
+    pointer-events: none;
+  }
+  .project:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+  }
+  .project:hover::before {
+    opacity: 1;
+  }
+
+  .project-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: clamp(1.5rem, 3vw, 2.1rem);
+  }
+
+  .project-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 1.1rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+  .project-num {
+    color: var(--accent-deep);
+    letter-spacing: 0.05em;
+  }
+  .project-kind {
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .project-kind[data-kind='Product'] {
+    background: var(--accent-tint);
+    border: 1px solid var(--accent-line);
+    color: var(--accent-deep);
+  }
+  .project-kind[data-kind='Bespoke build'] {
+    background: rgba(234, 138, 60, 0.13);
+    border: 1px solid rgba(234, 138, 60, 0.45);
+    color: #985614;
+  }
+  .project-year {
+    margin-inline-start: auto;
+    color: var(--text-dim);
+  }
+
+  .project-title {
+    font-size: clamp(1.3rem, 2.4vw, 1.65rem);
+  }
+  .project-blurb {
+    margin-top: 0.5rem;
+    color: var(--accent-deep);
+    font-weight: 600;
+  }
+  .project-desc {
+    margin-top: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.94rem;
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.25rem;
+  }
+  .project-tags li {
+    padding: 0.28rem 0.65rem;
+    border-radius: 7px;
+    background: var(--fill);
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+
+  .project-foot {
+    margin-top: auto;
+    padding-top: 1.5rem;
+  }
+  .project-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--accent-deep);
+    transition: color 0.2s var(--ease);
+  }
+  .project-link svg {
+    transition: transform 0.2s var(--ease);
+  }
+  .project-link:hover {
+    color: var(--accent-bright);
+  }
+  .project-link:hover svg {
+    transform: translate(2px, -2px);
+  }
+  .project-note {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.86rem;
+    color: var(--text-dim);
+  }
+  .project-note::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  /* ── featured layout ── */
+  .project.featured {
+    grid-column: 1 / -1;
+    flex-direction: row;
+  }
+  .project.featured .project-body {
+    flex: 1 1 62%;
+  }
+  .project-art {
+    position: relative;
+    flex: 1 1 38%;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(
+      circle at 70% 30%,
+      rgba(13, 148, 136, 0.16),
+      rgba(234, 138, 60, 0.07) 55%,
+      transparent 80%
+    );
+    border-left: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .project-art-grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(36, 31, 24, 0.06) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+  .project-art-num {
+    position: relative;
+    font-family: var(--font-display);
+    font-size: clamp(5rem, 12vw, 9rem);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  @media (max-width: 760px) {
+    .project.featured {
+      flex-direction: column;
+    }
+    .project.featured .project-body {
+      order: 2;
+    }
+    .project-art {
+      order: 1;
+      border-left: none;
+      border-bottom: 1px solid var(--border);
+      min-height: 160px;
+    }
+  }
+</style>
