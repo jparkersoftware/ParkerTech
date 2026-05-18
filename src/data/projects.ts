@@ -84,12 +84,35 @@ export const projects: Project[] = [
     kind: 'Product',
     logo: '/logos/vocmark.svg',
     cover: '/projects/vocmark.svg',
-    blurb: 'AI marking for BTEC & vocational courses.',
+    blurb: 'AI-assisted marking for BTEC & vocational courses.',
     description:
-      'An AI-powered marking platform for UK vocational qualifications — BTEC, CACHE and OCR Nationals. Teachers upload the course spec and assignment brief; VocMark extracts the assessment criteria, grades each submission against them with clear reasoning, and produces a personalised improvement plan for every student.',
-    tags: ['AI-powered', 'BTEC & vocational', 'Improvement plans'],
+      'An AI-assisted marking platform for UK vocational qualifications — BTEC, CACHE and OCR Nationals. Teachers upload the course spec and assignment brief; VocMark extracts the assessment criteria, drafts an assessment against them with clear reasoning for the teacher to review, and produces a personalised improvement plan for every student.',
+    tags: ['AI-assisted', 'BTEC & vocational', 'Improvement plans'],
     year: '2026',
     liveUrl: 'https://vocmark.co.uk',
+    builtWith: 'React, Firebase, Vite and the Anthropic API',
+    story: [
+      {
+        heading: 'Where it started',
+        body: [
+          "VocMark started with a single colleague. When I was moving on from a school, the BTEC course I'd taught was being handed to a teaching assistant — capable, but new to vocational qualifications, in a school where few staff had marked BTEC before. BTEC marking is exacting: every piece of work is judged against detailed Pass, Merit and Distinction criteria. I'd been experimenting with AI integrations, and it struck me that this was exactly the kind of task where the right tool could give a less experienced marker real confidence. So I built VocMark to support him — and it grew from there into a product any vocational teacher can use.",
+        ],
+      },
+      {
+        heading: 'How it works',
+        body: [
+          'VocMark works one assignment at a time. You create a class, then create an assignment by uploading two documents: the course specification and the assignment brief. VocMark reads both and pulls out the assessment criteria.',
+          "You then attach your class and, for each student, upload a PDF of their coursework. VocMark works through it against the criteria and produces a draft assessment — a judgement on each criterion with the reasoning behind it. That draft is a starting point, not a verdict: the teacher reviews, edits and decides. From there VocMark can generate a personal improvement plan for each student, setting out exactly what they'd need to do to reach the next grade.",
+        ],
+      },
+      {
+        heading: "Who it's for",
+        body: [
+          'VocMark is built for teachers who are new to vocational qualifications, or working without a BTEC specialist nearby. The aim is straightforward: help a less experienced marker feel confident in their grading decisions, and help every student get specific, useful feedback on how to progress.',
+          "It's an assistant, never a replacement for a teacher's professional judgement. VocMark only ever drafts and suggests — every grading decision stays with the teacher. That's deliberate: it keeps VocMark consistent with JCQ rules, which require the teacher to remain the assessor for regulated qualifications.",
+        ],
+      },
+    ],
   },
   {
     title: 'PM Review',
