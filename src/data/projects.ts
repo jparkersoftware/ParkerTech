@@ -33,7 +33,6 @@ export interface Project {
   featured?: boolean;
 }
 
-// TODO: refine any wording and confirm the launch years.
 export const projects: Project[] = [
   {
     title: 'ParkerMarker',
