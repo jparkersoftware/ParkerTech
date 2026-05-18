@@ -283,6 +283,12 @@ import Icon from './Icon.astro';
         if (i !== active) {
           event.preventDefault();
           go(i);
+          return;
+        }
+        // active card → open its detail page (unless a link was clicked)
+        const href = card.dataset.href;
+        if (href && !(event.target as HTMLElement).closest('a')) {
+          window.location.href = href;
         }
       });
     });

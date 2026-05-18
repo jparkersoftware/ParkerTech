@@ -9,6 +9,8 @@
 export interface Project {
   /** Project name shown on the card. */
   title: string;
+  /** URL slug for the project's detail page (/projects/<slug>). */
+  slug: string;
   /** "Product" (any school can use it) or "Bespoke build" (made for one school). */
   kind: 'Product' | 'Bespoke build';
   /** One short line summarising the project. */
@@ -36,6 +38,7 @@ export interface Project {
 export const projects: Project[] = [
   {
     title: 'ParkerMarker',
+    slug: 'parkermarker',
     kind: 'Product',
     logo: '/logos/parkermarker.svg',
     cover: '/projects/parkermarker.svg',
@@ -49,6 +52,7 @@ export const projects: Project[] = [
   },
   {
     title: 'VocMark',
+    slug: 'vocmark',
     kind: 'Product',
     logo: '/logos/vocmark.svg',
     cover: '/projects/vocmark.svg',
@@ -61,6 +65,7 @@ export const projects: Project[] = [
   },
   {
     title: 'PM Review',
+    slug: 'pm-review',
     kind: 'Product',
     logo: '/logos/pmreview.svg',
     cover: '/projects/pmreview.webp',
@@ -73,6 +78,7 @@ export const projects: Project[] = [
   },
   {
     title: 'Options Portal',
+    slug: 'options-portal',
     kind: 'Bespoke build',
     blurb: 'Subject options, controlled per student.',
     description:
@@ -83,6 +89,7 @@ export const projects: Project[] = [
   },
   {
     title: 'Staff Absence System',
+    slug: 'staff-absence-system',
     kind: 'Bespoke build',
     blurb: 'A paperless absence and cover workflow.',
     description:
@@ -93,6 +100,7 @@ export const projects: Project[] = [
   },
   {
     title: 'Staff Behaviour Dashboard',
+    slug: 'staff-behaviour-dashboard',
     kind: 'Bespoke build',
     blurb: 'Log, track and act on behaviour in one place.',
     description:
@@ -103,6 +111,7 @@ export const projects: Project[] = [
   },
   {
     title: 'Leadership Data Dashboards',
+    slug: 'leadership-data-dashboards',
     kind: 'Bespoke build',
     blurb: 'Live MIS data, visualised for leadership.',
     description:
@@ -113,6 +122,7 @@ export const projects: Project[] = [
   },
   {
     title: 'Exam Account Automation',
+    slug: 'exam-account-automation',
     kind: 'Bespoke build',
     blurb: 'Secure exam accounts, set up in seconds.',
     description:

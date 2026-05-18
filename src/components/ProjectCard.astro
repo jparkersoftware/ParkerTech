@@ -12,7 +12,12 @@ const num = String(index + 1).padStart(2, '0');
 const fit = project.coverFit ?? 'cover';
 ---
 
-<article class="pcard" data-index={index} aria-roledescription="project">
+<article
+  class="pcard"
+  data-index={index}
+  data-href={`/projects/${project.slug}`}
+  aria-roledescription="project"
+>
   <div class="pcard-cover" data-fit={fit}>
     {
       project.cover ? (
@@ -48,21 +53,10 @@ const fit = project.coverFit ?? 'cover';
     </ul>
 
     <div class="pcard-foot">
-      {
-        project.liveUrl ? (
-          <a
-            class="pcard-link"
-            href={project.liveUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Visit {project.title}
-            <Icon name="arrow-up-right" size={15} />
-          </a>
-        ) : (
-          <p class="pcard-note">{project.note ?? 'Case study'}</p>
-        )
-      }
+      <a class="pcard-link" href={`/projects/${project.slug}`}>
+        View project
+        <Icon name="arrow-right" size={15} />
+      </a>
     </div>
   </div>
 </article>
@@ -232,21 +226,6 @@ const fit = project.coverFit ?? 'cover';
   }
   .pcard-link:hover {
     gap: 0.6rem;
-  }
-  .pcard-note {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.84rem;
-    color: var(--text-dim);
-  }
-  .pcard-note::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--text-dim);
-    flex-shrink: 0;
   }
 
   /* ── mobile: cards sit in a native scroll-snap row ── */

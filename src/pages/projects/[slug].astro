@@ -1,0 +1,255 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import Icon from '../../components/Icon.astro';
+import { projects } from '../../data/projects';
+
+export function getStaticPaths() {
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const fit = project.coverFit ?? 'cover';
+---
+
+<Layout title={project.title} description={project.blurb}>
+  <Nav />
+  <main id="main" tabindex="-1">
+    <article class="project-detail">
+      <div class="container">
+        <div class="pd-wrap">
+          <a class="back-link" href="/#projects">
+            <span class="back-arrow" aria-hidden="true">←</span> All projects
+          </a>
+
+          <header class="pd-head">
+            <div class="pd-meta">
+              <span class="pd-kind" data-kind={project.kind}>{project.kind}</span>
+              <span class="pd-year">{project.year}</span>
+            </div>
+            <div class="pd-title-row">
+              {project.logo && <img class="pd-logo" src={project.logo} alt="" />}
+              <h1 class="pd-title">{project.title}</h1>
+            </div>
+            <p class="pd-blurb">{project.blurb}</p>
+          </header>
+
+          {
+            project.cover && (
+              <div class="pd-cover" data-fit={fit}>
+                <img src={project.cover} alt={`${project.title} preview`} />
+              </div>
+            )
+          }
+
+          <div class="pd-body">
+            <p class="pd-desc">{project.description}</p>
+
+            <ul class="pd-tags">
+              {project.tags.map((tag) => <li>{tag}</li>)}
+            </ul>
+
+            {
+              project.liveUrl ? (
+                <a
+                  class="pd-live"
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Visit the live site
+                  <Icon name="arrow-up-right" size={16} />
+                </a>
+              ) : (
+                <p class="pd-note">
+                  {project.note ?? 'Built privately as a case study.'}
+                </p>
+              )
+            }
+          </div>
+
+          <aside class="pd-cta">
+            <p>Interested in something similar for your school?</p>
+            <a class="btn btn-primary" href="/#contact">
+              Get in touch
+              <Icon name="arrow-right" size={18} class="arrow" />
+            </a>
+          </aside>
+        </div>
+      </div>
+    </article>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .project-detail {
+    padding-block: clamp(2rem, 5vw, 3.5rem) clamp(3.5rem, 8vw, 6rem);
+  }
+  .pd-wrap {
+    max-width: 820px;
+    margin-inline: auto;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color 0.2s var(--ease), gap 0.2s var(--ease);
+  }
+  .back-link:hover {
+    color: var(--accent-bright);
+    gap: 0.7rem;
+  }
+  .back-arrow {
+    font-size: 1.05em;
+  }
+
+  .pd-head {
+    margin-top: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .pd-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+  .pd-kind {
+    padding: 0.25rem 0.65rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .pd-kind[data-kind='Product'] {
+    background: var(--accent-tint);
+    border: 1px solid var(--accent-line);
+    color: var(--accent-bright);
+  }
+  .pd-kind[data-kind='Bespoke build'] {
+    background: rgba(245, 184, 100, 0.13);
+    border: 1px solid rgba(245, 184, 100, 0.4);
+    color: #f4c88c;
+  }
+  .pd-year {
+    color: var(--text-dim);
+  }
+
+  .pd-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-top: 1rem;
+  }
+  .pd-logo {
+    height: 44px;
+    width: auto;
+    flex-shrink: 0;
+  }
+  .pd-title {
+    font-size: clamp(2.1rem, 5vw, 3.2rem);
+  }
+  .pd-blurb {
+    margin-top: 0.9rem;
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    font-weight: 600;
+    color: var(--accent-bright);
+  }
+
+  .pd-cover {
+    margin-top: clamp(1.75rem, 4vw, 2.75rem);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+    overflow: hidden;
+  }
+  .pd-cover img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .pd-cover[data-fit='contain'] img {
+    padding: 1.5rem;
+  }
+
+  .pd-body {
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+  }
+  .pd-desc {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+  }
+  .pd-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+  }
+  .pd-tags li {
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    background: var(--fill);
+    border: 1px solid var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .pd-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 1.75rem;
+    font-weight: 600;
+    color: var(--accent-bright);
+    transition: gap 0.2s var(--ease);
+  }
+  .pd-live:hover {
+    gap: 0.65rem;
+  }
+  .pd-note {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.75rem;
+    font-size: 0.92rem;
+    color: var(--text-dim);
+  }
+  .pd-note::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    flex-shrink: 0;
+  }
+
+  .pd-cta {
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+    padding: clamp(1.5rem, 4vw, 2.25rem);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(circle at 100% 0%, rgba(125, 104, 255, 0.16), transparent 60%),
+      var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
+  .pd-cta p {
+    font-size: 1.05rem;
+    font-weight: 500;
+  }
+</style>

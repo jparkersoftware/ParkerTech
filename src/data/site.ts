@@ -97,6 +97,11 @@ export const site = {
         description:
           'Helping school leaders make sensible, well-structured technology decisions — with proper processes behind them, not guesswork.',
       },
+      {
+        title: 'MIS migration & setup',
+        description:
+          'Moving schools onto Arbor with full data migration from their previous MIS, then configuring it to fit — including assessment setup for individual schools and multi-academy trusts.',
+      },
     ],
     // Featured case study shown at the top of the IT support section.
     caseStudy: {

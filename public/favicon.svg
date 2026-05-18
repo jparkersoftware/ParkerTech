@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="ParkerTech">
   <defs>
-    <linearGradient id="pt" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#a294ff"/>
-      <stop offset="1" stop-color="#6a83ff"/>
+    <linearGradient id="pt" x1="8" y1="2" x2="56" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#a89bff"/>
+      <stop offset="1" stop-color="#5d8bff"/>
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="15" fill="url(#pt)"/>
-  <text x="50%" y="50%" dy="0.02em" text-anchor="middle" dominant-baseline="central"
-        font-family="'Bricolage Grotesque','Helvetica Neue',Arial,sans-serif"
-        font-size="42" font-weight="800" fill="#161620">P</text>
+  <text x="32" y="33" text-anchor="middle" dominant-baseline="central"
+        font-family="'Helvetica Neue',Helvetica,Arial,sans-serif"
+        font-size="42" font-weight="800" fill="#ffffff">P</text>
 </svg>

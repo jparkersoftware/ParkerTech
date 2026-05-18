@@ -3,25 +3,25 @@ import { site } from '../data/site';
 import Icon from './Icon.astro';
 
 const links = [
-  { href: '#projects', label: 'Projects' },
-  { href: '#about', label: 'About' },
-  { href: '#it-support', label: 'IT support' },
-  { href: '#contact', label: 'Contact' },
+  { id: 'projects', label: 'Projects' },
+  { id: 'about', label: 'About' },
+  { id: 'it-support', label: 'IT support' },
+  { id: 'contact', label: 'Contact' },
 ];
 ---
 
 <header class="nav" id="site-nav" data-state="top">
   <div class="container nav-inner">
-    <a class="brand" href="#top" aria-label={`${site.brand} — home`}>
+    <a class="brand" href="/#top" aria-label={`${site.brand} — home`}>
       <span class="brand-word">Parker<span class="brand-accent">Tech</span></span>
     </a>
 
     <nav class="nav-links" aria-label="Primary">
-      {links.map((l) => <a href={l.href} data-navlink={l.href}>{l.label}</a>)}
+      {links.map((l) => <a href={`/#${l.id}`} data-navlink={l.id}>{l.label}</a>)}
     </nav>
 
     <div class="nav-actions">
-      <a class="btn btn-primary nav-cta" href="#contact">Get in touch</a>
+      <a class="btn btn-primary nav-cta" href="/#contact">Get in touch</a>
       <button
         class="nav-toggle"
         id="nav-toggle"
@@ -37,9 +37,9 @@ const links = [
 
   <div class="mobile-menu" id="mobile-menu" hidden>
     <nav aria-label="Mobile">
-      {links.map((l) => <a href={l.href} data-mobilelink>{l.label}</a>)}
+      {links.map((l) => <a href={`/#${l.id}`} data-mobilelink>{l.label}</a>)}
     </nav>
-    <a class="btn btn-primary" href="#contact" data-mobilelink>Get in touch</a>
+    <a class="btn btn-primary" href="/#contact" data-mobilelink>Get in touch</a>
   </div>
 </header>
 
@@ -246,7 +246,7 @@ const links = [
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             navLinks.forEach((link) => {
-              link.dataset.active = String(link.dataset.navlink === `#${entry.target.id}`);
+              link.dataset.active = String(link.dataset.navlink === entry.target.id);
             });
           }
         });
