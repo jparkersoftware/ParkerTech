@@ -250,14 +250,36 @@ export const projects: Project[] = [
     note: 'Built privately for a school — not publicly available.',
   },
   {
-    title: 'Exam Account Automation',
-    slug: 'exam-account-automation',
+    title: 'Exam Account Deployment',
+    slug: 'exam-account-deployment',
     kind: 'Bespoke build',
     blurb: 'Secure exam accounts, set up in seconds.',
     description:
-      "A PowerShell automation built for a school's exams office. It provisions secure, locked-down candidate accounts ahead of on-screen exams and retrieves every candidate's files automatically once the exam finishes — replacing a manual, error-prone process with a fast, repeatable one that meets JCQ requirements for exam security.",
+      "A set of PowerShell scripts for a school's exams office, covering the full lifecycle of exam accounts — deploying secure, locked-down candidate accounts before on-screen exams, collecting candidates' files once exams finish, and resetting the accounts afterwards. It replaces a manual, error-prone routine with a fast, repeatable one that meets JCQ requirements for exam security.",
     tags: ['PowerShell', 'Exam administration', 'JCQ compliant'],
     year: '2023',
     note: 'Built privately for a school — not publicly available.',
+    builtWith: 'PowerShell and Active Directory',
+    story: [
+      {
+        heading: 'Where it started',
+        body: [
+          "Exam season comes with a quiet mountain of IT admin. Around on-screen exams and controlled assessments, a set of locked-down student accounts has to be created — each one named correctly, with the right password, group memberships and restrictions, so a candidate can only do what the exam allows — then, afterwards, the candidates' work collected and the accounts cleared back down. Done by hand, account by account, it's slow and easy to get subtly wrong, and in an exam context an inconsistent setting is a real problem. I wrote a set of PowerShell scripts so the school's exams office could handle every account the same way, every time.",
+        ],
+      },
+      {
+        heading: 'How it works',
+        body: [
+          "The work is split across a set of scripts that follow an exam account through its whole life. The first prepares the accounts: in a single run it creates or updates them in Active Directory, applies the school's standard naming convention, sets passwords, adds each account to the correct groups, and disables or restricts anything a candidate shouldn't be able to reach — so what comes out is a set of accounts ready for the exam devices, locked down and identical to one another.",
+          "Once exams are finished, a second script collects the candidates' work back off the accounts, so nothing is left scattered across machines — and a third resets the accounts, clearing them down ready for the next session. Because it's all scripted, the same process runs every exam season without depending on someone working through a list by hand.",
+        ],
+      },
+      {
+        heading: "Who it's for",
+        body: [
+          'The scripts were built for the people who carry exam readiness — the exams officer and the IT or network manager who have to be certain every account is correct before candidates sit down. They take a slow, error-prone job off their hands, and give school leadership confidence that exam access is controlled and consistent, in line with JCQ requirements for exam security.',
+        ],
+      },
+    ],
   },
 ];
