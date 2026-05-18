@@ -33,6 +33,10 @@ export interface Project {
   coverFit?: 'cover' | 'contain';
   /** Set true on ONE project to give it a larger, highlighted card. */
   featured?: boolean;
+  /** Optional one-line tech summary, shown on the detail page. */
+  builtWith?: string;
+  /** Optional long-form case study, shown on the detail page. */
+  story?: { heading: string; body: string[] }[];
 }
 
 export const projects: Project[] = [
@@ -49,6 +53,30 @@ export const projects: Project[] = [
     year: '2025',
     liveUrl: 'https://parkermarker.co.uk',
     featured: true,
+    builtWith: 'React, Firebase and Vite',
+    story: [
+      {
+        heading: 'Where it started',
+        body: [
+          "ParkerMarker began as a survival tactic. In my first years of teaching, a single class set of thirty geography books took about two hours to mark — a What Went Well, Even Better If and Next Steps comment for every student. So I built a spreadsheet: three comment banks, and lookups that turned a few numbers into a bespoke WWW/EBI/NS slip for each pupil. Mail-merged onto a cut-and-stick template, it brought that two hours down to twenty minutes. The teaching and learning team noticed, and within a week I was showing it to subject leaders — several departments adopted it. That spreadsheet is what ParkerMarker's Feedback Slips grew out of.",
+          "The other half came from assessment. After mock exams we kept large spreadsheets of marks per question, hunting for trends. One year I was asked to build a mail merge that could take the topics a student had struggled with and turn them into a personal improvement plan — their score, what they had done well, where the gaps were, and revision tasks to close them. That became ParkerMarker's Assessment Analysis. The app brings both ideas together, properly built, in one place.",
+        ],
+      },
+      {
+        heading: 'How it works',
+        body: [
+          'ParkerMarker is two tools in one app. You create your class once, then choose the workflow that fits the task in front of you.',
+          "Feedback Slips is for everyday marking. You build three comment banks yourself, or let the built-in AI suggest WWW/EBI/NS banks from the question you're marking. Then you mark with ParkerMarker open, assigning comments to each student with a click or a quick code. When you're done, you export the slips, print, cut and stick them into books — consistent feedback without writing the same comment thirty times.",
+          "Assessment Analysis is for gap analysis after an assessment. You enter the questions from a paper — the marks available, the topic, and a tolerance mark that flags weak performance — attach a class, and put in each student's marks per question. ParkerMarker does the rest: a clear picture of how the class performed and which topics they found hardest, plus a Personal Improvement Plan for every student showing what they know, what they don't, and the tasks to bridge the gap. You can also hand the AI a question paper and have it build the analysis grid for you — then you just enter the marks.",
+        ],
+      },
+      {
+        heading: "Who it's for",
+        body: [
+          'ParkerMarker is built for teachers, heads of department and school leaders. Teachers get their evenings back, with feedback that stays consistent without losing their own voice. Departments get shared comment banks and shared assignments, so a whole team marks to the same standard — and leaders can compare classes and see where support is needed most.',
+        ],
+      },
+    ],
   },
   {
     title: 'VocMark',
