@@ -33,7 +33,6 @@ export const site = {
 
   /* ── Hero section ─────────────────────────────────────────── */
   hero: {
-    eyebrow: 'Built by a teacher, for teachers',
     // The headline renders as:  {titleLead} {titleAccent in colour} {titleTail}
     titleLead: 'Technology that gives teachers',
     titleAccent: 'their time back.',
@@ -43,11 +42,12 @@ export const site = {
   },
 
   /* ── Contact form ─────────────────────────────────────────── */
-  // TODO: create a free form at https://formspree.io, then paste the
-  // ID from your form's endpoint (the bit after /f/) below.
-  // Example endpoint: https://formspree.io/f/xyzabcde  ->  formspreeId: 'xyzabcde'
-  // Until this is set, the form falls back to opening the visitor's email client.
-  formspreeId: 'YOUR_FORM_ID',
+  // TODO: get a free access key at https://web3forms.com — just enter the
+  // email address you want enquiries sent to and they email you a key.
+  // Paste it below: submissions are then emailed straight to you and the
+  // visitor never leaves the site. Until this is set, the form falls back
+  // to opening the visitor's email client.
+  web3formsKey: 'YOUR_ACCESS_KEY',
 
   /* ── About section ────────────────────────────────────────── */
   about: {
@@ -55,12 +55,6 @@ export const site = {
       "I'm Joseph. I spent a decade teaching in schools, so I know the Sunday evenings lost to marking, the clunky systems that fight you instead of helping, and the quiet wish that someone would just build the tool you actually needed.",
       "Eventually I decided to build it myself. I left the classroom to focus on technology full-time, and now I create software for schools — designed around how they really work, by someone who's been on the other side of the staffroom door.",
       'Some of what I build are products any school can pick up and use, like ParkerMarker and VocMark. Others are bespoke tools made for a single school. The aim never changes: less time lost to admin, more time for teaching.',
-    ],
-    // TODO: tweak these stats to reflect your real experience.
-    stats: [
-      { value: '10+', label: 'Years teaching in schools' },
-      { value: '4', label: 'Tools built for education' },
-      { value: '100%', label: 'Designed around real classrooms' },
     ],
     // The "What I can help with" card. Adjust the groups and items freely.
     capabilities: [

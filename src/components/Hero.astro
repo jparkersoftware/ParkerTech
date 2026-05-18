@@ -21,15 +21,6 @@ const headlineWords = [
   </div>
 
   <div class="container hero-inner">
-    {
-      site.available && (
-        <p class="hero-pill">
-          <span class="hero-dot" aria-hidden="true" />
-          {hero.eyebrow}
-        </p>
-      )
-    }
-
     <h1 class="hero-title">
       {
         headlineWords.map((item, i) => (
@@ -82,17 +73,18 @@ const headlineWords = [
   .aurora {
     position: absolute;
     border-radius: 50%;
-    filter: blur(90px);
+    filter: blur(100px);
+    opacity: 0.6;
     will-change: transform;
   }
   .aurora-1 {
-    width: 46vw;
-    height: 46vw;
-    max-width: 620px;
-    max-height: 620px;
+    width: 48vw;
+    height: 48vw;
+    max-width: 640px;
+    max-height: 640px;
     top: -14vw;
     left: -10vw;
-    background: radial-gradient(circle, rgba(13, 148, 136, 0.55), transparent 70%);
+    background: radial-gradient(circle, rgba(125, 104, 255, 0.62), transparent 70%);
     animation: drift-1 24s var(--ease) infinite alternate;
   }
   .aurora-2 {
@@ -102,7 +94,7 @@ const headlineWords = [
     max-height: 560px;
     bottom: -16vw;
     right: -8vw;
-    background: radial-gradient(circle, rgba(239, 154, 61, 0.42), transparent 70%);
+    background: radial-gradient(circle, rgba(93, 139, 255, 0.5), transparent 70%);
     animation: drift-2 30s var(--ease) infinite alternate;
   }
   .aurora-3 {
@@ -110,9 +102,9 @@ const headlineWords = [
     height: 34vw;
     max-width: 460px;
     max-height: 460px;
-    top: 28%;
-    right: 22%;
-    background: radial-gradient(circle, rgba(25, 196, 177, 0.4), transparent 70%);
+    top: 26%;
+    right: 24%;
+    background: radial-gradient(circle, rgba(168, 150, 255, 0.42), transparent 70%);
     animation: drift-3 20s var(--ease) infinite alternate;
   }
   @keyframes drift-1 {
@@ -133,7 +125,7 @@ const headlineWords = [
   .hero-grid {
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(rgba(21, 18, 13, 0.05) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px);
     background-size: 38px 38px;
     -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 10%, transparent 78%);
     mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 10%, transparent 78%);
@@ -149,45 +141,7 @@ const headlineWords = [
     text-align: center;
   }
 
-  .hero-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    padding: 0.48rem 1rem;
-    border-radius: var(--radius-pill);
-    border: 1px solid var(--border-strong);
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    box-shadow: var(--shadow);
-    font-size: 0.84rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    opacity: 0;
-    animation: rise 0.7s var(--ease) 0.05s forwards;
-  }
-  .hero-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #16a34a;
-    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5);
-    animation: pulse 2.4s infinite;
-  }
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.5);
-    }
-    70% {
-      box-shadow: 0 0 0 9px rgba(22, 163, 74, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
-    }
-  }
-
   .hero-title {
-    margin-top: 1.7rem;
     max-width: 16ch;
     font-size: clamp(2.9rem, 8.3vw, 6rem);
     line-height: 1.02;
@@ -199,7 +153,7 @@ const headlineWords = [
     opacity: 0;
     transform: translateY(0.55em);
     animation: word-in 0.72s var(--ease) forwards;
-    animation-delay: calc(var(--i) * 55ms + 0.15s);
+    animation-delay: calc(var(--i) * 55ms + 0.1s);
   }
   .hero-word .grad-text {
     display: inline-block;
@@ -217,7 +171,7 @@ const headlineWords = [
     color: var(--text-muted);
     font-size: clamp(1.02rem, 1.4vw, 1.2rem);
     opacity: 0;
-    animation: rise 0.7s var(--ease) 0.85s forwards;
+    animation: rise 0.7s var(--ease) 0.7s forwards;
   }
 
   .hero-actions {
@@ -227,7 +181,7 @@ const headlineWords = [
     justify-content: center;
     gap: 0.85rem;
     opacity: 0;
-    animation: rise 0.7s var(--ease) 1s forwards;
+    animation: rise 0.7s var(--ease) 0.85s forwards;
   }
 
   .hero-meta {
@@ -242,7 +196,7 @@ const headlineWords = [
     letter-spacing: 0.02em;
     color: var(--text-dim);
     opacity: 0;
-    animation: rise 0.7s var(--ease) 1.12s forwards;
+    animation: rise 0.7s var(--ease) 0.97s forwards;
   }
   .hero-meta-sep {
     width: 5px;
@@ -278,7 +232,7 @@ const headlineWords = [
     text-transform: uppercase;
     color: var(--text-dim);
     opacity: 0;
-    animation: rise 0.7s var(--ease) 1.3s forwards;
+    animation: rise 0.7s var(--ease) 1.15s forwards;
   }
   .hero-scroll-line {
     width: 1px;
@@ -314,7 +268,6 @@ const headlineWords = [
 
   @media (prefers-reduced-motion: reduce) {
     .hero-word,
-    .hero-pill,
     .hero-subtext,
     .hero-actions,
     .hero-meta,

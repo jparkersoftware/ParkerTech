@@ -17,14 +17,20 @@ import Icon from './Icon.astro';
     <div class="contact-grid">
       <!-- ── form ── -->
       <div class="contact-form-wrap" data-reveal>
-        <form
-          class="contact-form"
-          id="contact-form"
-          data-formspree-id={site.formspreeId}
-          data-email={site.email}
-        >
+        <form class="contact-form" id="contact-form" data-email={site.email}>
+          <!-- Web3Forms config: submissions are emailed to the key's owner -->
+          <input type="hidden" name="access_key" value={site.web3formsKey} />
+          <input type="hidden" name="subject" value="New enquiry from parkertech.co.uk" />
+          <input type="hidden" name="from_name" value="ParkerTech website" />
           <!-- honeypot: hidden from people, catches bots -->
-          <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <input
+            type="checkbox"
+            name="botcheck"
+            class="hp-field"
+            tabindex="-1"
+            autocomplete="off"
+            aria-hidden="true"
+          />
 
           <div class="field">
             <label for="cf-name">Name</label>
@@ -167,12 +173,12 @@ import Icon from './Icon.astro';
   .field textarea:focus {
     outline: none;
     border-color: var(--accent);
-    background: var(--surface);
-    box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.14);
+    background: rgba(125, 104, 255, 0.06);
+    box-shadow: 0 0 0 4px rgba(125, 104, 255, 0.2);
   }
 
   /* honeypot — visually removed, still in the DOM for bots */
-  input[name='_gotcha'] {
+  .hp-field {
     position: absolute;
     left: -9999px;
     width: 1px;
@@ -196,7 +202,7 @@ import Icon from './Icon.astro';
     color: var(--text-muted);
   }
   .form-status[data-kind='error'] {
-    color: #b91c1c;
+    color: #f87171;
   }
 
   /* success state */
@@ -214,9 +220,9 @@ import Icon from './Icon.astro';
     height: 56px;
     margin: 0 auto 1.1rem;
     border-radius: 50%;
-    background: rgba(22, 163, 74, 0.12);
-    border: 1px solid rgba(22, 163, 74, 0.4);
-    color: #16a34a;
+    background: rgba(52, 211, 153, 0.14);
+    border: 1px solid rgba(52, 211, 153, 0.4);
+    color: #34d399;
   }
   .form-success h3 {
     font-size: 1.4rem;
@@ -232,7 +238,7 @@ import Icon from './Icon.astro';
     border-radius: var(--radius);
     background: radial-gradient(
         circle at 100% 0%,
-        rgba(13, 148, 136, 0.1),
+        rgba(125, 104, 255, 0.16),
         transparent 55%
       ),
       var(--surface);
@@ -298,14 +304,14 @@ import Icon from './Icon.astro';
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    color: #15803d;
+    color: #4ade80;
   }
   .contact-available-dot {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #16a34a;
-    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
+    background: #34d399;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.2);
   }
 
   .contact-card-note {
@@ -328,9 +334,10 @@ import Icon from './Icon.astro';
   const submitBtn = form.querySelector('.contact-submit') as HTMLButtonElement;
   const labelEl = submitBtn.querySelector('.submit-label') as HTMLElement;
 
-  const formId = form.dataset.formspreeId ?? '';
+  const keyInput = form.querySelector('input[name="access_key"]') as HTMLInputElement | null;
+  const accessKey = keyInput?.value ?? '';
   const email = form.dataset.email ?? '';
-  const configured = formId !== '' && formId !== 'YOUR_FORM_ID';
+  const configured = accessKey !== '' && accessKey !== 'YOUR_ACCESS_KEY';
 
   const setStatus = (message: string, kind: 'error' | 'info' | '') => {
     statusEl.textContent = message;
@@ -346,7 +353,7 @@ import Icon from './Icon.astro';
 
     const data = new FormData(form);
 
-    // No Formspree set up yet — fall back to the visitor's email client.
+    // No form service set up yet — fall back to the visitor's email client.
     if (!configured) {
       const name = String(data.get('name') ?? '');
       const subject = encodeURIComponent(`Enquiry for ParkerTech from ${name}`);
@@ -363,19 +370,19 @@ import Icon from './Icon.astro';
     setStatus('', '');
 
     try {
-      const response = await fetch(`https://formspree.io/f/${formId}`, {
+      const response = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         body: data,
         headers: { Accept: 'application/json' },
       });
+      const json = await response.json().catch(() => null);
 
-      if (response.ok) {
+      if (response.ok && json?.success) {
         form.hidden = true;
         successEl.hidden = false;
         form.reset();
       } else {
-        const json = await response.json().catch(() => null);
-        const message = json?.errors?.[0]?.message ?? 'Something went wrong sending your message.';
+        const message = json?.message ?? 'Something went wrong sending your message.';
         setStatus(`${message} You can also email me directly at ${email}.`, 'error');
       }
     } catch {

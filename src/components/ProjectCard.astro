@@ -12,50 +12,46 @@ const num = String(index + 1).padStart(2, '0');
 const fit = project.coverFit ?? 'cover';
 ---
 
-<article
-  class:list={['project', { featured: project.featured, 'has-cover': !!project.cover }]}
-  data-reveal
->
-  {
-    project.cover && !project.featured && (
-      <div class="project-cover" data-fit={fit}>
+<article class="pcard" data-index={index} aria-roledescription="project">
+  <div class="pcard-cover" data-fit={fit}>
+    {
+      project.cover ? (
         <img src={project.cover} alt={`${project.title} preview`} loading="lazy" />
-      </div>
-    )
-  }
+      ) : (
+        <div class="pcard-cover-fallback">
+          <span class="grad-text">{num}</span>
+        </div>
+      )
+    }
+  </div>
 
-  <div class="project-body">
-    <div class="project-meta">
-      <span class="project-num">/{num}</span>
-      <span class="project-kind" data-kind={project.kind}>{project.kind}</span>
-      <span class="project-year">{project.year}</span>
+  <div class="pcard-body">
+    <div class="pcard-meta">
+      <span class="pcard-kind" data-kind={project.kind}>{project.kind}</span>
+      <span class="pcard-year">{project.year}</span>
     </div>
 
-    <div class="project-head">
+    <div class="pcard-head">
       {
         project.logo && (
-          <img
-            class="project-logo"
-            src={project.logo}
-            alt={`${project.title} logo`}
-            loading="lazy"
-          />
+          <img class="pcard-logo" src={project.logo} alt="" loading="lazy" />
         )
       }
-      <h3 class="project-title">{project.title}</h3>
+      <h3 class="pcard-title">{project.title}</h3>
     </div>
-    <p class="project-blurb">{project.blurb}</p>
-    <p class="project-desc">{project.description}</p>
 
-    <ul class="project-tags">
+    <p class="pcard-blurb">{project.blurb}</p>
+    <p class="pcard-desc">{project.description}</p>
+
+    <ul class="pcard-tags">
       {project.tags.map((tag) => <li>{tag}</li>)}
     </ul>
 
-    <div class="project-foot">
+    <div class="pcard-foot">
       {
         project.liveUrl ? (
           <a
-            class="project-link"
+            class="pcard-link"
             href={project.liveUrl}
             target="_blank"
             rel="noopener noreferrer"
@@ -64,32 +60,20 @@ const fit = project.coverFit ?? 'cover';
             <Icon name="arrow-up-right" size={15} />
           </a>
         ) : (
-          <p class="project-note">{project.note ?? 'Case study'}</p>
+          <p class="pcard-note">{project.note ?? 'Case study'}</p>
         )
       }
     </div>
   </div>
-
-  {
-    project.featured && project.cover && (
-      <div class="project-cover project-cover-side" data-fit={fit}>
-        <img src={project.cover} alt={`${project.title} preview`} loading="lazy" />
-      </div>
-    )
-  }
-  {
-    project.featured && !project.cover && (
-      <div class="project-art" aria-hidden="true">
-        <div class="project-art-grid" />
-        <span class="project-art-num grad-text">{num}</span>
-      </div>
-    )
-  }
 </article>
 
 <style>
-  .project {
-    position: relative;
+  .pcard {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: clamp(264px, 78vw, 384px);
+    height: clamp(430px, 112vw, 540px);
     display: flex;
     flex-direction: column;
     border-radius: var(--radius);
@@ -97,192 +81,167 @@ const fit = project.coverFit ?? 'cover';
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
     overflow: hidden;
-    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transform: translate(-50%, -50%);
+    transition: transform 0.6s var(--ease), opacity 0.5s var(--ease),
+      border-color 0.4s var(--ease), box-shadow 0.4s var(--ease);
+    cursor: pointer;
+    will-change: transform, opacity;
   }
-  /* cursor-following spotlight */
-  .project::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    border-radius: inherit;
-    background: radial-gradient(
-      360px circle at var(--mx, 50%) var(--my, 0%),
-      rgba(25, 196, 177, 0.16),
-      transparent 68%
-    );
-    opacity: 0;
-    transition: opacity 0.35s var(--ease);
-    pointer-events: none;
-  }
-  .project:hover::after {
-    opacity: 1;
-  }
-  /* glowing border on hover */
-  .project::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    border-radius: inherit;
-    padding: 1.5px;
-    background: linear-gradient(135deg, var(--accent-bright), transparent 48%);
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    mask-composite: exclude;
-    opacity: 0;
-    transition: opacity 0.35s var(--ease);
-    pointer-events: none;
-  }
-  .project:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-lg);
-  }
-  .project:hover::before {
-    opacity: 1;
+  .pcard.is-active {
+    border-color: var(--accent-line);
+    box-shadow: var(--shadow-lg), 0 0 70px -14px rgba(125, 104, 255, 0.55);
+    cursor: default;
   }
 
-  /* ── cover image ── */
-  .project-cover {
+  /* cover */
+  .pcard-cover {
     position: relative;
-    z-index: 1;
+    aspect-ratio: 1.618 / 1;
+    flex-shrink: 0;
     overflow: hidden;
     background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
   }
-  .project-cover img {
-    display: block;
+  .pcard-cover img {
     width: 100%;
     height: 100%;
+    display: block;
   }
-  .project-cover[data-fit='cover'] img {
+  .pcard-cover[data-fit='cover'] img {
     object-fit: cover;
     object-position: top center;
   }
-  .project-cover[data-fit='contain'] img {
+  .pcard-cover[data-fit='contain'] img {
     object-fit: contain;
-    padding: 1.75rem;
+    padding: 1.5rem;
   }
-  .project:not(.featured) .project-cover {
-    aspect-ratio: 16 / 10;
-    border-bottom: 1px solid var(--border);
+  .pcard-cover-fallback {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      circle at 70% 30%,
+      rgba(125, 104, 255, 0.3),
+      rgba(93, 139, 255, 0.1) 55%,
+      transparent 80%
+    );
+  }
+  .pcard-cover-fallback span {
+    font-family: var(--font-display);
+    font-size: 4.5rem;
+    font-weight: 800;
+    line-height: 1;
   }
 
-  .project-body {
-    position: relative;
-    z-index: 1;
+  /* body */
+  .pcard-body {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    flex: 1;
-    padding: clamp(1.6rem, 3vw, 2.3rem);
+    padding: clamp(1.15rem, 3.4vw, 1.6rem);
   }
-
-  .project-meta {
+  .pcard-meta {
     display: flex;
     align-items: center;
     gap: 0.7rem;
-    margin-bottom: 1.2rem;
     font-family: var(--font-mono);
-    font-size: 0.78rem;
+    font-size: 0.74rem;
   }
-  .project-num {
-    color: var(--accent-deep);
-    letter-spacing: 0.05em;
-  }
-  .project-kind {
-    padding: 0.22rem 0.62rem;
+  .pcard-kind {
+    padding: 0.22rem 0.6rem;
     border-radius: var(--radius-pill);
-    font-size: 0.68rem;
+    font-size: 0.66rem;
     font-weight: 500;
     letter-spacing: 0.05em;
     text-transform: uppercase;
   }
-  .project-kind[data-kind='Product'] {
+  .pcard-kind[data-kind='Product'] {
     background: var(--accent-tint);
     border: 1px solid var(--accent-line);
-    color: var(--accent-deep);
+    color: var(--accent-bright);
   }
-  .project-kind[data-kind='Bespoke build'] {
-    background: rgba(239, 154, 61, 0.14);
-    border: 1px solid rgba(239, 154, 61, 0.45);
-    color: var(--accent-2-deep);
+  .pcard-kind[data-kind='Bespoke build'] {
+    background: rgba(245, 184, 100, 0.13);
+    border: 1px solid rgba(245, 184, 100, 0.4);
+    color: #f4c88c;
   }
-  .project-year {
+  .pcard-year {
     margin-inline-start: auto;
     color: var(--text-dim);
   }
 
-  .project-head {
+  .pcard-head {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.6rem;
+    margin-top: 0.85rem;
   }
-  .project-logo {
-    height: 40px;
+  .pcard-logo {
+    height: 30px;
     width: auto;
     flex-shrink: 0;
   }
-  .project-title {
-    font-size: clamp(1.4rem, 2.4vw, 1.8rem);
+  .pcard-title {
+    font-size: clamp(1.25rem, 3.4vw, 1.5rem);
   }
-  .project-blurb {
-    margin-top: 0.55rem;
-    color: var(--accent-deep);
+  .pcard-blurb {
+    margin-top: 0.5rem;
+    color: var(--accent-bright);
     font-weight: 600;
-  }
-  .project-desc {
-    margin-top: 0.6rem;
-    color: var(--text-muted);
     font-size: 0.95rem;
   }
-
-  .project-tags {
+  .pcard-desc {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .pcard-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-top: 1.3rem;
+    gap: 0.35rem;
+    margin-top: 0.9rem;
   }
-  .project-tags li {
-    padding: 0.3rem 0.68rem;
-    border-radius: 8px;
+  .pcard-tags li {
+    padding: 0.26rem 0.58rem;
+    border-radius: 7px;
     background: var(--fill);
     border: 1px solid var(--border);
     font-family: var(--font-mono);
-    font-size: 0.74rem;
+    font-size: 0.68rem;
     color: var(--text-muted);
   }
-
-  .project-foot {
+  .pcard-foot {
     margin-top: auto;
-    padding-top: 1.6rem;
+    padding-top: 1.1rem;
   }
-  .project-link {
+  .pcard-link {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.94rem;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: var(--accent-deep);
-    transition: color 0.2s var(--ease), gap 0.2s var(--ease);
-  }
-  .project-link svg {
-    transition: transform 0.2s var(--ease);
-  }
-  .project-link:hover {
     color: var(--accent-bright);
-    gap: 0.55rem;
+    transition: gap 0.2s var(--ease);
   }
-  .project-link:hover svg {
-    transform: translate(2px, -2px);
+  .pcard-link:hover {
+    gap: 0.6rem;
   }
-  .project-note {
+  .pcard-note {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.86rem;
+    font-size: 0.84rem;
     color: var(--text-dim);
   }
-  .project-note::before {
+  .pcard-note::before {
     content: '';
     width: 6px;
     height: 6px;
@@ -290,83 +249,4 @@ const fit = project.coverFit ?? 'cover';
     background: var(--text-dim);
     flex-shrink: 0;
   }
-
-  /* ── featured layout ── */
-  .project.featured {
-    grid-column: 1 / -1;
-    flex-direction: row;
-  }
-  .project.featured .project-body {
-    flex: 1 1 62%;
-  }
-  .project.featured.has-cover .project-body {
-    flex: 1 1 52%;
-  }
-  .project-cover-side {
-    flex: 1 1 48%;
-    align-self: stretch;
-    border-left: 1px solid var(--border);
-  }
-  .project-art {
-    position: relative;
-    z-index: 1;
-    flex: 1 1 38%;
-    display: grid;
-    place-items: center;
-    background: radial-gradient(
-      circle at 70% 30%,
-      rgba(25, 196, 177, 0.2),
-      rgba(239, 154, 61, 0.08) 55%,
-      transparent 80%
-    );
-    border-left: 1px solid var(--border);
-    overflow: hidden;
-  }
-  .project-art-grid {
-    position: absolute;
-    inset: 0;
-    background-image: radial-gradient(rgba(21, 18, 13, 0.07) 1px, transparent 1px);
-    background-size: 26px 26px;
-  }
-  .project-art-num {
-    position: relative;
-    font-family: var(--font-display);
-    font-size: clamp(5rem, 12vw, 9.5rem);
-    font-weight: 800;
-    line-height: 1;
-  }
-
-  @media (max-width: 760px) {
-    .project.featured {
-      flex-direction: column;
-    }
-    .project.featured .project-body {
-      order: 2;
-    }
-    .project-art,
-    .project-cover-side {
-      order: 1;
-      align-self: auto;
-      border-left: none;
-      border-bottom: 1px solid var(--border);
-      aspect-ratio: 16 / 10;
-      min-height: 0;
-    }
-  }
 </style>
-
-<script>
-  // Move the spotlight gradient with the cursor (pointer devices only).
-  const fine = window.matchMedia('(hover: hover)').matches;
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (fine && !reduced) {
-    document.querySelectorAll<HTMLElement>('.project').forEach((card) => {
-      card.addEventListener('pointermove', (event) => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${event.clientX - rect.left}px`);
-        card.style.setProperty('--my', `${event.clientY - rect.top}px`);
-      });
-    });
-  }
-</script>

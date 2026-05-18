@@ -51,23 +51,23 @@ a `liveUrl` gets a "Visit" button; one without is shown as a case study.
 
 ---
 
-## 3. Set up the contact form (Formspree)
+## 3. Set up the contact form (Web3Forms)
 
-The contact form needs a free Formspree account to actually deliver messages.
-**Until you do this, the form falls back to opening the visitor's email app** —
-so the site still works, it just isn't as smooth.
+The contact form submits straight to your inbox **without the visitor leaving
+the site** — it just needs a free Web3Forms access key. **Until you add one,
+the form falls back to opening the visitor's email app**, so the site still
+works in the meantime.
 
-1. Sign up at [formspree.io](https://formspree.io) (free plan: 50 messages/month).
-2. Create a new form. Set the notification email to the address you want
-   enquiries sent to.
-3. Formspree gives you an endpoint like `https://formspree.io/f/abcdwxyz`.
-4. Copy the part after `/f/` (e.g. `abcdwxyz`).
-5. Open `src/data/site.ts` and set:
+1. Go to [web3forms.com](https://web3forms.com) and enter the email address you
+   want enquiries sent to. No account or password needed — they email you an
+   **access key**.
+2. Open `src/data/site.ts` and set:
    ```ts
-   formspreeId: 'abcdwxyz',
+   web3formsKey: 'your-access-key-here',
    ```
-6. Rebuild / redeploy. The first time a real message is submitted, Formspree
-   emails you to confirm the form — click that link once.
+3. Rebuild / redeploy. That's it — form submissions now arrive in your inbox,
+   and the visitor sees a "Message sent" confirmation without ever leaving the
+   page. Free plan: 250 submissions/month.
 
 ---
 
