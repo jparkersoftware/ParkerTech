@@ -11,7 +11,7 @@ import Icon from './Icon.astro';
       <h2 class="section-title">Tools I've built for schools.</h2>
       <p class="section-intro">
         From products any school can pick up and use, to bespoke tools made for a
-        single school. Drag the deck, or use the controls below.
+        single school. Swipe through, or use the controls below.
       </p>
     </div>
   </div>
@@ -118,6 +118,32 @@ import Icon from './Icon.astro';
     width: 28px;
     background: var(--accent);
   }
+
+  /* ── mobile: native scroll-snap instead of the 3D coverflow ── */
+  @media (max-width: 760px) {
+    .coverflow {
+      perspective: none;
+      overflow: hidden;
+      padding-block: clamp(1rem, 4vw, 1.75rem);
+    }
+    .cf-stage {
+      height: auto;
+      display: flex;
+      align-items: stretch;
+      gap: clamp(0.75rem, 3vw, 1.25rem);
+      padding-inline: calc((100% - clamp(264px, 78vw, 384px)) / 2);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
+      transform-style: flat;
+      cursor: default;
+      scrollbar-width: none;
+    }
+    .cf-stage::-webkit-scrollbar {
+      display: none;
+    }
+  }
 </style>
 
 <script>
@@ -130,11 +156,23 @@ import Icon from './Icon.astro';
     const nextBtn = document.getElementById('cf-next') as HTMLButtonElement;
     const region = document.getElementById('coverflow-region');
     const count = cards.length;
+    const mobileMq = window.matchMedia('(max-width: 760px)');
 
     let active = 0;
+    let mode: 'coverflow' | 'scroll' = mobileMq.matches ? 'scroll' : 'coverflow';
     let justDragged = false;
 
-    const render = () => {
+    const syncControls = () => {
+      dots.forEach((dot, i) =>
+        dot.setAttribute('aria-current', i === active ? 'true' : 'false')
+      );
+      cards.forEach((card, i) => card.classList.toggle('is-active', i === active));
+      prevBtn.disabled = active === 0;
+      nextBtn.disabled = active === count - 1;
+    };
+
+    // ── desktop: 3D coverflow ──
+    const renderCoverflow = () => {
       const w = cards[0]?.offsetWidth || 340;
       const gap = w * 0.56;
 
@@ -152,20 +190,70 @@ import Icon from './Icon.astro';
         card.style.opacity = ad === 0 ? '1' : ad === 1 ? '0.72' : ad === 2 ? '0.32' : '0';
         card.style.zIndex = String(30 - ad);
         card.style.pointerEvents = ad <= 2 ? 'auto' : 'none';
-        card.classList.toggle('is-active', d === 0);
         card.setAttribute('aria-hidden', d === 0 ? 'false' : 'true');
       });
-
-      dots.forEach((dot, i) =>
-        dot.setAttribute('aria-current', i === active ? 'true' : 'false')
-      );
-      prevBtn.disabled = active === 0;
-      nextBtn.disabled = active === count - 1;
+      syncControls();
     };
 
-    const go = (to: number) => {
+    // ── mobile: native scroll-snap ──
+    const clearCoverflowStyles = () => {
+      cards.forEach((card) => {
+        card.style.transform = '';
+        card.style.opacity = '';
+        card.style.zIndex = '';
+        card.style.pointerEvents = '';
+        card.setAttribute('aria-hidden', 'false');
+      });
+    };
+
+    const scrollToCard = (i: number, behavior: ScrollBehavior) => {
+      const card = cards[i];
+      if (!card) return;
+      stage.scrollTo({
+        left: card.offsetLeft - (stage.clientWidth - card.offsetWidth) / 2,
+        behavior,
+      });
+    };
+
+    let scrollRaf = 0;
+    const onScroll = () => {
+      if (mode !== 'scroll' || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(() => {
+        scrollRaf = 0;
+        const mid = stage.scrollLeft + stage.clientWidth / 2;
+        let best = 0;
+        let bestDist = Infinity;
+        cards.forEach((card, i) => {
+          const dist = Math.abs(card.offsetLeft + card.offsetWidth / 2 - mid);
+          if (dist < bestDist) {
+            bestDist = dist;
+            best = i;
+          }
+        });
+        if (best !== active) {
+          active = best;
+          syncControls();
+        }
+      });
+    };
+
+    // ── shared ──
+    const go = (to: number, behavior: ScrollBehavior = 'smooth') => {
       active = Math.max(0, Math.min(count - 1, to));
-      render();
+      if (mode === 'scroll') scrollToCard(active, behavior);
+      else renderCoverflow();
+      syncControls();
+    };
+
+    const applyMode = () => {
+      mode = mobileMq.matches ? 'scroll' : 'coverflow';
+      if (mode === 'scroll') {
+        clearCoverflowStyles();
+        scrollToCard(active, 'auto');
+      } else {
+        renderCoverflow();
+      }
+      syncControls();
     };
 
     prevBtn.addEventListener('click', () => go(active - 1));
@@ -185,10 +273,11 @@ import Icon from './Icon.astro';
       });
     });
 
-    // drag / swipe
+    // desktop drag / swipe (coverflow only — mobile uses native scroll)
     let startX = 0;
     let pointerDown = false;
     stage.addEventListener('pointerdown', (event) => {
+      if (mode !== 'coverflow') return;
       pointerDown = true;
       justDragged = false;
       startX = event.clientX;
@@ -206,6 +295,8 @@ import Icon from './Icon.astro';
       }
     });
 
+    stage.addEventListener('scroll', onScroll, { passive: true });
+
     // keyboard
     region?.addEventListener('keydown', (event) => {
       if (event.key === 'ArrowLeft') {
@@ -217,7 +308,12 @@ import Icon from './Icon.astro';
       }
     });
 
-    render();
-    window.addEventListener('resize', render);
+    window.addEventListener('resize', () => {
+      if (mode === 'coverflow') renderCoverflow();
+      else scrollToCard(active, 'auto');
+    });
+    mobileMq.addEventListener('change', applyMode);
+
+    applyMode();
   }
 </script>

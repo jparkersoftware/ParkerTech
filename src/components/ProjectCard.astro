@@ -249,4 +249,23 @@ const fit = project.coverFit ?? 'cover';
     background: var(--text-dim);
     flex-shrink: 0;
   }
+
+  /* ── mobile: cards sit in a native scroll-snap row ── */
+  @media (max-width: 760px) {
+    .pcard {
+      position: relative;
+      left: auto;
+      top: auto;
+      transform: none;
+      opacity: 1;
+      flex: 0 0 auto;
+      height: clamp(454px, 122vw, 540px);
+      scroll-snap-align: center;
+      will-change: auto;
+      /* the frosted blur is imperceptible over the flat dark
+         background here — drop it to keep scrolling smooth */
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+  }
 </style>

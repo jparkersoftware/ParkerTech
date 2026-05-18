@@ -64,7 +64,7 @@ export const projects: Project[] = [
     title: 'PM Review',
     kind: 'Product',
     logo: '/logos/pmreview.svg',
-    cover: '/projects/pmreview.png',
+    cover: '/projects/pmreview.webp',
     blurb: 'The whole appraisal cycle, in one place.',
     description:
       'A complete staff appraisal platform for schools. PM Review runs the full cycle — objective setting, self-review with evidence, CPD logging, and progress dashboards for leadership — with automatic reminders that keep deadlines on track. All data is hosted in the UK.',
