@@ -195,15 +195,37 @@ export const projects: Project[] = [
     ],
   },
   {
-    title: 'Staff Absence System',
-    slug: 'staff-absence-system',
+    title: 'Staff Leave Request System',
+    slug: 'staff-leave-request-system',
     kind: 'Bespoke build',
-    blurb: 'A paperless absence and cover workflow.',
+    blurb: 'A paperless leave-request and approval workflow.',
     description:
-      "A bespoke absence system built for a school on the Microsoft Power Platform — Power Apps, Power Automate and SharePoint — replacing a paper-based process. Staff request leave and flag which lessons need covering; requests route to their line manager and then the headship team for sign-off, while the cover team gets a dashboard showing exactly who's away each day.",
-    tags: ['Power Platform', 'Approval workflows', 'Cover management'],
+      "A staff leave-request system built for a school on the Microsoft Power Platform — Power Apps, Power Automate and SharePoint — replacing a paper-and-email process. Staff submit leave requests digitally; each one is routed automatically to the right line manager or SLT for approval, and approved leave is logged centrally — giving leadership a clear view of staff availability and the cover team a daily picture of who needs covering.",
+    tags: ['Power Platform', 'Approval workflows', 'Leave & cover'],
     year: '2024',
     note: 'Built privately for one school — not publicly available.',
+    builtWith: 'Power Apps, Power Automate and SharePoint',
+    story: [
+      {
+        heading: 'Where it started',
+        body: [
+          "Staff leave in a school is one of those processes that quietly sprawls. Requests came in as paper forms, emails, or a quick word in the corridor — which made it hard for leadership to keep a consistent view of who was off, who had approved what, and what the history was. I built the Staff Leave Request System to bring all of that into one place: the polish of a modern HR platform, but shaped around how a school actually runs.",
+        ],
+      },
+      {
+        heading: 'How it works',
+        body: [
+          "A staff member submits a leave request from their phone or a computer — a short, simple form. From there the system takes over: the request is routed automatically to the right line manager or member of SLT, who can see the staffing picture and approve or decline it. The staff member gets confirmation and status updates without having to chase anyone.",
+          "Every approved request feeds one central record, so there's a single, reliable picture of staff leave rather than a scatter of forms and inboxes. The cover team gets a dashboard of exactly who's out each day, so they can arrange cover without chasing anyone; leadership get reporting and a clear audit trail of who requested what, when, and who signed it off; and role-based permissions mean each person sees only what's relevant to them.",
+        ],
+      },
+      {
+        heading: "Who it's for",
+        body: [
+          "The system serves everyone in the loop. Teaching and support staff get a quick, professional way to request leave; line managers and SLT get the staffing context to make a decision and approve in a tap; the cover team can see who's out each day and arrange cover from one screen; and the school's leadership and admin team get oversight — a live picture of availability and a complete history — instead of piecing it together from emails and spreadsheets.",
+        ],
+      },
+    ],
   },
   {
     title: 'Staff Behaviour Dashboard',
