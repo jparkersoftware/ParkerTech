@@ -175,3 +175,40 @@ const { about } = site;
     }
   }
 </style>
+
+<script>
+  // Count the stat numbers up when they scroll into view.
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const statsEl = document.querySelector<HTMLElement>('.about-stats');
+
+  if (statsEl && !reduced && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          observer.disconnect();
+
+          statsEl.querySelectorAll<HTMLElement>('.stat-value').forEach((el) => {
+            const raw = (el.textContent ?? '').trim();
+            const target = parseInt(raw, 10) || 0;
+            const suffix = raw.replace(/[0-9]/g, '');
+            const duration = 1400;
+            const start = performance.now();
+
+            const tick = (now: number) => {
+              const t = Math.min(1, (now - start) / duration);
+              const eased = 1 - Math.pow(1 - t, 3);
+              el.textContent = Math.round(target * eased) + suffix;
+              if (t < 1) requestAnimationFrame(tick);
+            };
+
+            el.textContent = '0' + suffix;
+            requestAnimationFrame(tick);
+          });
+        });
+      },
+      { threshold: 0.4 }
+    );
+    observer.observe(statsEl);
+  }
+</script>

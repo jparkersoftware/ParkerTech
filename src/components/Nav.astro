@@ -56,11 +56,11 @@ const links = [
     border-bottom: 1px solid transparent;
   }
   .nav[data-state='scrolled'] {
-    background: rgba(250, 248, 243, 0.85);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: rgba(243, 242, 236, 0.82);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
     border-bottom-color: var(--border);
-    box-shadow: 0 8px 30px -20px rgba(36, 31, 24, 0.4);
+    box-shadow: 0 8px 30px -20px rgba(21, 18, 13, 0.4);
   }
 
   .nav-inner {
@@ -184,7 +184,7 @@ const links = [
     flex-direction: column;
     gap: 0.4rem;
     padding: 1rem clamp(1.25rem, 5vw, 2.5rem) 1.5rem;
-    background: rgba(250, 248, 243, 0.98);
+    background: rgba(243, 242, 236, 0.98);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);

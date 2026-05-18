@@ -66,26 +66,46 @@ const num = String(index + 1).padStart(2, '0');
     border: 1px solid var(--border);
     box-shadow: var(--shadow);
     overflow: hidden;
-    transition: transform 0.3s var(--ease), border-color 0.3s var(--ease),
-      box-shadow 0.3s var(--ease);
+    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
   }
+  /* cursor-following spotlight */
+  .project::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      360px circle at var(--mx, 50%) var(--my, 0%),
+      rgba(25, 196, 177, 0.16),
+      transparent 68%
+    );
+    opacity: 0;
+    transition: opacity 0.35s var(--ease);
+    pointer-events: none;
+  }
+  .project:hover::after {
+    opacity: 1;
+  }
+  /* glowing border on hover */
   .project::before {
     content: '';
     position: absolute;
     inset: 0;
+    z-index: 2;
     border-radius: inherit;
     padding: 1.5px;
-    background: linear-gradient(135deg, var(--accent), transparent 48%);
+    background: linear-gradient(135deg, var(--accent-bright), transparent 48%);
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     mask-composite: exclude;
     opacity: 0;
-    transition: opacity 0.3s var(--ease);
+    transition: opacity 0.35s var(--ease);
     pointer-events: none;
   }
   .project:hover {
-    transform: translateY(-5px);
+    transform: translateY(-6px);
     box-shadow: var(--shadow-lg);
   }
   .project:hover::before {
@@ -93,17 +113,19 @@ const num = String(index + 1).padStart(2, '0');
   }
 
   .project-body {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: clamp(1.5rem, 3vw, 2.1rem);
+    padding: clamp(1.6rem, 3vw, 2.3rem);
   }
 
   .project-meta {
     display: flex;
     align-items: center;
     gap: 0.7rem;
-    margin-bottom: 1.1rem;
+    margin-bottom: 1.2rem;
     font-family: var(--font-mono);
     font-size: 0.78rem;
   }
@@ -112,7 +134,7 @@ const num = String(index + 1).padStart(2, '0');
     letter-spacing: 0.05em;
   }
   .project-kind {
-    padding: 0.2rem 0.6rem;
+    padding: 0.22rem 0.62rem;
     border-radius: var(--radius-pill);
     font-size: 0.68rem;
     font-weight: 500;
@@ -125,9 +147,9 @@ const num = String(index + 1).padStart(2, '0');
     color: var(--accent-deep);
   }
   .project-kind[data-kind='Bespoke build'] {
-    background: rgba(234, 138, 60, 0.13);
-    border: 1px solid rgba(234, 138, 60, 0.45);
-    color: #985614;
+    background: rgba(239, 154, 61, 0.14);
+    border: 1px solid rgba(239, 154, 61, 0.45);
+    color: var(--accent-2-deep);
   }
   .project-year {
     margin-inline-start: auto;
@@ -135,28 +157,28 @@ const num = String(index + 1).padStart(2, '0');
   }
 
   .project-title {
-    font-size: clamp(1.3rem, 2.4vw, 1.65rem);
+    font-size: clamp(1.4rem, 2.4vw, 1.8rem);
   }
   .project-blurb {
-    margin-top: 0.5rem;
+    margin-top: 0.55rem;
     color: var(--accent-deep);
     font-weight: 600;
   }
   .project-desc {
     margin-top: 0.6rem;
     color: var(--text-muted);
-    font-size: 0.94rem;
+    font-size: 0.95rem;
   }
 
   .project-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
-    margin-top: 1.25rem;
+    margin-top: 1.3rem;
   }
   .project-tags li {
-    padding: 0.28rem 0.65rem;
-    border-radius: 7px;
+    padding: 0.3rem 0.68rem;
+    border-radius: 8px;
     background: var(--fill);
     border: 1px solid var(--border);
     font-family: var(--font-mono);
@@ -166,22 +188,23 @@ const num = String(index + 1).padStart(2, '0');
 
   .project-foot {
     margin-top: auto;
-    padding-top: 1.5rem;
+    padding-top: 1.6rem;
   }
   .project-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    font-size: 0.92rem;
+    gap: 0.4rem;
+    font-size: 0.94rem;
     font-weight: 600;
     color: var(--accent-deep);
-    transition: color 0.2s var(--ease);
+    transition: color 0.2s var(--ease), gap 0.2s var(--ease);
   }
   .project-link svg {
     transition: transform 0.2s var(--ease);
   }
   .project-link:hover {
     color: var(--accent-bright);
+    gap: 0.55rem;
   }
   .project-link:hover svg {
     transform: translate(2px, -2px);
@@ -212,13 +235,14 @@ const num = String(index + 1).padStart(2, '0');
   }
   .project-art {
     position: relative;
+    z-index: 1;
     flex: 1 1 38%;
     display: grid;
     place-items: center;
     background: radial-gradient(
       circle at 70% 30%,
-      rgba(13, 148, 136, 0.16),
-      rgba(234, 138, 60, 0.07) 55%,
+      rgba(25, 196, 177, 0.2),
+      rgba(239, 154, 61, 0.08) 55%,
       transparent 80%
     );
     border-left: 1px solid var(--border);
@@ -227,14 +251,14 @@ const num = String(index + 1).padStart(2, '0');
   .project-art-grid {
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(rgba(36, 31, 24, 0.06) 1px, transparent 1px);
+    background-image: radial-gradient(rgba(21, 18, 13, 0.07) 1px, transparent 1px);
     background-size: 26px 26px;
   }
   .project-art-num {
     position: relative;
     font-family: var(--font-display);
-    font-size: clamp(5rem, 12vw, 9rem);
-    font-weight: 700;
+    font-size: clamp(5rem, 12vw, 9.5rem);
+    font-weight: 800;
     line-height: 1;
   }
 
@@ -249,7 +273,23 @@ const num = String(index + 1).padStart(2, '0');
       order: 1;
       border-left: none;
       border-bottom: 1px solid var(--border);
-      min-height: 160px;
+      min-height: 170px;
     }
   }
 </style>
+
+<script>
+  // Move the spotlight gradient with the cursor (pointer devices only).
+  const fine = window.matchMedia('(hover: hover)').matches;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (fine && !reduced) {
+    document.querySelectorAll<HTMLElement>('.project').forEach((card) => {
+      card.addEventListener('pointermove', (event) => {
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${event.clientX - rect.left}px`);
+        card.style.setProperty('--my', `${event.clientY - rect.top}px`);
+      });
+    });
+  }
+</script>
