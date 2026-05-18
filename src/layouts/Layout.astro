@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { site } from '../data/site';
+import ConsentBanner from '../components/ConsentBanner.astro';
 
 interface Props {
   title?: string;
@@ -52,6 +53,7 @@ const ogImage = new URL('/og-image.png', Astro.site ?? site.url).href;
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="scroll-progress" aria-hidden="true"></div>
     <slot />
+    <ConsentBanner />
 
     <script>
       // Top scroll-progress bar.

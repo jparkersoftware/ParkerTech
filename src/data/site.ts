@@ -46,6 +46,11 @@ export const site = {
   // and the visitor stays on the site. (This key is safe to be public.)
   web3formsKey: 'f065eb0f-00c9-482f-be79-a75e1d7b013b',
 
+  /* ── Analytics ────────────────────────────────────────────── */
+  // Google Analytics 4 Measurement ID. Analytics load only after a visitor
+  // accepts the cookie-consent banner.
+  googleAnalyticsId: 'G-ZPJ0JW0GRV',
+
   /* ── About section ────────────────────────────────────────── */
   about: {
     paragraphs: [

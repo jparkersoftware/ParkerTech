@@ -71,6 +71,19 @@ works in the meantime.
 
 ---
 
+## 3a. Google Analytics (optional)
+
+The site supports Google Analytics 4, gated behind a cookie-consent banner —
+analytics only load once a visitor clicks **Accept**.
+
+1. Create a free GA4 property at [analytics.google.com](https://analytics.google.com)
+   and copy its **Measurement ID** (looks like `G-XXXXXXXXXX`).
+2. Open `src/data/site.ts` and set `googleAnalyticsId` to that ID.
+3. Rebuild / redeploy. The consent banner now appears for new visitors; until
+   then (placeholder ID) no banner shows and nothing is tracked.
+
+---
+
 ## 4. Put it on GitHub
 
 1. Create a **free account** at [github.com](https://github.com) if you don't have one.
