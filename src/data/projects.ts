@@ -27,16 +27,15 @@ export interface Project {
   featured?: boolean;
 }
 
-// TODO: check the details below and refine any wording. Years and the two
-// URLs marked TODO need confirming — see the README / chat notes.
+// TODO: refine any wording and confirm the launch years.
 export const projects: Project[] = [
   {
     title: 'ParkerMarker',
     kind: 'Product',
-    blurb: 'Marking, dramatically faster.',
+    blurb: 'Mark faster, feed back better.',
     description:
-      'A web tool that takes the grind out of marking. ParkerMarker helps teachers work through student assessments quickly and consistently — turning a long evening of marking into a manageable task, and handing teachers their evenings back.',
-    tags: ['Marking', 'Time-saving', 'For teachers'],
+      'A feedback and assessment platform for UK secondary schools. ParkerMarker lets teachers build shared comment banks, mark quickly, export polished feedback slips and generate personal improvement plans — then turns the results into clear assessment insight for whole departments.',
+    tags: ['Marking & feedback', 'Comment banks', 'Assessment insight'],
     year: '2025',
     liveUrl: 'https://parkermarker.co.uk',
     featured: true,
@@ -44,32 +43,30 @@ export const projects: Project[] = [
   {
     title: 'VocMark',
     kind: 'Product',
-    blurb: 'AI-assisted marking for vocational coursework.',
+    blurb: 'AI marking for BTEC & vocational courses.',
     description:
-      'Marking vocational coursework such as BTECs is detailed, criteria-heavy work. VocMark uses AI to help teachers assess vocational submissions against the assessment criteria — faster, and with consistent, well-evidenced feedback.',
-    tags: ['AI-assisted', 'BTEC & vocational', 'Assessment'],
-    year: '2025',
-    // TODO: confirm VocMark's real web address (this is a best guess).
+      'An AI-powered marking platform for UK vocational qualifications — BTEC, CACHE and OCR Nationals. Teachers upload the course spec and assignment brief; VocMark extracts the assessment criteria, grades each submission against them with clear reasoning, and produces a personalised improvement plan for every student.',
+    tags: ['AI-powered', 'BTEC & vocational', 'Improvement plans'],
+    year: '2026',
     liveUrl: 'https://vocmark.co.uk',
   },
   {
-    title: 'Performance Management System',
+    title: 'PM Review',
     kind: 'Product',
-    blurb: 'Staff appraisals, without the spreadsheet sprawl.',
+    blurb: 'The whole appraisal cycle, in one place.',
     description:
-      'A performance management system built for schools. It gives leadership a clear, structured way to set objectives, record progress through the year, and run appraisals — replacing scattered documents with one organised place.',
-    tags: ['School leadership', 'Appraisals', 'Staff development'],
-    year: '2024',
-    // TODO: confirm the real web address for this tool.
-    liveUrl: 'https://example.com',
+      'A complete staff appraisal platform for schools. PM Review runs the full cycle — objective setting, self-review with evidence, CPD logging, and progress dashboards for leadership — with automatic reminders that keep deadlines on track. All data is hosted in the UK.',
+    tags: ['Staff appraisal', 'CPD tracking', 'School leadership'],
+    year: '2026',
+    liveUrl: 'https://performancemanagements.web.app',
   },
   {
     title: 'Staff Absence System',
     kind: 'Bespoke build',
     blurb: 'A paperless absence and cover workflow.',
     description:
-      'A bespoke tool built for a school to handle staff absence requests. It replaced a paper-and-email process with a simple digital workflow — staff submit requests, leadership review and approve them, and cover is organised, all in one place.',
-    tags: ['Bespoke build', 'Staff admin', 'Workflow'],
+      "A bespoke absence system built for a school on the Microsoft Power Platform — Power Apps, Power Automate and SharePoint — replacing a paper-based process. Staff request leave and flag which lessons need covering; requests route to their line manager and then the headship team for sign-off, while the cover team gets a dashboard showing exactly who's away each day.",
+    tags: ['Power Platform', 'Approval workflows', 'Cover management'],
     year: '2024',
     note: 'Built privately for one school — not publicly available.',
   },

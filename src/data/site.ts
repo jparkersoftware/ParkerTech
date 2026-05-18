@@ -9,14 +9,14 @@ export const site = {
   /** Brand name shown in the nav and footer. */
   brand: 'ParkerTech',
 
-  /** Your name. TODO: replace with your real name. */
-  owner: 'Parker',
+  /** Your name. */
+  owner: 'Joseph',
 
   /** Short description of what you do. */
   role: 'Educational technology developer & former teacher',
 
-  /** Contact email. TODO: replace with the address you want enquiries sent to. */
-  email: 'hello@parkertech.co.uk',
+  /** Contact email — where enquiries are sent. */
+  email: 'joseph@parkertech.co.uk',
 
   /** Where you're based. */
   location: 'United Kingdom',
@@ -39,7 +39,7 @@ export const site = {
     titleAccent: 'their time back.',
     titleTail: '',
     subtext:
-      "I'm a developer and former teacher with a decade in the classroom. ParkerTech is where I build practical software for schools — and a place to see what's possible when the person writing the code has actually done the job.",
+      "I'm Joseph — a developer and former teacher with a decade in the classroom. ParkerTech is where I build practical software for schools, and a place to see what's possible when the person writing the code has actually done the job.",
   },
 
   /* ── Contact form ─────────────────────────────────────────── */
@@ -52,7 +52,7 @@ export const site = {
   /* ── About section ────────────────────────────────────────── */
   about: {
     paragraphs: [
-      'I spent a decade teaching in schools. I know the Sunday evenings lost to marking, the clunky systems that fight you instead of helping, and the quiet wish that someone would just build the tool you actually needed.',
+      "I'm Joseph. I spent a decade teaching in schools, so I know the Sunday evenings lost to marking, the clunky systems that fight you instead of helping, and the quiet wish that someone would just build the tool you actually needed.",
       "Eventually I decided to build it myself. I left the classroom to focus on technology full-time, and now I create software for schools — designed around how they really work, by someone who's been on the other side of the staffroom door.",
       'Some of what I build are products any school can pick up and use, like ParkerMarker and VocMark. Others are bespoke tools made for a single school. The aim never changes: less time lost to admin, more time for teaching.',
     ],
@@ -75,6 +75,31 @@ export const site = {
       {
         group: 'How I work',
         items: ['Bespoke to your school', 'Ready-made products', 'Built with teacher input', 'Mindful of school data'],
+      },
+    ],
+  },
+
+  /* ── IT support section ───────────────────────────────────── */
+  // TODO: refine the wording below to match the IT services you offer.
+  itSupport: {
+    title: 'I keep school IT running, too.',
+    intro:
+      'Building software is only part of it. Alongside the products, I help schools with the technology underneath the day — from the everyday fixes to the long-term plan.',
+    services: [
+      {
+        title: 'Everyday IT support',
+        description:
+          'A dependable point of contact for the issues that stall a school day — accounts, devices, access and the rest — handled quickly and without the fuss.',
+      },
+      {
+        title: 'Cloud & infrastructure',
+        description:
+          'Planning and delivering modern, cloud-first infrastructure, so schools run on systems that are resilient, secure and straightforward to manage.',
+      },
+      {
+        title: 'IT strategy & systems',
+        description:
+          'Helping school leaders make sensible, well-structured technology decisions — with proper processes behind them, not guesswork.',
       },
     ],
   },
