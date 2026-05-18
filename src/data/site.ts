@@ -34,7 +34,7 @@ export const site = {
   /* ── Hero section ─────────────────────────────────────────── */
   hero: {
     // The headline renders as:  {titleLead} {titleAccent in colour} {titleTail}
-    titleLead: 'Technology that gives teachers',
+    titleLead: 'Technology that gives schools',
     titleAccent: 'their time back.',
     titleTail: '',
     subtext:
@@ -56,7 +56,7 @@ export const site = {
     paragraphs: [
       "I'm Joseph. I spent a decade teaching in schools, so I know the Sunday evenings lost to marking, the clunky systems that fight you instead of helping, and the quiet wish that someone would just build the tool you actually needed.",
       "Eventually I decided to build it myself. I left the classroom to focus on technology full-time, and now I create software for schools — designed around how they really work, by someone who's been on the other side of the staffroom door.",
-      'Some of what I build are products any school can pick up and use, like ParkerMarker and VocMark. Others are bespoke tools made for a single school. The aim never changes: less time lost to admin, more time for teaching.',
+      'Some of what I build are products any school can pick up and use, like ParkerMarker and VocMark. The rest is bespoke — intranets, data dashboards and automations built around a single school and the people who run it: leadership, admin and data teams as much as teachers. The aim never changes: less time lost to admin, more time for the work that matters.',
     ],
     // The "What I can help with" card. Adjust the groups and items freely.
     capabilities: [
@@ -65,8 +65,8 @@ export const site = {
         items: ['Marking automation', 'AI-assisted grading', 'Vocational coursework (BTEC)', 'Feedback & moderation'],
       },
       {
-        group: 'School operations',
-        items: ['Staff absence & cover', 'Performance management', 'Admin workflows', 'Reporting dashboards'],
+        group: 'School operations & data',
+        items: ['Staff absence & cover', 'Performance management', 'Power BI dashboards', 'Wonde & MIS integration'],
       },
       {
         group: 'How I work',
@@ -116,6 +116,17 @@ export const site = {
       ],
     },
   },
+
+  /* ── Testimonials ─────────────────────────────────────────── */
+  testimonials: [
+    {
+      quote:
+        "The standard of Joseph's work is exceptional. He has expertly supported the school to automate a wide range of systems and processes that have resulted in significant efficiency improvements, whilst freeing up leaders to work strategically and be that all important visible presence around the school. No task has proven too small or insurmountable for Joseph, and the quality of creativity, support and guidance he has provided is simply outstanding. Thank you Joseph.",
+      name: 'Dan Walton',
+      role: 'Associate Headteacher',
+      org: "St John's Catholic Comprehensive",
+    },
+  ],
 };
 
 export type Site = typeof site;

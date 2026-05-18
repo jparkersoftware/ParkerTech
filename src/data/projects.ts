@@ -93,4 +93,24 @@ export const projects: Project[] = [
     year: '2024',
     note: 'Built privately for one school — not publicly available.',
   },
+  {
+    title: 'School Intranet',
+    kind: 'Bespoke build',
+    blurb: 'An intranet that turns behaviour data into action.',
+    description:
+      'A SharePoint intranet built for a school, with Power Apps and Power Automate embedded throughout. It captures student behaviour as it happens and turns it into automated, visual dashboards — so staff see clear, actionable insight rather than raw data.',
+    tags: ['SharePoint', 'Power Platform', 'Behaviour insight'],
+    year: '2025',
+    note: 'Built privately for a school — not publicly available.',
+  },
+  {
+    title: 'Leadership Data Dashboards',
+    kind: 'Bespoke build',
+    blurb: 'Live MIS data, visualised for leadership.',
+    description:
+      "A data integration that pulls live information straight from a school's MIS using Wonde and visualises it in Power BI. It turns scattered records into clear dashboards for leadership — including staff attendance tracking and automated Bradford Factor calculations.",
+    tags: ['Wonde + MIS', 'Power BI', 'Leadership data'],
+    year: '2025',
+    note: 'Built privately for a school — not publicly available.',
+  },
 ];

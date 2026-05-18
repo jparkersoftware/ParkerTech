@@ -1,0 +1,113 @@
+---
+import { site } from '../data/site';
+
+const testimonials = site.testimonials;
+---
+
+<section class="section testimonials" id="testimonials">
+  <div class="container">
+    <p class="t-label" data-reveal>What school leaders say</p>
+
+    {
+      testimonials.map((t, i) => (
+        <figure class="t-card" data-reveal style={`--reveal-delay:${i * 100}ms`}>
+          <span class="t-glow" aria-hidden="true" />
+          <span class="t-mark" aria-hidden="true">&ldquo;</span>
+          <blockquote class="t-quote">{t.quote}</blockquote>
+          <figcaption class="t-by">
+            <span class="t-name">{t.name}</span>
+            <span class="t-role">{t.role} · {t.org}</span>
+          </figcaption>
+        </figure>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .testimonials {
+    padding-block: clamp(3.5rem, 8vw, 6.5rem);
+  }
+  .t-label {
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+    margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .t-card {
+    position: relative;
+    max-width: 840px;
+    margin-inline: auto;
+    padding: clamp(2rem, 5vw, 3.25rem) clamp(1.75rem, 5vw, 3.5rem)
+      clamp(1.75rem, 4vw, 2.75rem);
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    text-align: center;
+    overflow: hidden;
+  }
+  .t-glow {
+    position: absolute;
+    top: -160px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 460px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(125, 104, 255, 0.28), transparent 70%);
+    filter: blur(70px);
+    pointer-events: none;
+  }
+  .t-mark {
+    position: relative;
+    display: block;
+    font-family: var(--font-display);
+    font-size: 5rem;
+    font-weight: 800;
+    line-height: 0.4;
+    height: 2.1rem;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .t-quote {
+    position: relative;
+    margin-top: 1.25rem;
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    line-height: 1.5;
+    letter-spacing: -0.015em;
+    color: var(--text);
+  }
+  .t-by {
+    position: relative;
+    margin-top: 1.75rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .t-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--text);
+  }
+  .t-role {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  /* if more testimonials are added later, space them out */
+  .t-card + .t-card {
+    margin-top: 1.25rem;
+  }
+</style>
