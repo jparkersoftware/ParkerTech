@@ -102,6 +102,23 @@ export const site = {
           'Helping school leaders make sensible, well-structured technology decisions — with proper processes behind them, not guesswork.',
       },
     ],
+    // Featured case study shown at the top of the IT support section.
+    caseStudy: {
+      label: 'Featured case study',
+      title: 'A cloud-first transformation',
+      summary:
+        'A secondary school was heading into an expensive renewal cycle — ageing on-premise servers, end-of-life network switches and a 270-user Citrix licence. I built and delivered a cloud-first strategy that retired the legacy stack and moved the school onto modern, low-maintenance cloud services.',
+      points: [
+        'Replaced on-premise servers and Citrix with Microsoft Intune and Azure AD',
+        'Chromebooks and Google Workspace rolled out for staff and students',
+        'Cloud printing, cloud phones and a refreshed, modern network',
+      ],
+      stats: [
+        { value: '~£22k', label: 'Saved every year' },
+        { value: 'Under 5mo', label: 'Investment payback' },
+        { value: '270 → 20', label: 'Citrix licences needed' },
+      ],
+    },
   },
 };
 

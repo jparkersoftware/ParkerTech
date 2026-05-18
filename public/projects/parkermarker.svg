@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 400" font-family="ui-sans-serif,system-ui,-apple-system,sans-serif">
+  <!-- background -->
+  <rect width="620" height="400" fill="#f1f5f9"/>
+  <!-- card -->
+  <rect x="10" y="10" width="600" height="380" rx="10" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+  <!-- header -->
+  <rect x="10" y="10" width="600" height="46" rx="10" fill="#0f172a"/>
+  <rect x="10" y="42" width="600" height="14" fill="#0f172a"/>
+  <text x="22" y="38" fill="white" font-size="13" font-weight="700">Assessment Analysis</text>
+  <text x="194" y="38" fill="#94a3b8" font-size="13"> — </text>
+  <text x="210" y="38" fill="#f59e0b" font-size="13" font-weight="600">Marking</text>
+  <rect x="424" y="18" width="172" height="22" rx="11" fill="#1e293b"/>
+  <text x="510" y="33" fill="#94a3b8" font-size="10.5" text-anchor="middle">Y10 Maths · Winter Mock 2025</text>
+  <!-- subheader -->
+  <rect x="10" y="56" width="600" height="26" fill="#f8fafc"/>
+  <text x="22" y="73" fill="#64748b" font-size="11">5 students · 3 questions · Total marks: 20</text>
+  <line x1="10" y1="82" x2="610" y2="82" stroke="#e2e8f0"/>
+  <!-- col headers -->
+  <rect x="10" y="82" width="600" height="30" fill="#f1f5f9"/>
+  <line x1="10" y1="112" x2="610" y2="112" stroke="#e2e8f0"/>
+  <text x="22" y="101" fill="#475569" font-size="11" font-weight="700">Student</text>
+  <text x="226" y="101" fill="#475569" font-size="11" font-weight="700" text-anchor="middle">Q1  /5</text>
+  <text x="314" y="101" fill="#475569" font-size="11" font-weight="700" text-anchor="middle">Q2  /8</text>
+  <text x="402" y="101" fill="#475569" font-size="11" font-weight="700" text-anchor="middle">Q3  /7</text>
+  <text x="490" y="101" fill="#475569" font-size="11" font-weight="700" text-anchor="middle">Total</text>
+  <text x="574" y="101" fill="#475569" font-size="11" font-weight="700" text-anchor="middle">Score</text>
+
+  <!-- ROW 1: Alice Brown 18/20 = 90% -->
+  <rect x="10" y="112" width="600" height="34" fill="white"/>
+  <line x1="10" y1="146" x2="610" y2="146" stroke="#f1f5f9"/>
+  <text x="22" y="133" fill="#1e293b" font-size="12.5">Alice Brown</text>
+  <rect x="189" y="116" width="74" height="26" rx="4" fill="#16a34a"/>
+  <text x="226" y="133" fill="white" font-size="13" font-weight="700" text-anchor="middle">5</text>
+  <rect x="277" y="116" width="74" height="26" rx="4" fill="#16a34a"/>
+  <text x="314" y="133" fill="white" font-size="13" font-weight="700" text-anchor="middle">7</text>
+  <rect x="365" y="116" width="74" height="26" rx="4" fill="#16a34a"/>
+  <text x="402" y="133" fill="white" font-size="13" font-weight="700" text-anchor="middle">6</text>
+  <text x="490" y="133" fill="#1e293b" font-size="13" font-weight="700" text-anchor="middle">18</text>
+  <rect x="537" y="116" width="74" height="26" rx="4" fill="#16a34a"/>
+  <text x="574" y="133" fill="white" font-size="12" font-weight="700" text-anchor="middle">90%</text>
+
+  <!-- ROW 2: Ben Clarke 15/20 = 75% -->
+  <rect x="10" y="146" width="600" height="34" fill="#fafafa"/>
+  <line x1="10" y1="180" x2="610" y2="180" stroke="#f1f5f9"/>
+  <text x="22" y="167" fill="#1e293b" font-size="12.5">Ben Clarke</text>
+  <rect x="189" y="150" width="74" height="26" rx="4" fill="#16a34a"/>
+  <text x="226" y="167" fill="white" font-size="13" font-weight="700" text-anchor="middle">4</text>
+  <rect x="277" y="150" width="74" height="26" rx="4" fill="#16a34a"/>
+  <text x="314" y="167" fill="white" font-size="13" font-weight="700" text-anchor="middle">6</text>
+  <rect x="365" y="150" width="74" height="26" rx="4" fill="#dcfce7"/>
+  <text x="402" y="167" fill="#15803d" font-size="13" font-weight="700" text-anchor="middle">5</text>
+  <text x="490" y="167" fill="#1e293b" font-size="13" font-weight="700" text-anchor="middle">15</text>
+  <rect x="537" y="150" width="74" height="26" rx="4" fill="#dcfce7"/>
+  <text x="574" y="167" fill="#15803d" font-size="12" font-weight="700" text-anchor="middle">75%</text>
+
+  <!-- ROW 3: Chloe Davis 11/20 = 55% -->
+  <rect x="10" y="180" width="600" height="34" fill="white"/>
+  <line x1="10" y1="214" x2="610" y2="214" stroke="#f1f5f9"/>
+  <text x="22" y="201" fill="#1e293b" font-size="12.5">Chloe Davis</text>
+  <rect x="189" y="184" width="74" height="26" rx="4" fill="#dcfce7"/>
+  <text x="226" y="201" fill="#15803d" font-size="13" font-weight="700" text-anchor="middle">3</text>
+  <rect x="277" y="184" width="74" height="26" rx="4" fill="#dcfce7"/>
+  <text x="314" y="201" fill="#15803d" font-size="13" font-weight="700" text-anchor="middle">5</text>
+  <rect x="365" y="184" width="74" height="26" rx="4" fill="#fef08a"/>
+  <text x="402" y="201" fill="#854d0e" font-size="13" font-weight="700" text-anchor="middle">3</text>
+  <text x="490" y="201" fill="#1e293b" font-size="13" font-weight="700" text-anchor="middle">11</text>
+  <rect x="537" y="184" width="74" height="26" rx="4" fill="#dcfce7"/>
+  <text x="574" y="201" fill="#15803d" font-size="12" font-weight="700" text-anchor="middle">55%</text>
+
+  <!-- ROW 4: Daniel Evans 7/20 = 35% -->
+  <rect x="10" y="214" width="600" height="34" fill="#fafafa"/>
+  <line x1="10" y1="248" x2="610" y2="248" stroke="#f1f5f9"/>
+  <text x="22" y="235" fill="#1e293b" font-size="12.5">Daniel Evans</text>
+  <rect x="189" y="218" width="74" height="26" rx="4" fill="#fef08a"/>
+  <text x="226" y="235" fill="#854d0e" font-size="13" font-weight="700" text-anchor="middle">2</text>
+  <rect x="277" y="218" width="74" height="26" rx="4" fill="#fef08a"/>
+  <text x="314" y="235" fill="#854d0e" font-size="13" font-weight="700" text-anchor="middle">3</text>
+  <rect x="365" y="218" width="74" height="26" rx="4" fill="#fecaca"/>
+  <text x="402" y="235" fill="#b91c1c" font-size="13" font-weight="700" text-anchor="middle">2</text>
+  <text x="490" y="235" fill="#1e293b" font-size="13" font-weight="700" text-anchor="middle">7</text>
+  <rect x="537" y="218" width="74" height="26" rx="4" fill="#fecaca"/>
+  <text x="574" y="235" fill="#b91c1c" font-size="12" font-weight="700" text-anchor="middle">35%</text>
+
+  <!-- ROW 5: Emma Foster 20/20 = 100% -->
+  <rect x="10" y="248" width="600" height="34" fill="white"/>
+  <line x1="10" y1="282" x2="610" y2="282" stroke="#e2e8f0"/>
+  <text x="22" y="269" fill="#1e293b" font-size="12.5">Emma Foster</text>
+  <rect x="189" y="252" width="74" height="26" rx="4" fill="#16a34a"/>
+  <text x="226" y="269" fill="white" font-size="13" font-weight="700" text-anchor="middle">5</text>
+  <rect x="277" y="252" width="74" height="26" rx="4" fill="#16a34a"/>
+  <text x="314" y="269" fill="white" font-size="13" font-weight="700" text-anchor="middle">8</text>
+  <rect x="365" y="252" width="74" height="26" rx="4" fill="#16a34a"/>
+  <text x="402" y="269" fill="white" font-size="13" font-weight="700" text-anchor="middle">7</text>
+  <text x="490" y="269" fill="#1e293b" font-size="13" font-weight="700" text-anchor="middle">20</text>
+  <rect x="537" y="252" width="74" height="26" rx="4" fill="#16a34a"/>
+  <text x="574" y="269" fill="white" font-size="12" font-weight="700" text-anchor="middle">100%</text>
+
+  <!-- CLASS AVG ROW -->
+  <rect x="10" y="282" width="600" height="34" fill="#f8fafc"/>
+  <line x1="10" y1="316" x2="610" y2="316" stroke="#e2e8f0"/>
+  <text x="22" y="303" fill="#475569" font-size="11.5" font-weight="700">Class average</text>
+  <rect x="189" y="286" width="74" height="26" rx="4" fill="#16a34a"/>
+  <text x="226" y="303" fill="white" font-size="12" font-weight="700" text-anchor="middle">76%</text>
+  <rect x="277" y="286" width="74" height="26" rx="4" fill="#dcfce7"/>
+  <text x="314" y="303" fill="#15803d" font-size="12" font-weight="700" text-anchor="middle">73%</text>
+  <rect x="365" y="286" width="74" height="26" rx="4" fill="#dcfce7"/>
+  <text x="402" y="303" fill="#15803d" font-size="12" font-weight="700" text-anchor="middle">66%</text>
+  <text x="490" y="303" fill="#64748b" font-size="12" font-weight="700" text-anchor="middle">14.2</text>
+  <rect x="537" y="286" width="74" height="26" rx="4" fill="#dcfce7"/>
+  <text x="574" y="303" fill="#15803d" font-size="12" font-weight="700" text-anchor="middle">71%</text>
+
+  <!-- legend -->
+  <rect x="18" y="325" width="582" height="54" rx="6" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="30" y="342" fill="#64748b" font-size="10.5" font-weight="700">Score key</text>
+  <rect x="96" y="332" width="11" height="11" rx="2" fill="#16a34a"/>
+  <text x="111" y="342" fill="#475569" font-size="10.5">≥ 75%</text>
+  <rect x="162" y="332" width="11" height="11" rx="2" fill="#dcfce7" stroke="#86efac" stroke-width="1"/>
+  <text x="177" y="342" fill="#475569" font-size="10.5">50 – 74%</text>
+  <rect x="242" y="332" width="11" height="11" rx="2" fill="#fef08a" stroke="#fde047" stroke-width="1"/>
+  <text x="257" y="342" fill="#475569" font-size="10.5">30 – 49%</text>
+  <rect x="322" y="332" width="11" height="11" rx="2" fill="#fecaca" stroke="#fca5a5" stroke-width="1"/>
+  <text x="337" y="342" fill="#475569" font-size="10.5">Below 30%</text>
+  <text x="30" y="362" fill="#94a3b8" font-size="10">After marking, view the class analysis or generate Personal Improvement Plans for each student.</text>
+</svg>
