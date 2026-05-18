@@ -42,12 +42,9 @@ export const site = {
   },
 
   /* ── Contact form ─────────────────────────────────────────── */
-  // TODO: get a free access key at https://web3forms.com — just enter the
-  // email address you want enquiries sent to and they email you a key.
-  // Paste it below: submissions are then emailed straight to you and the
-  // visitor never leaves the site. Until this is set, the form falls back
-  // to opening the visitor's email client.
-  web3formsKey: 'YOUR_ACCESS_KEY',
+  // Web3Forms access key — form submissions are emailed straight to you,
+  // and the visitor stays on the site. (This key is safe to be public.)
+  web3formsKey: 'f065eb0f-00c9-482f-be79-a75e1d7b013b',
 
   /* ── About section ────────────────────────────────────────── */
   about: {
