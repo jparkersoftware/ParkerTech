@@ -6,13 +6,10 @@ const { about } = site;
 
 <section class="section about" id="about">
   <div class="container">
-    <div class="section-head" data-reveal>
-      <span class="eyebrow">01 — About</span>
-      <h2 class="section-title">From the classroom to the codebase.</h2>
-    </div>
-
     <div class="about-grid">
       <div class="about-bio" data-reveal>
+        <span class="eyebrow">01 — About</span>
+        <h2 class="section-title">From the classroom to the codebase.</h2>
         {about.paragraphs.map((para) => <p>{para}</p>)}
       </div>
 
@@ -49,6 +46,9 @@ const { about } = site;
   }
 
   /* bio */
+  .about-bio .section-title {
+    margin-bottom: clamp(1.5rem, 3vw, 2.25rem);
+  }
   .about-bio p {
     color: var(--text-muted);
     font-size: 1.06rem;
@@ -56,7 +56,7 @@ const { about } = site;
   .about-bio p + p {
     margin-top: 1.1rem;
   }
-  .about-bio p:first-child {
+  .about-bio p:first-of-type {
     color: var(--text);
     font-size: 1.2rem;
     line-height: 1.55;
