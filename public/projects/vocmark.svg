@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 400" font-family="Inter, ui-sans-serif, system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3b3899"/>
+      <stop offset="1" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.05" r="0.85">
+      <stop offset="0" stop-color="#6d5cf5" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#6d5cf5" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- VocMark hero backdrop -->
+  <rect width="620" height="400" fill="url(#bg)"/>
+  <rect width="620" height="400" fill="url(#grid)"/>
+  <rect width="620" height="400" fill="url(#glow)"/>
+
+  <!-- frosted panel -->
+  <rect x="44" y="54" width="532" height="292" rx="16" fill="#ffffff" fill-opacity="0.07"/>
+  <rect x="44.5" y="54.5" width="531" height="291" rx="15.5" fill="none" stroke="#ffffff" stroke-opacity="0.18"/>
+
+  <!-- panel title -->
+  <text x="74" y="89" fill="#a5b4fc" font-size="14.5" font-weight="600">Marking Grid — Unit 1: Health and Social Care</text>
+
+  <!-- column headers -->
+  <g fill="#a5b4fc" font-size="11" font-weight="600">
+    <text x="74" y="124">Student</text>
+    <text x="275" y="124" text-anchor="middle">P1</text>
+    <text x="317" y="124" text-anchor="middle">P2</text>
+    <text x="358" y="124" text-anchor="middle">P3</text>
+    <text x="400" y="124" text-anchor="middle">M1</text>
+    <text x="442" y="124" text-anchor="middle">M2</text>
+    <text x="483" y="124" text-anchor="middle">D1</text>
+    <text x="525" y="124" text-anchor="middle">Grade</text>
+  </g>
+
+  <!-- row separators -->
+  <g stroke="#ffffff" stroke-opacity="0.08">
+    <line x1="74" y1="140" x2="546" y2="140"/>
+    <line x1="74" y1="186" x2="546" y2="186"/>
+    <line x1="74" y1="230" x2="546" y2="230"/>
+    <line x1="74" y1="274" x2="546" y2="274"/>
+  </g>
+
+  <!-- student names -->
+  <g fill="#ffffff" font-size="13" font-weight="500">
+    <text x="74" y="168">Alice Thompson</text>
+    <text x="74" y="212">Ben Clarke</text>
+    <text x="74" y="256">Chloe Davies</text>
+    <text x="74" y="300">Dan Morris</text>
+  </g>
+
+  <!-- criteria badges -->
+  <g font-size="11" font-weight="700" text-anchor="middle">
+    <!-- Alice Thompson: Y Y Y Y Y Y -->
+    <g transform="translate(0,164)">
+      <rect x="265" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="275" y="4" fill="#4ade80">Y</text>
+      <rect x="307" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="317" y="4" fill="#4ade80">Y</text>
+      <rect x="348" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="358" y="4" fill="#4ade80">Y</text>
+      <rect x="390" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="400" y="4" fill="#4ade80">Y</text>
+      <rect x="432" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="442" y="4" fill="#4ade80">Y</text>
+      <rect x="473" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="483" y="4" fill="#4ade80">Y</text>
+    </g>
+    <!-- Ben Clarke: Y Y Y Y Y N -->
+    <g transform="translate(0,208)">
+      <rect x="265" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="275" y="4" fill="#4ade80">Y</text>
+      <rect x="307" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="317" y="4" fill="#4ade80">Y</text>
+      <rect x="348" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="358" y="4" fill="#4ade80">Y</text>
+      <rect x="390" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="400" y="4" fill="#4ade80">Y</text>
+      <rect x="432" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="442" y="4" fill="#4ade80">Y</text>
+      <rect x="473" y="-10" width="20" height="20" rx="4" fill="#ef4444" fill-opacity="0.3"/><text x="483" y="4" fill="#f87171">N</text>
+    </g>
+    <!-- Chloe Davies: Y Y Y N N N -->
+    <g transform="translate(0,252)">
+      <rect x="265" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="275" y="4" fill="#4ade80">Y</text>
+      <rect x="307" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="317" y="4" fill="#4ade80">Y</text>
+      <rect x="348" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="358" y="4" fill="#4ade80">Y</text>
+      <rect x="390" y="-10" width="20" height="20" rx="4" fill="#ef4444" fill-opacity="0.3"/><text x="400" y="4" fill="#f87171">N</text>
+      <rect x="432" y="-10" width="20" height="20" rx="4" fill="#ef4444" fill-opacity="0.3"/><text x="442" y="4" fill="#f87171">N</text>
+      <rect x="473" y="-10" width="20" height="20" rx="4" fill="#ef4444" fill-opacity="0.3"/><text x="483" y="4" fill="#f87171">N</text>
+    </g>
+    <!-- Dan Morris: Y Y N N N N -->
+    <g transform="translate(0,296)">
+      <rect x="265" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="275" y="4" fill="#4ade80">Y</text>
+      <rect x="307" y="-10" width="20" height="20" rx="4" fill="#22c55e" fill-opacity="0.3"/><text x="317" y="4" fill="#4ade80">Y</text>
+      <rect x="348" y="-10" width="20" height="20" rx="4" fill="#ef4444" fill-opacity="0.3"/><text x="358" y="4" fill="#f87171">N</text>
+      <rect x="390" y="-10" width="20" height="20" rx="4" fill="#ef4444" fill-opacity="0.3"/><text x="400" y="4" fill="#f87171">N</text>
+      <rect x="432" y="-10" width="20" height="20" rx="4" fill="#ef4444" fill-opacity="0.3"/><text x="442" y="4" fill="#f87171">N</text>
+      <rect x="473" y="-10" width="20" height="20" rx="4" fill="#ef4444" fill-opacity="0.3"/><text x="483" y="4" fill="#f87171">N</text>
+    </g>
+  </g>
+
+  <!-- grades -->
+  <g font-size="15" font-weight="700" text-anchor="middle">
+    <text x="525" y="169" fill="#fbbf24">D</text>
+    <text x="525" y="213" fill="#60a5fa">M</text>
+    <text x="525" y="257" fill="#4ade80">P</text>
+    <text x="525" y="301" fill="#9ca3af">U</text>
+  </g>
+</svg>

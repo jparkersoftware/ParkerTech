@@ -52,8 +52,7 @@ export const projects: Project[] = [
     title: 'VocMark',
     kind: 'Product',
     logo: '/logos/vocmark.svg',
-    cover: '/projects/vocmark.png',
-    coverFit: 'contain',
+    cover: '/projects/vocmark.svg',
     blurb: 'AI marking for BTEC & vocational courses.',
     description:
       'An AI-powered marking platform for UK vocational qualifications — BTEC, CACHE and OCR Nationals. Teachers upload the course spec and assignment brief; VocMark extracts the assessment criteria, grades each submission against them with clear reasoning, and produces a personalised improvement plan for every student.',
