@@ -74,7 +74,7 @@ import Icon from './Icon.astro';
           <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
         </form>
 
-        <div class="form-success" id="form-success" hidden>
+        <div class="form-success" id="form-success" tabindex="-1" hidden>
           <span class="form-success-icon"><Icon name="check" size={26} /></span>
           <h3>Message sent</h3>
           <p>Thanks for reaching out — I'll get back to you within a couple of days.</p>
@@ -385,6 +385,8 @@ import Icon from './Icon.astro';
         form.hidden = true;
         successEl.hidden = false;
         form.reset();
+        // move focus so screen-reader users hear the confirmation
+        successEl.focus();
       } else {
         const message = json?.message ?? 'Something went wrong sending your message.';
         setStatus(`${message} You can also email me directly at ${email}.`, 'error');

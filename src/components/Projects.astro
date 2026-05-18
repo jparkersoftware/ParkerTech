@@ -27,7 +27,7 @@ import Icon from './Icon.astro';
       <button class="cf-arrow is-prev" id="cf-prev" type="button" aria-label="Previous project">
         <Icon name="arrow-right" size={20} />
       </button>
-      <div class="cf-dots" id="cf-dots" role="tablist" aria-label="Choose a project">
+      <div class="cf-dots" id="cf-dots" role="group" aria-label="Choose a project">
         {
           projects.map((project, i) => (
             <button class="cf-dot" type="button" data-i={i} aria-label={project.title} />
@@ -99,24 +99,27 @@ import Icon from './Icon.astro';
   .cf-dots {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0;
   }
+  /* 8px visual dot, but a 24px hit area (transparent padding) for touch */
   .cf-dot {
+    box-sizing: content-box;
     width: 8px;
     height: 8px;
-    padding: 0;
+    padding: 8px;
     border: none;
     border-radius: var(--radius-pill);
-    background: var(--border-strong);
+    background-color: var(--border-strong);
+    background-clip: content-box;
     cursor: pointer;
     transition: width 0.3s var(--ease), background-color 0.3s var(--ease);
   }
   .cf-dot:hover {
-    background: var(--text-dim);
+    background-color: var(--text-dim);
   }
   .cf-dot[aria-current='true'] {
     width: 28px;
-    background: var(--accent);
+    background-color: var(--accent);
   }
 
   /* ── mobile: native scroll-snap instead of the 3D coverflow ── */
@@ -157,6 +160,7 @@ import Icon from './Icon.astro';
     const region = document.getElementById('coverflow-region');
     const count = cards.length;
     const mobileMq = window.matchMedia('(max-width: 760px)');
+    const reduceMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     let active = 0;
     let mode: 'coverflow' | 'scroll' = mobileMq.matches ? 'scroll' : 'coverflow';
@@ -191,6 +195,12 @@ import Icon from './Icon.astro';
         card.style.zIndex = String(30 - ad);
         card.style.pointerEvents = ad <= 2 ? 'auto' : 'none';
         card.setAttribute('aria-hidden', d === 0 ? 'false' : 'true');
+        // keep links inside hidden cards out of the tab order
+        const link = card.querySelector('.pcard-link');
+        if (link) {
+          if (d === 0) link.removeAttribute('tabindex');
+          else link.setAttribute('tabindex', '-1');
+        }
       });
       syncControls();
     };
@@ -203,6 +213,7 @@ import Icon from './Icon.astro';
         card.style.zIndex = '';
         card.style.pointerEvents = '';
         card.setAttribute('aria-hidden', 'false');
+        card.querySelector('.pcard-link')?.removeAttribute('tabindex');
       });
     };
 
@@ -238,7 +249,10 @@ import Icon from './Icon.astro';
     };
 
     // ── shared ──
-    const go = (to: number, behavior: ScrollBehavior = 'smooth') => {
+    const go = (
+      to: number,
+      behavior: ScrollBehavior = reduceMotionMq.matches ? 'auto' : 'smooth'
+    ) => {
       active = Math.max(0, Math.min(count - 1, to));
       if (mode === 'scroll') scrollToCard(active, behavior);
       else renderCoverflow();
