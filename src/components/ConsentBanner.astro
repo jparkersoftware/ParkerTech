@@ -12,7 +12,8 @@ import { site } from '../data/site';
 >
   <p class="consent-text">
     This site uses <strong>Google Analytics</strong> cookies to understand how
-    it's used. Analytics only run if you accept.
+    it's used — see the <a href="/privacy">privacy &amp; cookie policy</a>.
+    Analytics only run if you accept.
   </p>
   <div class="consent-actions">
     <button class="consent-btn consent-decline" id="consent-decline" type="button">
@@ -58,6 +59,11 @@ import { site } from '../data/site';
   .consent-text strong {
     color: var(--text);
     font-weight: 600;
+  }
+  .consent-text a {
+    color: var(--accent-bright);
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .consent-actions {

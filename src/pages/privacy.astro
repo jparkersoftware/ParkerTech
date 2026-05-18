@@ -1,0 +1,273 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+
+const updated = 'May 2026';
+---
+
+<Layout
+  title="Privacy & Cookie Policy"
+  description="How the ParkerTech website handles your information and cookies."
+>
+  <header class="legal-header">
+    <div class="container legal-header-inner">
+      <a class="brand" href="/#top" aria-label={`${site.brand} — home`}>
+        <span class="brand-word">Parker<span class="brand-accent">Tech</span></span>
+      </a>
+      <a class="legal-back" href="/#top">← Back to site</a>
+    </div>
+  </header>
+
+  <main id="main" class="legal">
+    <div class="container legal-inner">
+      <span class="eyebrow">Legal</span>
+      <h1>Privacy &amp; Cookie Policy</h1>
+      <p class="legal-updated">Last updated: {updated}</p>
+
+      <div class="legal-body">
+        <p class="legal-lead">
+          This policy explains how the ParkerTech website (parkertech.co.uk)
+          handles your information. It covers this website only — the products
+          listed on it, such as ParkerMarker and VocMark, are separate services
+          with their own terms and privacy policies.
+        </p>
+
+        <h2>Who we are</h2>
+        <p>
+          ParkerTech is a small educational-technology business run by Joseph,
+          and is the data controller for this website. For any privacy question,
+          email <a href={`mailto:${site.email}`}>{site.email}</a>.
+        </p>
+
+        <h2>What we collect</h2>
+        <ul>
+          <li>
+            <strong>When you use the contact form</strong> — your name, email
+            address and the message you write.
+          </li>
+          <li>
+            <strong>When you accept analytics</strong> — if you accept the
+            cookie banner, Google Analytics collects anonymous usage data: the
+            pages you view, your approximate region, your device and browser
+            type, and how you arrived at the site.
+          </li>
+          <li>
+            <strong>Automatically</strong> — like any website, our host receives
+            technical data such as your IP address and browser type as a
+            standard part of delivering the page.
+          </li>
+        </ul>
+
+        <h2>How we use it</h2>
+        <ul>
+          <li>
+            <strong>Contact form data</strong> is used only to read and reply to
+            your enquiry. You are not added to any mailing list, and it is not
+            sold or shared for marketing.
+          </li>
+          <li>
+            <strong>Analytics</strong> are used only to understand which parts of
+            the site are useful and to improve it. The data is looked at in
+            aggregate and is not used to identify you personally.
+          </li>
+        </ul>
+
+        <h2>Cookies</h2>
+        <p>
+          This site sets <strong>no cookies unless you accept analytics</strong>
+          via the banner shown on your first visit.
+        </p>
+        <ul>
+          <li>
+            If you <strong>accept</strong>, Google Analytics sets cookies (such
+            as <code>_ga</code>) to recognise return visits and measure usage.
+            They expire after up to two years.
+          </li>
+          <li>
+            If you <strong>decline</strong> (or ignore the banner), no analytics
+            cookies are set and nothing is tracked.
+          </li>
+          <li>
+            Your choice itself is saved in your browser's local storage — not a
+            cookie — so the banner doesn't ask again. You can change your mind at
+            any time by clearing this site's data in your browser; the banner
+            will then reappear.
+          </li>
+        </ul>
+
+        <h2>Services we rely on</h2>
+        <p>
+          A few trusted third parties help run the site. Each only receives the
+          data needed to do its job:
+        </p>
+        <ul>
+          <li><strong>Web3Forms</strong> — delivers contact-form submissions to our inbox.</li>
+          <li><strong>Google Analytics</strong> — website analytics, only with your consent.</li>
+          <li><strong>GitHub Pages</strong> — hosts the website.</li>
+          <li><strong>Google Fonts</strong> — serves the site's fonts.</li>
+        </ul>
+
+        <h2>How long we keep it</h2>
+        <ul>
+          <li>
+            <strong>Contact emails</strong> are kept only as long as needed to
+            deal with your enquiry and any follow-up, then deleted.
+          </li>
+          <li>
+            <strong>Analytics data</strong> is retained by Google according to
+            the property's settings (by default, up to 14 months).
+          </li>
+        </ul>
+
+        <h2>Your rights</h2>
+        <p>
+          Under UK GDPR you can ask to see, correct or delete the personal data
+          we hold about you, object to how it's used, or withdraw your consent.
+          Just email <a href={`mailto:${site.email}`}>{site.email}</a>. If you're
+          unhappy with how we've handled your data, you can also complain to the
+          Information Commissioner's Office at
+          <a href="https://ico.org.uk" target="_blank" rel="noopener noreferrer">ico.org.uk</a>.
+        </p>
+
+        <h2>Children</h2>
+        <p>
+          This website is aimed at school staff and decision-makers, not
+          children, and we don't knowingly collect data from children through
+          it.
+        </p>
+
+        <h2>Changes</h2>
+        <p>
+          We may update this policy from time to time. The date at the top shows
+          when it was last revised.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Layout>
+
+<style>
+  /* ── header ── */
+  .legal-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    background: rgba(19, 19, 24, 0.8);
+    backdrop-filter: blur(16px) saturate(1.3);
+    -webkit-backdrop-filter: blur(16px) saturate(1.3);
+    border-bottom: 1px solid var(--border);
+  }
+  .legal-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .brand {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.32rem;
+    letter-spacing: -0.035em;
+  }
+  .brand-accent {
+    background: linear-gradient(120deg, #a294ff, #7d68ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .legal-back {
+    font-size: 0.92rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    transition: color 0.2s var(--ease);
+  }
+  .legal-back:hover {
+    color: var(--text);
+  }
+
+  /* ── content ── */
+  .legal {
+    padding-block: clamp(3rem, 7vw, 5.5rem) clamp(4rem, 9vw, 7rem);
+  }
+  .legal-inner {
+    max-width: 720px;
+  }
+  .legal h1 {
+    font-size: clamp(2.1rem, 5vw, 3.1rem);
+    margin-top: 0.85rem;
+  }
+  .legal-updated {
+    margin-top: 0.8rem;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+
+  .legal-body {
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+  .legal-lead {
+    font-size: 1.12rem;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .legal-body h2 {
+    font-size: 1.3rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  .legal-body p {
+    margin-top: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .legal-body ul {
+    margin-top: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .legal-body li {
+    position: relative;
+    padding-left: 1.4rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+  .legal-body li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .legal-body strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+  .legal-body code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    padding: 0.1rem 0.35rem;
+    border-radius: 5px;
+    background: var(--fill-strong);
+    color: var(--accent-bright);
+  }
+  .legal-body a {
+    color: var(--accent-bright);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .legal-body a:hover {
+    color: var(--text);
+  }
+</style>

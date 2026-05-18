@@ -4,10 +4,10 @@ import { projects } from '../data/projects';
 
 const year = new Date().getFullYear();
 const sections = [
-  { href: '#projects', label: 'Projects' },
-  { href: '#about', label: 'About' },
-  { href: '#it-support', label: 'IT support' },
-  { href: '#contact', label: 'Contact' },
+  { href: '/#projects', label: 'Projects' },
+  { href: '/#about', label: 'About' },
+  { href: '/#it-support', label: 'IT support' },
+  { href: '/#contact', label: 'Contact' },
 ];
 const tools = projects.filter((p) => p.liveUrl);
 ---
@@ -17,7 +17,7 @@ const tools = projects.filter((p) => p.liveUrl);
   <div class="container footer-inner">
     <div class="footer-top">
       <div class="footer-brand">
-        <a class="brand" href="#top" aria-label={`${site.brand} — home`}>
+        <a class="brand" href="/#top" aria-label={`${site.brand} — home`}>
           <span class="brand-word">Parker<span class="brand-accent">Tech</span></span>
         </a>
         <p class="footer-tagline">
@@ -49,10 +49,13 @@ const tools = projects.filter((p) => p.liveUrl);
 
     <div class="footer-bottom">
       <p>© {year} {site.brand}. All rights reserved.</p>
-      <a class="footer-top-link" href="#top">
-        Back to top
-        <span class="footer-arrow" aria-hidden="true">↑</span>
-      </a>
+      <div class="footer-bottom-links">
+        <a href="/privacy">Privacy &amp; cookies</a>
+        <a class="footer-top-link" href="#main">
+          Back to top
+          <span class="footer-arrow" aria-hidden="true">↑</span>
+        </a>
+      </div>
     </div>
   </div>
 </footer>
@@ -159,6 +162,19 @@ const tools = projects.filter((p) => p.liveUrl);
     border-top: 1px solid var(--border);
     color: var(--text-dim);
     font-size: 0.86rem;
+  }
+  .footer-bottom-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .footer-bottom-links a {
+    color: var(--text-muted);
+    font-weight: 500;
+    transition: color 0.2s var(--ease);
+  }
+  .footer-bottom-links a:hover {
+    color: var(--text);
   }
   .footer-top-link {
     display: inline-flex;
