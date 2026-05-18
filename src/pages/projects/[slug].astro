@@ -68,6 +68,20 @@ const fit = project.coverFit ?? 'cover';
               )
             }
 
+            {
+              project.gallery && (
+                <div class="pd-gallery">
+                  <h2>A closer look</h2>
+                  {project.gallery.map((shot) => (
+                    <figure class="pd-shot">
+                      <img src={shot.src} alt={shot.caption} loading="lazy" />
+                      <figcaption>{shot.caption}</figcaption>
+                    </figure>
+                  ))}
+                </div>
+              )
+            }
+
             {project.builtWith && (
               <p class="pd-built">Built with {project.builtWith}</p>
             )}
@@ -246,6 +260,34 @@ const fit = project.coverFit ?? 'cover';
     margin-top: clamp(1.75rem, 4vw, 2.5rem);
     font-family: var(--font-mono);
     font-size: 0.82rem;
+    color: var(--text-dim);
+  }
+
+  .pd-gallery {
+    margin-top: clamp(2.5rem, 6vw, 4rem);
+  }
+  .pd-gallery > h2 {
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    margin-bottom: clamp(1.25rem, 3vw, 1.75rem);
+  }
+  .pd-shot {
+    margin: 0;
+  }
+  .pd-shot + .pd-shot {
+    margin-top: clamp(1.25rem, 3vw, 1.75rem);
+  }
+  .pd-shot img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg-soft);
+  }
+  .pd-shot figcaption {
+    margin-top: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
     color: var(--text-dim);
   }
 

@@ -37,6 +37,8 @@ export interface Project {
   builtWith?: string;
   /** Optional long-form case study, shown on the detail page. */
   story?: { heading: string; body: string[] }[];
+  /** Optional screenshots, shown in a gallery on the detail page. */
+  gallery?: { src: string; caption: string }[];
 }
 
 export const projects: Project[] = [
@@ -126,6 +128,38 @@ export const projects: Project[] = [
     tags: ['Staff appraisal', 'CPD tracking', 'School leadership'],
     year: '2026',
     liveUrl: 'https://performancemanagements.web.app',
+    builtWith: 'React, TypeScript, Tailwind CSS and Firebase',
+    story: [
+      {
+        heading: 'Where it started',
+        body: [
+          "Performance management at one of the schools I worked in was held together with email. There was a Word template; staff made a copy, filled it in, and emailed it to their line manager to review. Inevitably there were several versions of the same document in circulation, and no real oversight — no way to see at a glance who had finished their review and who hadn't. I built a OneDrive folder structure with sharing restrictions to at least keep everything central and give it some hierarchy, but it still meant working through folders by hand to tell SLT where things stood. PM Review is the proper version of that idea: the whole cycle in one place, tracked automatically.",
+        ],
+      },
+      {
+        heading: 'How it works',
+        body: [
+          "PM Review runs a school's entire performance management cycle as one structured workflow. An admin sets up a review cycle with deadlines. Staff log in and complete their self-review — objectives, ratings and commentary — then their line manager reviews it, adds their own commentary, and either returns it for revision or submits it. Mid-year check-ins are opened by the admin and flow through the same loop.",
+          "Everything is tracked in real time. Staff see a countdown to their deadline; line managers are notified the moment a review is submitted to them; and the headteacher has a live dashboard showing the status of every review across the school — completion percentages, rating distributions, and progress broken down by line manager. Alongside the cycle there's a shared document library and a CPD log, where staff record their professional development through the year.",
+        ],
+      },
+      {
+        heading: "Who it's for",
+        body: [
+          "PM Review has four roles, each seeing only what's relevant to them. A School Admin sets up cycles and manages staff; the Headteacher gets oversight of every review and opens the mid-year round; Line Managers review and confirm their own team; and Staff complete their self-review and keep their CPD log. Staff can't see each other's reviews — the structure mirrors how a school actually runs appraisal, and replaces the paper forms, shared drives and email chains it used to take.",
+        ],
+      },
+    ],
+    gallery: [
+      {
+        src: '/projects/pmreview-review.webp',
+        caption: 'A staff review — objectives, commentary and evidence',
+      },
+      {
+        src: '/projects/pmreview-cpd.webp',
+        caption: 'The CPD log, where staff record professional development',
+      },
+    ],
   },
   {
     title: 'Options Portal',
