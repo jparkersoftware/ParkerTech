@@ -167,10 +167,32 @@ export const projects: Project[] = [
     kind: 'Bespoke build',
     blurb: 'Subject options, controlled per student.',
     description:
-      "A yearly subject-options website built for a school. Students choose the courses they'll take next year — but the school decides exactly which courses each individual student can see and select, so no one signs up to a subject they aren't set up to succeed on.",
+      "A yearly subject-options website for a secondary school. Students choose the courses they'll take next year — but the school decides exactly which courses each individual student can see and select, so no one signs up to a subject they aren't set up to succeed on.",
     tags: ['Subject options', 'Per-student access', 'School admin'],
     year: '2024',
     note: 'Built privately for a school — not publicly available.',
+    builtWith: 'PHP, with HTML, CSS and JavaScript',
+    story: [
+      {
+        heading: 'Where it started',
+        body: [
+          "The Options Portal came to me as a rescue job. A secondary school had commissioned a developer to build a website for its subject-options process — the point in the year when students choose the courses they'll study next. It had already replaced a heavily manual routine of paper forms and spreadsheets: each student logged in and picked only from the options actually offered to them. By the time it reached me, parts of it had stopped working — the hosting provider had dropped the old version of PHP the site relied on, and without it the site broke.",
+          "I was asked to take it over. It was my first time inside a PHP codebase — until then I'd been firmly an HTML, CSS and JavaScript developer — so I learned what I needed as I went, updated the functions the newer PHP needed, and got the portal running again. From there I kept improving it, making the changes the school asked for: reworking the interface to be properly mobile-friendly, since a phone is what most students use, and giving the whole thing a cleaner, more modern feel.",
+        ],
+      },
+      {
+        heading: 'How it works',
+        body: [
+          "Students log in securely and work through their choices in option blocks, with live validation that catches an invalid combination before it's ever submitted — so no one picks a set of subjects the timetable can't support. Behind the scenes, staff get an administration dashboard: real-time tracking of who has and hasn't submitted, and the collected choices ready to export straight into the next stage of timetabling, with no re-keying.",
+        ],
+      },
+      {
+        heading: "Who it's for",
+        body: [
+          "The portal serves two sides at once. For students and parents it's a clear, modern process they can complete from a phone in a few minutes. For the school it removes the paper forms and the duplicate data entry, improves the accuracy of what students submit, and gives leadership immediate sight of how the options process is going — rather than waiting on a pile of forms to be collated by hand.",
+        ],
+      },
+    ],
   },
   {
     title: 'Staff Absence System',
