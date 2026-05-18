@@ -34,8 +34,8 @@ export const site = {
   /* ── Hero section ─────────────────────────────────────────── */
   hero: {
     // The headline renders as:  {titleLead} {titleAccent in colour} {titleTail}
-    titleLead: 'Technology that gives schools',
-    titleAccent: 'their time back.',
+    titleLead: 'School technology that',
+    titleAccent: 'makes the grade.',
     titleTail: '',
     subtext:
       "I'm Joseph — a developer and former teacher with a decade in the classroom. ParkerTech is where I build practical software for schools, and a place to see what's possible when the person writing the code has actually done the job.",
