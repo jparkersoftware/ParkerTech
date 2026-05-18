@@ -23,6 +23,8 @@ export interface Project {
   liveUrl?: string;
   /** Optional note shown instead of a link (e.g. for private builds). */
   note?: string;
+  /** Optional path to the project's own logo, e.g. '/logos/name.svg'. */
+  logo?: string;
   /** Set true on ONE project to give it a larger, highlighted card. */
   featured?: boolean;
 }
@@ -32,6 +34,7 @@ export const projects: Project[] = [
   {
     title: 'ParkerMarker',
     kind: 'Product',
+    logo: '/logos/parkermarker.svg',
     blurb: 'Mark faster, feed back better.',
     description:
       'A feedback and assessment platform for UK secondary schools. ParkerMarker lets teachers build shared comment banks, mark quickly, export polished feedback slips and generate personal improvement plans — then turns the results into clear assessment insight for whole departments.',
@@ -43,6 +46,7 @@ export const projects: Project[] = [
   {
     title: 'VocMark',
     kind: 'Product',
+    logo: '/logos/vocmark.svg',
     blurb: 'AI marking for BTEC & vocational courses.',
     description:
       'An AI-powered marking platform for UK vocational qualifications — BTEC, CACHE and OCR Nationals. Teachers upload the course spec and assignment brief; VocMark extracts the assessment criteria, grades each submission against them with clear reasoning, and produces a personalised improvement plan for every student.',

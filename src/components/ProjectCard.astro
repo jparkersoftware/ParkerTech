@@ -19,7 +19,19 @@ const num = String(index + 1).padStart(2, '0');
       <span class="project-year">{project.year}</span>
     </div>
 
-    <h3 class="project-title">{project.title}</h3>
+    <div class="project-head">
+      {
+        project.logo && (
+          <img
+            class="project-logo"
+            src={project.logo}
+            alt={`${project.title} logo`}
+            loading="lazy"
+          />
+        )
+      }
+      <h3 class="project-title">{project.title}</h3>
+    </div>
     <p class="project-blurb">{project.blurb}</p>
     <p class="project-desc">{project.description}</p>
 
@@ -156,6 +168,16 @@ const num = String(index + 1).padStart(2, '0');
     color: var(--text-dim);
   }
 
+  .project-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .project-logo {
+    height: 40px;
+    width: auto;
+    flex-shrink: 0;
+  }
   .project-title {
     font-size: clamp(1.4rem, 2.4vw, 1.8rem);
   }

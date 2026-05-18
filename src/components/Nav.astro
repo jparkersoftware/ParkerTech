@@ -13,7 +13,6 @@ const links = [
 <header class="nav" id="site-nav" data-state="top">
   <div class="container nav-inner">
     <a class="brand" href="#top" aria-label={`${site.brand} — home`}>
-      <span class="brand-mark" aria-hidden="true">P</span>
       <span class="brand-word">Parker<span class="brand-accent">Tech</span></span>
     </a>
 
@@ -74,28 +73,16 @@ const links = [
 
   /* brand */
   .brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
     font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 1.12rem;
-    letter-spacing: -0.01em;
-  }
-  .brand-mark {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    background: var(--grad-soft);
-    color: #fff;
-    font-weight: 700;
-    font-size: 1.05rem;
-    box-shadow: 0 6px 16px -6px rgba(13, 148, 136, 0.6);
+    font-weight: 800;
+    font-size: 1.32rem;
+    letter-spacing: -0.035em;
   }
   .brand-accent {
-    color: var(--accent-deep);
+    background: linear-gradient(120deg, #14a99b, #0a6f66);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   /* desktop links */
