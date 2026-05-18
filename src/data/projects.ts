@@ -93,12 +93,12 @@ export const projects: Project[] = [
     note: 'Built privately for one school — not publicly available.',
   },
   {
-    title: 'School Intranet',
+    title: 'Staff Behaviour Dashboard',
     kind: 'Bespoke build',
-    blurb: 'An intranet that turns behaviour data into action.',
+    blurb: 'Log, track and act on behaviour in one place.',
     description:
-      'A SharePoint intranet built for a school, with Power Apps and Power Automate embedded throughout. It captures student behaviour as it happens and turns it into automated, visual dashboards — so staff see clear, actionable insight rather than raw data.',
-    tags: ['SharePoint', 'Power Platform', 'Behaviour insight'],
+      "A behaviour and pastoral system built into a school's SharePoint intranet on the Microsoft Power Platform. Staff log incidents — out-of-lesson, headteacher detentions, exits and isolation — in seconds, and Power Automate tracks every event, firing alerts the moment a student crosses a threshold. Power Apps galleries give staff the full picture of any student at a glance, while Power BI dashboards give leadership the deeper view.",
+    tags: ['Power Platform', 'Behaviour tracking', 'Power BI insight'],
     year: '2025',
     note: 'Built privately for a school — not publicly available.',
   },
@@ -110,6 +110,16 @@ export const projects: Project[] = [
       "A data integration that pulls live information straight from a school's MIS using Wonde and visualises it in Power BI. It turns scattered records into clear dashboards for leadership — including staff attendance tracking and automated Bradford Factor calculations.",
     tags: ['Wonde + MIS', 'Power BI', 'Leadership data'],
     year: '2025',
+    note: 'Built privately for a school — not publicly available.',
+  },
+  {
+    title: 'Exam Account Automation',
+    kind: 'Bespoke build',
+    blurb: 'Secure exam accounts, set up in seconds.',
+    description:
+      "A PowerShell automation built for a school's exams office. It provisions secure, locked-down candidate accounts ahead of on-screen exams and retrieves every candidate's files automatically once the exam finishes — replacing a manual, error-prone process with a fast, repeatable one that meets JCQ requirements for exam security.",
+    tags: ['PowerShell', 'Exam administration', 'JCQ compliant'],
+    year: '2023',
     note: 'Built privately for a school — not publicly available.',
   },
 ];
