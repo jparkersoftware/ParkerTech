@@ -29,7 +29,7 @@ export const site = {
 
   /** Used for the <meta name="description"> tag and social previews. */
   description:
-    'ParkerTech builds educational technology for schools — practical tools that save teachers time, made by a developer who spent a decade in the classroom.',
+    'ParkerTech solves the technology problems in education — practical software and IT support for UK schools, from a developer who spent a decade teaching.',
 
   /* ── Hero section ─────────────────────────────────────────── */
   hero: {
