@@ -6,15 +6,17 @@ import ConsentBanner from '../components/ConsentBanner.astro';
 interface Props {
   title?: string;
   description?: string;
+  /** Page-specific social-share image (path under public/). */
+  ogImage?: string;
 }
 
-const { title, description = site.description } = Astro.props;
+const { title, description = site.description, ogImage: ogImageProp } = Astro.props;
 const pageTitle = title
   ? `${title} · ${site.brand}`
   : `${site.brand} — ${site.role}`;
 
 const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
-const ogImage = new URL('/og-image.png', Astro.site ?? site.url).href;
+const ogImage = new URL(ogImageProp ?? '/og-image.png', Astro.site ?? site.url).href;
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -63,7 +65,7 @@ const jsonLd = {
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="ParkerTech — technology that gives schools their time back"
+      content={title ? `${title} — ParkerTech` : 'ParkerTech — school technology for UK schools'}
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={pageTitle} />

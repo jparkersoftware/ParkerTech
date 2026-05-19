@@ -16,7 +16,11 @@ const { project } = Astro.props;
 const fit = project.coverFit ?? 'cover';
 ---
 
-<Layout title={project.title} description={project.blurb}>
+<Layout
+  title={project.title}
+  description={project.blurb}
+  ogImage={`/og/${project.slug}.png`}
+>
   <Nav />
   <main id="main" tabindex="-1">
     <article class="project-detail">

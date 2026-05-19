@@ -13,7 +13,7 @@ export const site = {
   owner: 'Joseph',
 
   /** Short description of what you do. */
-  role: 'Educational technology developer & former teacher',
+  role: 'Software & IT support for UK schools',
 
   /** Contact email — where enquiries are sent. */
   email: 'joseph@parkertech.co.uk',
