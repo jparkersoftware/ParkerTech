@@ -193,6 +193,12 @@ export const projects: Project[] = [
         ],
       },
     ],
+    gallery: [
+      {
+        src: '/projects/options-portal.svg',
+        caption: 'The multi-stage options form — pathway questions, then KS3 and KS4 choices',
+      },
+    ],
   },
   {
     title: 'Staff Leave Request System',

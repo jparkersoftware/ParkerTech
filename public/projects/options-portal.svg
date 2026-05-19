@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 730"
+     font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <!-- backdrop + card -->
+  <rect width="760" height="730" fill="#eef1f4"/>
+  <rect x="20" y="20" width="720" height="690" rx="16" fill="#ffffff" stroke="#e4e7ec" stroke-width="1.5"/>
+
+  <!-- header -->
+  <rect x="52" y="44" width="42" height="42" rx="10" fill="#2f9e44"/>
+  <text x="73" y="71" text-anchor="middle" font-size="16" font-weight="800" fill="#ffffff">OA</text>
+  <text x="108" y="61" font-size="16" font-weight="800" fill="#0f172a">Oakwood Academy</text>
+  <text x="108" y="81" font-size="14" fill="#64748b">Year 9 Options Portal</text>
+  <line x1="52" y1="106" x2="708" y2="106" stroke="#e8ebef" stroke-width="1.5"/>
+
+  <!-- Stage 1 -->
+  <text x="52" y="142" font-size="16" font-weight="700" fill="#c026d3">Stage 1 — Select EBACC Pathway</text>
+  <text x="52" y="164" font-size="12" fill="#64748b">Use the pathway questions below — EBACC is selected automatically.</text>
+  <rect x="52" y="180" width="656" height="64" rx="10" fill="#f7f9fb" stroke="#e8ebef"/>
+  <text x="74" y="209" font-size="12.5" font-weight="700" fill="#1e293b">Do you wish to study a language?</text>
+  <circle cx="80" cy="228" r="7" fill="#ffffff" stroke="#c026d3" stroke-width="1.6"/>
+  <circle cx="80" cy="228" r="3.4" fill="#c026d3"/>
+  <text x="95" y="232" font-size="12.5" fill="#1e293b">Yes</text>
+  <circle cx="150" cy="228" r="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.6"/>
+  <text x="165" y="232" font-size="12.5" fill="#64748b">No</text>
+
+  <!-- Stage 2 -->
+  <text x="52" y="294" font-size="16" font-weight="700" fill="#2f9e44">Stage 2 — Select KS3 Option</text>
+  <text x="52" y="316" font-size="12" fill="#64748b">Make a first, second and reserve choice — you'll be allocated two.</text>
+
+  <text x="52" y="344" font-size="11" font-weight="700" fill="#475569">First choice</text>
+  <rect x="52" y="352" width="330" height="36" rx="8" fill="#f7f9fb" stroke="#cbd5e1"/>
+  <text x="70" y="375" font-size="12.5" fill="#1e293b">Art &amp; Design</text>
+  <path d="M357 367 L362 372 L367 367" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text x="52" y="408" font-size="11" font-weight="700" fill="#475569">Second choice</text>
+  <rect x="52" y="416" width="330" height="36" rx="8" fill="#f7f9fb" stroke="#cbd5e1"/>
+  <text x="70" y="439" font-size="12.5" fill="#1e293b">Drama</text>
+  <path d="M357 431 L362 436 L367 431" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text x="52" y="472" font-size="11" font-weight="700" fill="#475569">Reserve choice</text>
+  <rect x="52" y="480" width="330" height="36" rx="8" fill="#f7f9fb" stroke="#cbd5e1"/>
+  <text x="70" y="503" font-size="12.5" fill="#1e293b">Music</text>
+  <path d="M357 495 L362 500 L367 495" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Stage 3 -->
+  <text x="52" y="558" font-size="16" font-weight="700" fill="#0f172a">Stage 3 — Select KS4 Option</text>
+  <text x="52" y="580" font-size="12" fill="#64748b">Filter the subjects with the tabs below, then make your choices.</text>
+
+  <rect x="52" y="594" width="204" height="36" rx="8" fill="#f1c4cc"/>
+  <text x="154" y="617" text-anchor="middle" font-size="12.5" font-weight="600" fill="#80414c">Enrichment</text>
+  <rect x="268" y="594" width="204" height="36" rx="8" fill="#bedae2"/>
+  <text x="370" y="617" text-anchor="middle" font-size="12.5" font-weight="600" fill="#2f5f6c">BTEC</text>
+  <rect x="484" y="594" width="224" height="36" rx="8" fill="#e6a93f" stroke="#0f172a" stroke-width="2"/>
+  <text x="596" y="617" text-anchor="middle" font-size="12.5" font-weight="700" fill="#5c3f10">GCSE</text>
+
+  <text x="52" y="656" font-size="11" font-weight="700" fill="#475569">First choice</text>
+  <rect x="52" y="664" width="320" height="36" rx="8" fill="#f7f9fb" stroke="#cbd5e1"/>
+  <text x="70" y="687" font-size="12.5" fill="#1e293b">GCSE Geography</text>
+  <path d="M347 679 L352 684 L357 679" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <text x="388" y="656" font-size="11" font-weight="700" fill="#475569">Second choice</text>
+  <rect x="388" y="664" width="320" height="36" rx="8" fill="#f7f9fb" stroke="#cbd5e1"/>
+  <text x="406" y="687" font-size="12.5" fill="#1e293b">GCSE Computer Science</text>
+  <path d="M683 679 L688 684 L693 679" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
