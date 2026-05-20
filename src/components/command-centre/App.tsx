@@ -1,19 +1,47 @@
+import { HashRouter, Route, Routes } from 'react-router-dom';
+import { AuthProvider, useAuth } from './auth/AuthProvider';
+import SignIn from './auth/SignIn';
+import NotAuthorized from './auth/NotAuthorized';
+import AppShell from './shell/AppShell';
+import Dashboard from './routes/Dashboard';
+import Clients from './routes/Clients';
+import Projects from './routes/Projects';
+import Quotes from './routes/Quotes';
+import Correspondence from './routes/Correspondence';
+
 export default function App() {
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto max-w-6xl px-6 py-4">
-          <h1 className="text-xl font-semibold tracking-tight">Command Centre</h1>
-          <p className="mt-1 text-xs uppercase tracking-wider text-slate-400">
-            ParkerTech
-          </p>
-        </div>
-      </header>
-      <main className="mx-auto max-w-6xl px-6 py-10">
-        <p className="text-slate-600">
-          Bootstrap complete. Auth, clients, projects and the dashboard come next.
-        </p>
-      </main>
-    </div>
+    <AuthProvider>
+      <Gate />
+    </AuthProvider>
+  );
+}
+
+function Gate() {
+  const state = useAuth();
+
+  if (state.status === 'loading') {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-sm text-slate-400">
+        Loading…
+      </div>
+    );
+  }
+  if (state.status === 'signed-out') return <SignIn />;
+  if (state.status === 'not-authorized')
+    return <NotAuthorized email={state.user.email} />;
+
+  return (
+    <HashRouter>
+      <Routes>
+        <Route element={<AppShell />}>
+          <Route index element={<Dashboard />} />
+          <Route path="clients" element={<Clients />} />
+          <Route path="projects" element={<Projects />} />
+          <Route path="quotes" element={<Quotes />} />
+          <Route path="correspondence" element={<Correspondence />} />
+        </Route>
+      </Routes>
+    </HashRouter>
   );
 }
