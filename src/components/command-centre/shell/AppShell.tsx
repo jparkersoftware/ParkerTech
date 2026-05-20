@@ -7,28 +7,22 @@ export default function AppShell() {
   const email = state.status === 'authed' ? state.user.email : null;
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-900">
-      <aside className="hidden w-56 shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col">
-        <div className="border-b border-slate-200 px-5 py-4">
-          <p className="text-sm font-semibold tracking-tight">Command Centre</p>
-          <p className="mt-0.5 text-[10px] uppercase tracking-wider text-slate-400">
-            ParkerTech
-          </p>
+    <div className="flex min-h-screen">
+      <aside className="hidden w-60 shrink-0 border-r border-[var(--border)] bg-[var(--bg-soft)] md:flex md:flex-col">
+        <div className="border-b border-[var(--border)] px-5 py-5">
+          <p className="cc-eyebrow">ParkerTech</p>
+          <p className="cc-display mt-1 text-lg">Command Centre</p>
         </div>
         <SideNav />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
-          <p className="text-xs text-slate-500">{email}</p>
-          <button
-            type="button"
-            onClick={() => signOutNow()}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
-          >
+        <header className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-soft)] px-6 py-3">
+          <p className="text-xs text-[var(--text-dim)]">{email}</p>
+          <button type="button" onClick={() => signOutNow()} className="cc-btn-ghost">
             Sign out
           </button>
         </header>
-        <main className="flex-1 px-6 py-8">
+        <main className="flex-1 px-8 py-10">
           <Outlet />
         </main>
       </div>

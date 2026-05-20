@@ -21,9 +21,6 @@ export const site = {
   /** Where you're based. */
   location: 'United Kingdom',
 
-  /** Set to false to hide the "open to new work" badges. */
-  available: true,
-
   /** Live site URL — keep in sync with astro.config.mjs. */
   url: 'https://parkertech.co.uk',
 

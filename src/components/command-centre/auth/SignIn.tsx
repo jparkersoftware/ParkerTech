@@ -22,49 +22,37 @@ export default function SignIn() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
-      <div className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-        <div className="mb-6">
-          <h1 className="text-lg font-semibold tracking-tight text-slate-900">
-            Command Centre
-          </h1>
-          <p className="mt-1 text-xs uppercase tracking-wider text-slate-400">
-            ParkerTech
-          </p>
+    <div className="flex min-h-screen items-center justify-center px-6">
+      <div className="cc-card w-full max-w-sm p-8">
+        <div className="mb-7">
+          <p className="cc-eyebrow">ParkerTech</p>
+          <h1 className="cc-display mt-2 text-2xl">Command Centre</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block">
-            <span className="text-xs font-medium text-slate-700">Email</span>
+            <span className="cc-eyebrow mb-2 block">Email</span>
             <input
               type="email"
               autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-xs focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+              className="cc-input"
             />
           </label>
           <label className="block">
-            <span className="text-xs font-medium text-slate-700">Password</span>
+            <span className="cc-eyebrow mb-2 block">Password</span>
             <input
               type="password"
               autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-xs focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+              className="cc-input"
             />
           </label>
-          {error && (
-            <p className="rounded-md bg-rose-50 px-3 py-2 text-xs text-rose-700">
-              {error}
-            </p>
-          )}
-          <button
-            type="submit"
-            disabled={busy}
-            className="w-full rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-          >
+          {error && <p className="cc-error">{error}</p>}
+          <button type="submit" disabled={busy} className="cc-btn-primary mt-2 w-full">
             {busy ? 'Signing in…' : 'Sign in'}
           </button>
         </form>

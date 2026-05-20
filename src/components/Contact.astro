@@ -103,17 +103,6 @@ import Icon from './Icon.astro';
             <dt>Response time</dt>
             <dd>Within 1–2 days</dd>
           </div>
-          {
-            site.available && (
-              <div>
-                <dt>Availability</dt>
-                <dd class="contact-available">
-                  <span class="contact-available-dot" aria-hidden="true" />
-                  Open to new projects
-                </dd>
-              </div>
-            )
-          }
         </dl>
 
         <p class="contact-card-note">
@@ -304,20 +293,6 @@ import Icon from './Icon.astro';
     font-weight: 500;
     text-align: right;
   }
-  .contact-available {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    color: #4ade80;
-  }
-  .contact-available-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #34d399;
-    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.2);
-  }
-
   .contact-card-note {
     margin-top: 1.5rem;
     font-size: 0.9rem;

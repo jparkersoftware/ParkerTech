@@ -7,8 +7,11 @@ export default function Placeholder({
 }) {
   return (
     <div>
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-      <p className="mt-2 text-sm text-slate-500">Coming in Step {step}.</p>
+      <p className="cc-eyebrow">Section</p>
+      <h1 className="cc-display mt-2 text-3xl md:text-4xl">{title}</h1>
+      <p className="mt-3 text-sm text-[var(--text-muted)]">
+        Coming in Step {step}.
+      </p>
     </div>
   );
 }

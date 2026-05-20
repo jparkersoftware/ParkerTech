@@ -22,7 +22,7 @@ function Gate() {
 
   if (state.status === 'loading') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-sm text-slate-400">
+      <div className="flex min-h-screen items-center justify-center text-sm text-[var(--text-dim)]">
         Loading…
       </div>
     );

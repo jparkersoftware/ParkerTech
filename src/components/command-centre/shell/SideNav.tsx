@@ -17,12 +17,7 @@ export default function SideNav() {
           to={item.to}
           end={item.end}
           className={({ isActive }) =>
-            [
-              'rounded-md px-3 py-2 text-sm font-medium transition',
-              isActive
-                ? 'bg-slate-900 text-white'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900',
-            ].join(' ')
+            ['cc-nav-link', isActive ? 'is-active' : ''].join(' ')
           }
         >
           {item.label}
