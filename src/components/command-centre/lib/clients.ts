@@ -4,17 +4,21 @@ import {
   deleteDoc,
   doc,
   getDoc,
+  getDocs,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   updateDoc,
+  where,
+  writeBatch,
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import type { Client, Contact } from './types';
 
 const COL = 'clients';
+const PROJECTS_COL = 'projects';
 
 export function watchClients(cb: (clients: Client[]) => void): Unsubscribe {
   const q = query(collection(db, COL), orderBy('name'));
@@ -67,6 +71,21 @@ export async function updateClientFields(
     ...patch,
     updatedAt: serverTimestamp(),
   });
+  if (patch.name) {
+    await cascadeClientNameToProjects(id, patch.name);
+  }
+}
+
+async function cascadeClientNameToProjects(clientId: string, newName: string): Promise<void> {
+  const projectsSnap = await getDocs(
+    query(collection(db, PROJECTS_COL), where('clientId', '==', clientId)),
+  );
+  if (projectsSnap.empty) return;
+  const batch = writeBatch(db);
+  projectsSnap.forEach((p) => {
+    batch.update(p.ref, { clientName: newName });
+  });
+  await batch.commit();
 }
 
 export async function deleteClient(id: string): Promise<void> {

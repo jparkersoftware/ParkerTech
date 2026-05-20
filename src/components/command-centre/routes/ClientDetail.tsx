@@ -8,7 +8,9 @@ import {
   updateContact,
   watchClient,
 } from '../lib/clients';
-import type { Client, Contact } from '../lib/types';
+import { watchProjectsForClient } from '../lib/projects';
+import type { Client, Contact, Project } from '../lib/types';
+import StatusPill from '../components/StatusPill';
 
 export default function ClientDetail() {
   const { id = '' } = useParams<{ id: string }>();
@@ -47,7 +49,40 @@ export default function ClientDetail() {
 
       <DetailsSection client={client} onDelete={handleDeleteClient} />
       <ContactsSection client={client} />
+      <ProjectsForClient clientId={client.id} />
     </div>
+  );
+}
+
+function ProjectsForClient({ clientId }: { clientId: string }) {
+  const [projects, setProjects] = useState<Project[] | null>(null);
+  const navigate = useNavigate();
+  useEffect(() => watchProjectsForClient(clientId, setProjects), [clientId]);
+
+  return (
+    <section className="mt-10">
+      <h2 className="cc-display mb-3 text-xl">Projects</h2>
+      {projects === null ? (
+        <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>
+      ) : projects.length === 0 ? (
+        <div className="cc-empty">No projects for this client yet.</div>
+      ) : (
+        <ul className="space-y-2">
+          {projects.map((p) => (
+            <li key={p.id}>
+              <button
+                type="button"
+                onClick={() => navigate(`/projects/${p.id}`)}
+                className="cc-card flex w-full items-center justify-between gap-3 p-4 text-left transition hover:bg-[var(--surface-hover)]"
+              >
+                <span className="font-medium">{p.title}</span>
+                <StatusPill status={p.status} />
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }
 
