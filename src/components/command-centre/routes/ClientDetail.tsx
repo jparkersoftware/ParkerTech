@@ -11,6 +11,7 @@ import {
 import { watchProjectsForClient } from '../lib/projects';
 import type { Client, Contact, Project } from '../lib/types';
 import StatusPill from '../components/StatusPill';
+import CorrespondenceFeed from '../components/CorrespondenceFeed';
 
 export default function ClientDetail() {
   const { id = '' } = useParams<{ id: string }>();
@@ -50,6 +51,11 @@ export default function ClientDetail() {
       <DetailsSection client={client} onDelete={handleDeleteClient} />
       <ContactsSection client={client} />
       <ProjectsForClient clientId={client.id} />
+
+      <section className="mt-10">
+        <h2 className="cc-display mb-3 text-xl">Correspondence</h2>
+        <CorrespondenceFeed scope="client" id={client.id} />
+      </section>
     </div>
   );
 }

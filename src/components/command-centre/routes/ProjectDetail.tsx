@@ -19,6 +19,7 @@ import {
   type TaskPriority,
 } from '../lib/types';
 import StatusPill from '../components/StatusPill';
+import CorrespondenceFeed from '../components/CorrespondenceFeed';
 import { formatISODate } from './Projects';
 
 export default function ProjectDetail() {
@@ -60,6 +61,11 @@ export default function ProjectDetail() {
 
       <DetailsSection project={project} clients={clients} onDelete={handleDelete} />
       <TasksSection project={project} />
+
+      <section className="mt-10">
+        <h2 className="cc-display mb-3 text-xl">Correspondence</h2>
+        <CorrespondenceFeed scope="project" id={project.id} />
+      </section>
     </div>
   );
 }

@@ -375,3 +375,66 @@ select.cc-input {
   white-space: nowrap;
   flex-shrink: 0;
 }
+.cc-type-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid;
+}
+.cc-type-pill.is-meeting {
+  background: rgba(125, 104, 255, 0.16);
+  border-color: rgba(125, 104, 255, 0.5);
+  color: var(--accent-bright);
+}
+.cc-type-pill.is-call {
+  background: rgba(93, 139, 255, 0.16);
+  border-color: rgba(93, 139, 255, 0.5);
+  color: #93c5fd;
+}
+.cc-type-pill.is-email {
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: #fcd34d;
+}
+.cc-type-pill.is-note {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+}
+.cc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.15s var(--ease), color 0.15s var(--ease),
+    border-color 0.15s var(--ease);
+}
+.cc-chip:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.cc-chip.is-active {
+  background: var(--accent-tint);
+  border-color: var(--accent-line);
+  color: var(--accent-bright);
+}
+.cc-chip-static {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.6rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}

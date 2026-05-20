@@ -61,3 +61,28 @@ export type Project = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
+
+export const CORRESPONDENCE_TYPES = ['meeting', 'call', 'email', 'note'] as const;
+export type CorrespondenceType = (typeof CORRESPONDENCE_TYPES)[number];
+
+export const CORRESPONDENCE_TYPE_LABEL: Record<CorrespondenceType, string> = {
+  meeting: 'Meeting',
+  call: 'Call',
+  email: 'Email',
+  note: 'Note',
+};
+
+export type Correspondence = {
+  id: string;
+  clientId: string;
+  clientName: string;
+  projectId?: string;
+  projectTitle?: string;
+  type: CorrespondenceType;
+  date: string;
+  title: string;
+  body: string;
+  contactIds: string[];
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
