@@ -5,6 +5,7 @@ import NotAuthorized from './auth/NotAuthorized';
 import AppShell from './shell/AppShell';
 import Dashboard from './routes/Dashboard';
 import Clients from './routes/Clients';
+import ClientDetail from './routes/ClientDetail';
 import Projects from './routes/Projects';
 import Quotes from './routes/Quotes';
 import Correspondence from './routes/Correspondence';
@@ -37,6 +38,7 @@ function Gate() {
         <Route element={<AppShell />}>
           <Route index element={<Dashboard />} />
           <Route path="clients" element={<Clients />} />
+          <Route path="clients/:id" element={<ClientDetail />} />
           <Route path="projects" element={<Projects />} />
           <Route path="quotes" element={<Quotes />} />
           <Route path="correspondence" element={<Correspondence />} />

@@ -1,0 +1,305 @@
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import {
+  addContact,
+  deleteClient,
+  removeContact,
+  updateClientFields,
+  updateContact,
+  watchClient,
+} from '../lib/clients';
+import type { Client, Contact } from '../lib/types';
+
+export default function ClientDetail() {
+  const { id = '' } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [client, setClient] = useState<Client | null | undefined>(undefined);
+
+  useEffect(() => watchClient(id, setClient), [id]);
+
+  if (client === undefined) {
+    return <p className="text-sm text-[var(--text-dim)]">Loading…</p>;
+  }
+  if (client === null) {
+    return (
+      <div>
+        <Link to="/clients" className="cc-eyebrow inline-block">
+          ← Clients
+        </Link>
+        <p className="mt-4 text-sm text-[var(--text-muted)]">
+          This client doesn't exist (or has been deleted).
+        </p>
+      </div>
+    );
+  }
+
+  async function handleDeleteClient() {
+    if (!confirm(`Delete ${client!.name}? This can't be undone.`)) return;
+    await deleteClient(client!.id);
+    navigate('/clients');
+  }
+
+  return (
+    <div className="max-w-3xl">
+      <Link to="/clients" className="cc-eyebrow inline-block">
+        ← Clients
+      </Link>
+      <header className="cc-page-head mt-3">
+        <h1 className="cc-page-title">{client.name}</h1>
+        <button type="button" className="cc-btn-danger" onClick={handleDeleteClient}>
+          Delete client
+        </button>
+      </header>
+
+      <NameAndNotes client={client} />
+      <ContactsSection client={client} />
+    </div>
+  );
+}
+
+function NameAndNotes({ client }: { client: Client }) {
+  const [name, setName] = useState(client.name);
+  const [notes, setNotes] = useState(client.notes ?? '');
+  const [saving, setSaving] = useState<'name' | 'notes' | null>(null);
+  const nameSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const notesSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => setName(client.name), [client.name]);
+  useEffect(() => setNotes(client.notes ?? ''), [client.notes]);
+
+  function scheduleSave(field: 'name' | 'notes', value: string) {
+    const timer = field === 'name' ? nameSaveTimer : notesSaveTimer;
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(async () => {
+      const trimmed = field === 'name' ? value.trim() : value;
+      if (field === 'name' && !trimmed) return;
+      setSaving(field);
+      try {
+        await updateClientFields(client.id, { [field]: trimmed });
+      } finally {
+        setSaving(null);
+      }
+    }, 600);
+  }
+
+  return (
+    <div className="cc-card mb-8 p-6">
+      <label className="block">
+        <span className="cc-eyebrow mb-2 block">
+          School name {saving === 'name' && <span className="ml-2 text-[var(--text-dim)]">saving…</span>}
+        </span>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            scheduleSave('name', e.target.value);
+          }}
+          className="cc-input"
+        />
+      </label>
+      <label className="mt-4 block">
+        <span className="cc-eyebrow mb-2 block">
+          Notes {saving === 'notes' && <span className="ml-2 text-[var(--text-dim)]">saving…</span>}
+        </span>
+        <textarea
+          value={notes}
+          onChange={(e) => {
+            setNotes(e.target.value);
+            scheduleSave('notes', e.target.value);
+          }}
+          className="cc-textarea"
+          placeholder="Anything worth remembering about this school — context, history, quirks."
+        />
+      </label>
+    </div>
+  );
+}
+
+function ContactsSection({ client }: { client: Client }) {
+  const [adding, setAdding] = useState(false);
+
+  return (
+    <section>
+      <div className="mb-3 flex items-end justify-between">
+        <h2 className="cc-display text-xl">Contacts</h2>
+        {!adding && (
+          <button type="button" className="cc-btn-ghost" onClick={() => setAdding(true)}>
+            Add contact
+          </button>
+        )}
+      </div>
+
+      {adding && (
+        <ContactForm
+          onCancel={() => setAdding(false)}
+          onSubmit={async (data) => {
+            await addContact(client.id, client.contacts ?? [], data);
+            setAdding(false);
+          }}
+        />
+      )}
+
+      {(client.contacts?.length ?? 0) === 0 && !adding ? (
+        <div className="cc-empty">No contacts yet.</div>
+      ) : (
+        <ul className="space-y-3">
+          {(client.contacts ?? []).map((c) => (
+            <li key={c.id}>
+              <ContactCard client={client} contact={c} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function ContactCard({ client, contact }: { client: Client; contact: Contact }) {
+  const [editing, setEditing] = useState(false);
+
+  if (editing) {
+    return (
+      <ContactForm
+        initial={contact}
+        onCancel={() => setEditing(false)}
+        onSubmit={async (data) => {
+          await updateContact(client.id, client.contacts ?? [], contact.id, data);
+          setEditing(false);
+        }}
+        onDelete={async () => {
+          if (!confirm(`Remove ${contact.name}?`)) return;
+          await removeContact(client.id, client.contacts ?? [], contact.id);
+          setEditing(false);
+        }}
+      />
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setEditing(true)}
+      className="cc-card block w-full p-4 text-left transition hover:bg-[var(--surface-hover)]"
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="font-medium">{contact.name}</p>
+        {contact.role && <p className="text-sm text-[var(--text-muted)]">{contact.role}</p>}
+      </div>
+      {(contact.email || contact.phone) && (
+        <p className="mt-1 text-sm text-[var(--text-dim)]">
+          {contact.email}
+          {contact.email && contact.phone && ' · '}
+          {contact.phone}
+        </p>
+      )}
+      {contact.notes && (
+        <p className="mt-2 text-sm text-[var(--text-muted)]">{contact.notes}</p>
+      )}
+    </button>
+  );
+}
+
+function ContactForm({
+  initial,
+  onSubmit,
+  onCancel,
+  onDelete,
+}: {
+  initial?: Contact;
+  onSubmit: (data: Omit<Contact, 'id'>) => Promise<void>;
+  onCancel: () => void;
+  onDelete?: () => Promise<void>;
+}) {
+  const [name, setName] = useState(initial?.name ?? '');
+  const [role, setRole] = useState(initial?.role ?? '');
+  const [email, setEmail] = useState(initial?.email ?? '');
+  const [phone, setPhone] = useState(initial?.phone ?? '');
+  const [notes, setNotes] = useState(initial?.notes ?? '');
+  const [busy, setBusy] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setBusy(true);
+    try {
+      await onSubmit({
+        name: name.trim(),
+        role: role.trim() || undefined,
+        email: email.trim() || undefined,
+        phone: phone.trim() || undefined,
+        notes: notes.trim() || undefined,
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="cc-card mb-3 space-y-3 p-5">
+      <div className="grid gap-3 md:grid-cols-2">
+        <label className="block">
+          <span className="cc-eyebrow mb-2 block">Name</span>
+          <input
+            type="text"
+            autoFocus
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="cc-input"
+          />
+        </label>
+        <label className="block">
+          <span className="cc-eyebrow mb-2 block">Role</span>
+          <input
+            type="text"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="cc-input"
+            placeholder="e.g. Headteacher"
+          />
+        </label>
+        <label className="block">
+          <span className="cc-eyebrow mb-2 block">Email</span>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="cc-input"
+          />
+        </label>
+        <label className="block">
+          <span className="cc-eyebrow mb-2 block">Phone</span>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="cc-input"
+          />
+        </label>
+      </div>
+      <label className="block">
+        <span className="cc-eyebrow mb-2 block">Notes</span>
+        <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          className="cc-textarea"
+          placeholder="Anything useful — preferences, things to remember."
+        />
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <button type="submit" className="cc-btn-primary" disabled={busy || !name.trim()}>
+          {busy ? 'Saving…' : initial ? 'Save' : 'Add contact'}
+        </button>
+        <button type="button" className="cc-btn-ghost" onClick={onCancel}>
+          Cancel
+        </button>
+        {onDelete && (
+          <button type="button" className="cc-btn-danger ml-auto" onClick={onDelete}>
+            Remove contact
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}
