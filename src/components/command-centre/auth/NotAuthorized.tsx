@@ -2,7 +2,7 @@ import { signOutNow } from './AuthProvider';
 
 export default function NotAuthorized({ email }: { email: string | null }) {
   return (
-    <div className="flex min-h-screen items-center justify-center px-6">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-5 px-6">
       <div className="cc-card w-full max-w-sm p-8 text-center">
         <p className="cc-eyebrow">ParkerTech</p>
         <h1 className="cc-display mt-2 text-2xl">Not authorized</h1>
@@ -21,6 +21,9 @@ export default function NotAuthorized({ email }: { email: string | null }) {
           Sign out
         </button>
       </div>
+      <a href="/" className="cc-back-link">
+        ← Back to parkertech.co.uk
+      </a>
     </div>
   );
 }

@@ -190,3 +190,11 @@
   text-align: center;
   color: var(--text-muted);
 }
+.cc-back-link {
+  font-size: 0.875rem;
+  color: var(--text-dim);
+  transition: color 0.15s var(--ease);
+}
+.cc-back-link:hover {
+  color: var(--text);
+}

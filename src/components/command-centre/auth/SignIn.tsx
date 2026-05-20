@@ -22,7 +22,7 @@ export default function SignIn() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-6">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-5 px-6">
       <div className="cc-card w-full max-w-sm p-8">
         <div className="mb-7">
           <p className="cc-eyebrow">ParkerTech</p>
@@ -57,6 +57,9 @@ export default function SignIn() {
           </button>
         </form>
       </div>
+      <a href="/" className="cc-back-link">
+        ← Back to parkertech.co.uk
+      </a>
     </div>
   );
 }
