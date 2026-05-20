@@ -11,9 +11,18 @@
     "astro": "astro"
   },
   "devDependencies": {
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
     "astro": "^5.0.0"
   },
   "dependencies": {
-    "@astrojs/sitemap": "^3.7.2"
+    "@astrojs/react": "^5.0.5",
+    "@astrojs/sitemap": "^3.7.2",
+    "@tailwindcss/vite": "^4.3.0",
+    "firebase": "^12.13.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.15.1",
+    "tailwindcss": "^4.3.0"
   }
 }

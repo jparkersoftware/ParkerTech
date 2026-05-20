@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /command-centre/
 
 Sitemap: https://parkertech.co.uk/sitemap-index.xml
