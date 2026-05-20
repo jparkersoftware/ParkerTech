@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   addContact,
@@ -18,7 +18,7 @@ export default function ClientDetail() {
   useEffect(() => watchClient(id, setClient), [id]);
 
   if (client === undefined) {
-    return <p className="text-sm text-[var(--text-dim)]">Loading…</p>;
+    return <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>;
   }
   if (client === null) {
     return (
@@ -26,7 +26,7 @@ export default function ClientDetail() {
         <Link to="/clients" className="cc-eyebrow inline-block">
           ← Clients
         </Link>
-        <p className="mt-4 text-sm text-[var(--text-muted)]">
+        <p className="mt-4 text-sm" style={{ color: 'var(--text-muted)' }}>
           This client doesn't exist (or has been deleted).
         </p>
       </div>
@@ -44,75 +44,113 @@ export default function ClientDetail() {
       <Link to="/clients" className="cc-eyebrow inline-block">
         ← Clients
       </Link>
-      <header className="cc-page-head mt-3">
-        <h1 className="cc-page-title">{client.name}</h1>
-        <button type="button" className="cc-btn-danger" onClick={handleDeleteClient}>
-          Delete client
-        </button>
-      </header>
 
-      <NameAndNotes client={client} />
+      <DetailsSection client={client} onDelete={handleDeleteClient} />
       <ContactsSection client={client} />
     </div>
   );
 }
 
-function NameAndNotes({ client }: { client: Client }) {
-  const [name, setName] = useState(client.name);
-  const [notes, setNotes] = useState(client.notes ?? '');
-  const [saving, setSaving] = useState<'name' | 'notes' | null>(null);
-  const nameSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const notesSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+function DetailsSection({
+  client,
+  onDelete,
+}: {
+  client: Client;
+  onDelete: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
 
-  useEffect(() => setName(client.name), [client.name]);
-  useEffect(() => setNotes(client.notes ?? ''), [client.notes]);
-
-  function scheduleSave(field: 'name' | 'notes', value: string) {
-    const timer = field === 'name' ? nameSaveTimer : notesSaveTimer;
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(async () => {
-      const trimmed = field === 'name' ? value.trim() : value;
-      if (field === 'name' && !trimmed) return;
-      setSaving(field);
-      try {
-        await updateClientFields(client.id, { [field]: trimmed });
-      } finally {
-        setSaving(null);
-      }
-    }, 600);
+  if (editing) {
+    return (
+      <DetailsForm
+        client={client}
+        onCancel={() => setEditing(false)}
+        onSaved={() => setEditing(false)}
+      />
+    );
   }
 
   return (
-    <div className="cc-card mb-8 p-6">
+    <section className="mt-3 mb-8">
+      <header className="cc-page-head">
+        <h1 className="cc-page-title">{client.name}</h1>
+        <div className="flex gap-2">
+          <button type="button" className="cc-btn-ghost" onClick={() => setEditing(true)}>
+            Edit details
+          </button>
+          <button type="button" className="cc-btn-danger" onClick={onDelete}>
+            Delete client
+          </button>
+        </div>
+      </header>
+      {client.notes ? (
+        <div className="cc-card whitespace-pre-wrap p-6 text-sm" style={{ color: 'var(--text-muted)' }}>
+          {client.notes}
+        </div>
+      ) : (
+        <div className="cc-empty">No notes yet.</div>
+      )}
+    </section>
+  );
+}
+
+function DetailsForm({
+  client,
+  onCancel,
+  onSaved,
+}: {
+  client: Client;
+  onCancel: () => void;
+  onSaved: () => void;
+}) {
+  const [name, setName] = useState(client.name);
+  const [notes, setNotes] = useState(client.notes ?? '');
+  const [busy, setBusy] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    setBusy(true);
+    try {
+      await updateClientFields(client.id, { name: trimmed, notes });
+      onSaved();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="cc-card mt-3 mb-8 space-y-4 p-6">
       <label className="block">
-        <span className="cc-eyebrow mb-2 block">
-          School name {saving === 'name' && <span className="ml-2 text-[var(--text-dim)]">saving…</span>}
-        </span>
+        <span className="cc-eyebrow mb-2 block">School name</span>
         <input
           type="text"
+          autoFocus
+          required
           value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-            scheduleSave('name', e.target.value);
-          }}
+          onChange={(e) => setName(e.target.value)}
           className="cc-input"
         />
       </label>
-      <label className="mt-4 block">
-        <span className="cc-eyebrow mb-2 block">
-          Notes {saving === 'notes' && <span className="ml-2 text-[var(--text-dim)]">saving…</span>}
-        </span>
+      <label className="block">
+        <span className="cc-eyebrow mb-2 block">Notes</span>
         <textarea
           value={notes}
-          onChange={(e) => {
-            setNotes(e.target.value);
-            scheduleSave('notes', e.target.value);
-          }}
+          onChange={(e) => setNotes(e.target.value)}
           className="cc-textarea"
           placeholder="Anything worth remembering about this school — context, history, quirks."
         />
       </label>
-    </div>
+      <div className="flex gap-2">
+        <button type="submit" className="cc-btn-primary" disabled={busy || !name.trim()}>
+          {busy ? 'Saving…' : 'Save'}
+        </button>
+        <button type="button" className="cc-btn-ghost" onClick={onCancel}>
+          Cancel
+        </button>
+      </div>
+    </form>
   );
 }
 
@@ -177,26 +215,35 @@ function ContactCard({ client, contact }: { client: Client; contact: Contact }) 
   }
 
   return (
-    <button
-      type="button"
-      onClick={() => setEditing(true)}
-      className="cc-card block w-full p-4 text-left transition hover:bg-[var(--surface-hover)]"
-    >
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="font-medium">{contact.name}</p>
-        {contact.role && <p className="text-sm text-[var(--text-muted)]">{contact.role}</p>}
+    <div className="cc-card p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <p className="font-medium">{contact.name}</p>
+            {contact.role && (
+              <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
+                {contact.role}
+              </p>
+            )}
+          </div>
+          {(contact.email || contact.phone) && (
+            <p className="mt-1 text-sm" style={{ color: 'var(--text-dim)' }}>
+              {contact.email}
+              {contact.email && contact.phone && ' · '}
+              {contact.phone}
+            </p>
+          )}
+          {contact.notes && (
+            <p className="mt-2 text-sm" style={{ color: 'var(--text-muted)' }}>
+              {contact.notes}
+            </p>
+          )}
+        </div>
+        <button type="button" className="cc-btn-ghost shrink-0" onClick={() => setEditing(true)}>
+          Edit
+        </button>
       </div>
-      {(contact.email || contact.phone) && (
-        <p className="mt-1 text-sm text-[var(--text-dim)]">
-          {contact.email}
-          {contact.email && contact.phone && ' · '}
-          {contact.phone}
-        </p>
-      )}
-      {contact.notes && (
-        <p className="mt-2 text-sm text-[var(--text-muted)]">{contact.notes}</p>
-      )}
-    </button>
+    </div>
   );
 }
 
