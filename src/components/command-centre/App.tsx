@@ -9,6 +9,8 @@ import ClientDetail from './routes/ClientDetail';
 import Projects from './routes/Projects';
 import ProjectDetail from './routes/ProjectDetail';
 import Quotes from './routes/Quotes';
+import QuoteDetail from './routes/QuoteDetail';
+import QuotePrint from './routes/QuotePrint';
 import Correspondence from './routes/Correspondence';
 
 export default function App() {
@@ -36,6 +38,7 @@ function Gate() {
   return (
     <HashRouter>
       <Routes>
+        <Route path="quotes/:id/print" element={<QuotePrint />} />
         <Route element={<AppShell />}>
           <Route index element={<Dashboard />} />
           <Route path="clients" element={<Clients />} />
@@ -43,6 +46,7 @@ function Gate() {
           <Route path="projects" element={<Projects />} />
           <Route path="projects/:id" element={<ProjectDetail />} />
           <Route path="quotes" element={<Quotes />} />
+          <Route path="quotes/:id" element={<QuoteDetail />} />
           <Route path="correspondence" element={<Correspondence />} />
         </Route>
       </Routes>

@@ -20,6 +20,7 @@ import {
 } from '../lib/types';
 import StatusPill from '../components/StatusPill';
 import CorrespondenceFeed from '../components/CorrespondenceFeed';
+import QuotesFeed from '../components/QuotesFeed';
 import { formatISODate } from './Projects';
 
 export default function ProjectDetail() {
@@ -61,6 +62,11 @@ export default function ProjectDetail() {
 
       <DetailsSection project={project} clients={clients} onDelete={handleDelete} />
       <TasksSection project={project} />
+
+      <section className="mt-10">
+        <h2 className="cc-display mb-3 text-xl">Quotes</h2>
+        <QuotesFeed scope="project" id={project.id} />
+      </section>
 
       <section className="mt-10">
         <h2 className="cc-display mb-3 text-xl">Correspondence</h2>

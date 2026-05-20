@@ -86,3 +86,42 @@ export type Correspondence = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
+
+export const QUOTE_STATUSES = ['draft', 'sent', 'accepted', 'declined'] as const;
+export type QuoteStatus = (typeof QUOTE_STATUSES)[number];
+
+export const QUOTE_STATUS_LABEL: Record<QuoteStatus, string> = {
+  draft: 'Draft',
+  sent: 'Sent',
+  accepted: 'Accepted',
+  declined: 'Declined',
+};
+
+export type QuoteLineItem = {
+  id: string;
+  description: string;
+  quantity: number;
+  unit?: string;
+  unitPrice: number;
+};
+
+export type Quote = {
+  id: string;
+  number: string;
+  clientId: string;
+  clientName: string;
+  projectId?: string;
+  projectTitle?: string;
+  status: QuoteStatus;
+  issueDate: string;
+  validUntil?: string;
+  introNote?: string;
+  lineItems: QuoteLineItem[];
+  vatRate: number;
+  termsNote?: string;
+  sentAt?: Timestamp;
+  acceptedAt?: Timestamp;
+  declinedAt?: Timestamp;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
