@@ -488,7 +488,7 @@ server.tool(
 // knowledge and read past sessions even when launched from outside the
 // vault folder (e.g. while coding in another repo).
 
-const VAULT_WRITABLE_PREFIXES = ['Knowledge/', 'Daily/', 'Inbox/'];
+const VAULT_WRITABLE_PREFIXES = ['Knowledge/', 'Daily/', 'Inbox/', 'raw/'];
 
 function vaultPath(relative: string): string {
   const trimmed = relative.replace(/^\/+/, '');
@@ -637,6 +637,147 @@ server.tool(
     return ok({ ok: true, path: relPath });
   },
 );
+
+server.tool(
+  'vault_save_raw_source',
+  'Save an unprocessed source (article, transcript, paste, etc.) into the vault\'s raw/ folder for later ingestion into the Knowledge wiki. Use this when Joseph hands you content he wants integrated — you save it here, then do a separate ingest pass that updates the relevant Knowledge pages.',
+  {
+    title: z.string().describe('Short descriptive title — becomes the filename.'),
+    content: z.string().describe('The raw content. Paste verbatim; don\'t pre-summarise.'),
+    sourceType: z
+      .enum(['article', 'transcript', 'pdf-text', 'email', 'note', 'other'])
+      .default('other'),
+    sourceUrl: z.string().optional().describe('Original URL if applicable.'),
+    tags: z.array(z.string()).default([]),
+  },
+  async ({ title, content, sourceType, sourceUrl, tags }) => {
+    const date = new Date().toISOString().slice(0, 10);
+    const slug =
+      title
+        .normalize('NFKD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^A-Za-z0-9 ]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .toLowerCase()
+        .slice(0, 60) || 'untitled';
+    const relPath = join('raw', `${date}-${slug}.md`);
+    const full = vaultPath(relPath);
+    ensureWritable(relPath);
+    mkdirSync(dirname(full), { recursive: true });
+
+    const fm = [
+      '---',
+      'type: raw-source',
+      `source_type: ${sourceType}`,
+      `captured: ${new Date().toISOString()}`,
+      `title: ${JSON.stringify(title)}`,
+    ];
+    if (sourceUrl) fm.push(`source_url: ${JSON.stringify(sourceUrl)}`);
+    if (tags.length) fm.push(`tags: [${tags.map((t) => JSON.stringify(t)).join(', ')}]`);
+    fm.push('ingested: false');
+    fm.push('source: claude-code');
+    fm.push('---', '');
+
+    writeFileSync(full, `${fm.join('\n')}# ${title}\n\n${content}\n`);
+    tryCommitVault(`raw: ${title}`);
+    return ok({
+      ok: true,
+      path: relPath,
+      next:
+        'Now run the ingest workflow: read this source, identify the 5–15 Knowledge pages it touches, use vault_append_knowledge or vault_write_knowledge to integrate the facts, then flip frontmatter ingested: true.',
+    });
+  },
+);
+
+server.tool(
+  'vault_rebuild_index',
+  'Scan the Knowledge/ folder and write Knowledge/Index.md — a flat catalog of every knowledge note with category and one-line summary parsed from the H1/first line. Call this after a batch of writes so future sessions can use the index as a navigation map instead of reading every file.',
+  {},
+  async () => {
+    const knowledgeRoot = vaultPath('Knowledge');
+    if (!existsSync(knowledgeRoot)) return err('Knowledge/ folder does not exist yet.');
+
+    const entries: { category: string; title: string; path: string; summary: string }[] = [];
+
+    function walk(dir: string, category: string): void {
+      for (const name of readdirSync(dir)) {
+        if (name.startsWith('.')) continue;
+        if (name === 'Index.md') continue;
+        const full = join(dir, name);
+        const stat = statSync(full);
+        if (stat.isDirectory()) {
+          walk(full, name);
+        } else if (name.endsWith('.md')) {
+          const content = readFileSync(full, 'utf-8');
+          const title = parseTitle(content, name);
+          const summary = parseSummary(content);
+          const rel = full.replace(`${VAULT_ROOT}/`, '');
+          entries.push({ category, title, path: rel, summary });
+        }
+      }
+    }
+
+    walk(knowledgeRoot, 'General');
+
+    entries.sort((a, b) =>
+      a.category === b.category
+        ? a.title.localeCompare(b.title)
+        : a.category.localeCompare(b.category),
+    );
+
+    const byCat = new Map<string, typeof entries>();
+    for (const e of entries) {
+      if (!byCat.has(e.category)) byCat.set(e.category, []);
+      byCat.get(e.category)!.push(e);
+    }
+
+    const lines: string[] = [
+      '---',
+      'type: knowledge-index',
+      `updated: ${new Date().toISOString()}`,
+      `entries: ${entries.length}`,
+      'source: claude-code',
+      '---',
+      '',
+      '# Knowledge Index',
+      '',
+      'Auto-generated catalogue of every note in `Knowledge/`. Refresh via `vault_rebuild_index`. Scan this first when you need to find what we already know about something.',
+      '',
+    ];
+
+    for (const [cat, items] of byCat) {
+      lines.push(`## ${cat}`, '');
+      for (const e of items) {
+        const link = e.path.replace(/\.md$/, '');
+        lines.push(`- [[${link}|${e.title}]] — ${e.summary || '_(no summary)_'}`);
+      }
+      lines.push('');
+    }
+
+    const indexPath = vaultPath(join('Knowledge', 'Index.md'));
+    writeFileSync(indexPath, lines.join('\n'));
+    tryCommitVault(`index: rebuild (${entries.length} entries)`);
+    return ok({ ok: true, entries: entries.length, path: 'Knowledge/Index.md' });
+  },
+);
+
+function parseTitle(content: string, fallbackName: string): string {
+  const match = content.match(/^#\s+(.+)$/m);
+  if (match) return match[1]!.trim();
+  return fallbackName.replace(/\.md$/, '').replace(/-/g, ' ');
+}
+
+function parseSummary(content: string): string {
+  const body = content.replace(/^---[\s\S]*?---\n?/, '');
+  for (const raw of body.split('\n')) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (line.startsWith('#')) continue;
+    return line.slice(0, 200);
+  }
+  return '';
+}
 
 server.tool(
   'save_conversation_snapshot',
