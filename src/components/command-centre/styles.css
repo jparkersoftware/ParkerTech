@@ -656,3 +656,70 @@ select.cc-input {
     margin: 18mm;
   }
 }
+.cc-milestone-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid;
+}
+.cc-milestone-pill.is-planned {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+}
+.cc-milestone-pill.is-progress {
+  background: rgba(125, 104, 255, 0.16);
+  border-color: rgba(125, 104, 255, 0.5);
+  color: var(--accent-bright);
+}
+.cc-milestone-pill.is-done {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #86efac;
+}
+.cc-milestone-pill.is-cancelled {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: var(--text-dim);
+}
+.cc-progress {
+  height: 6px;
+  width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.cc-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #7d68ff, #a294ff);
+  transition: width 0.3s var(--ease);
+}
+.cc-progress-bar.is-complete {
+  background: linear-gradient(90deg, #22c55e, #86efac);
+}
+.cc-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s var(--ease);
+}
+.cc-check:hover {
+  background: var(--surface);
+}
+.cc-check.is-done .cc-check-text {
+  color: var(--text-dim);
+  text-decoration: line-through;
+}
+.cc-check-text {
+  flex: 1;
+  font-size: 0.92rem;
+  color: var(--text);
+  line-height: 1.5;
+}

@@ -1,24 +1,34 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
+  addMilestone,
   addTask,
   deleteProject,
+  removeMilestone,
   removeTask,
+  toggleChecklistItem,
+  updateMilestone,
   updateProjectFields,
   updateTask,
   watchProject,
 } from '../lib/projects';
 import { watchClients } from '../lib/clients';
 import {
+  MILESTONE_STATUSES,
+  MILESTONE_STATUS_LABEL,
   PROJECT_STATUSES,
   PROJECT_STATUS_LABEL,
+  type ChecklistItem,
   type Client,
+  type Milestone,
+  type MilestoneStatus,
   type Project,
   type ProjectStatus,
   type Task,
   type TaskPriority,
 } from '../lib/types';
 import StatusPill from '../components/StatusPill';
+import MilestoneStatusPill from '../components/MilestoneStatusPill';
 import CorrespondenceFeed from '../components/CorrespondenceFeed';
 import QuotesFeed from '../components/QuotesFeed';
 import { formatISODate } from './Projects';
@@ -61,6 +71,7 @@ export default function ProjectDetail() {
       </Link>
 
       <DetailsSection project={project} clients={clients} onDelete={handleDelete} />
+      <RoadmapSection project={project} />
       <TasksSection project={project} />
 
       <section className="mt-10">
@@ -479,4 +490,338 @@ function sortTasks(tasks: Task[]): Task[] {
 function isPast(iso: string): boolean {
   const today = new Date().toISOString().slice(0, 10);
   return iso < today;
+}
+
+function RoadmapSection({ project }: { project: Project }) {
+  const [adding, setAdding] = useState(false);
+  const milestones = project.milestones ?? [];
+
+  return (
+    <section className="mb-10">
+      <div className="mb-3 flex items-end justify-between">
+        <h2 className="cc-display text-xl">Roadmap</h2>
+        {!adding && (
+          <button type="button" className="cc-btn-ghost" onClick={() => setAdding(true)}>
+            Add milestone
+          </button>
+        )}
+      </div>
+
+      {adding && (
+        <MilestoneForm
+          onCancel={() => setAdding(false)}
+          onSubmit={async (data) => {
+            await addMilestone(project.id, project.milestones ?? [], data);
+            setAdding(false);
+          }}
+        />
+      )}
+
+      {milestones.length === 0 && !adding ? (
+        <div className="cc-empty">
+          No milestones yet. Break a larger project into measurable sections.
+        </div>
+      ) : (
+        <ul className="space-y-4">
+          {milestones.map((m) => (
+            <li key={m.id}>
+              <MilestoneCard project={project} milestone={m} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function MilestoneCard({
+  project,
+  milestone,
+}: {
+  project: Project;
+  milestone: Milestone;
+}) {
+  const [editing, setEditing] = useState(false);
+  const overdue =
+    milestone.status !== 'done' &&
+    milestone.status !== 'cancelled' &&
+    milestone.targetDate &&
+    isPast(milestone.targetDate);
+
+  if (editing) {
+    return (
+      <MilestoneForm
+        initial={milestone}
+        onCancel={() => setEditing(false)}
+        onSubmit={async (data) => {
+          await updateMilestone(project.id, project.milestones ?? [], milestone.id, data);
+          setEditing(false);
+        }}
+        onDelete={async () => {
+          if (!confirm(`Remove milestone "${milestone.title}"?`)) return;
+          await removeMilestone(project.id, project.milestones ?? [], milestone.id);
+          setEditing(false);
+        }}
+      />
+    );
+  }
+
+  const total = milestone.checklist.length;
+  const done = milestone.checklist.filter((c) => c.done).length;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  const complete = total > 0 && done === total;
+
+  return (
+    <div className="cc-card p-5">
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <MilestoneStatusPill status={milestone.status} />
+            {milestone.targetDate && (
+              <span
+                className={overdue ? 'cc-task-overdue' : ''}
+                style={{
+                  fontSize: '0.85rem',
+                  color: overdue ? undefined : 'var(--text-dim)',
+                }}
+              >
+                Target {formatISODate(milestone.targetDate)}
+              </span>
+            )}
+          </div>
+          <h3 className="cc-display mt-2 text-lg">{milestone.title}</h3>
+          {milestone.description && (
+            <p
+              className="mt-2 whitespace-pre-wrap text-sm"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              {milestone.description}
+            </p>
+          )}
+        </div>
+        <button type="button" className="cc-btn-ghost shrink-0" onClick={() => setEditing(true)}>
+          Edit
+        </button>
+      </header>
+
+      {total > 0 && (
+        <>
+          <ul className="mt-4 space-y-1">
+            {milestone.checklist.map((item) => (
+              <li key={item.id}>
+                <label className={`cc-check ${item.done ? 'is-done' : ''}`}>
+                  <input
+                    type="checkbox"
+                    className="cc-checkbox"
+                    checked={item.done}
+                    onChange={() =>
+                      toggleChecklistItem(
+                        project.id,
+                        project.milestones ?? [],
+                        milestone.id,
+                        item.id,
+                      )
+                    }
+                  />
+                  <span className="cc-check-text">{item.text}</span>
+                </label>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 flex items-center gap-3">
+            <div className="cc-progress flex-1">
+              <div
+                className={`cc-progress-bar ${complete ? 'is-complete' : ''}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <span
+              style={{
+                fontSize: '0.85rem',
+                color: 'var(--text-muted)',
+                fontVariantNumeric: 'tabular-nums',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {done}/{total} · {pct}%
+            </span>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function MilestoneForm({
+  initial,
+  onSubmit,
+  onCancel,
+  onDelete,
+}: {
+  initial?: Milestone;
+  onSubmit: (data: {
+    title: string;
+    description?: string;
+    targetDate?: string;
+    status: MilestoneStatus;
+    checklist: ChecklistItem[];
+  }) => Promise<void>;
+  onCancel: () => void;
+  onDelete?: () => Promise<void>;
+}) {
+  const [title, setTitle] = useState(initial?.title ?? '');
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const [targetDate, setTargetDate] = useState(initial?.targetDate ?? '');
+  const [status, setStatus] = useState<MilestoneStatus>(initial?.status ?? 'planned');
+  const [checklist, setChecklist] = useState<ChecklistItem[]>(
+    initial?.checklist ?? [],
+  );
+  const [newItemText, setNewItemText] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  function addItem() {
+    const text = newItemText.trim();
+    if (!text) return;
+    setChecklist((cs) => [...cs, { id: crypto.randomUUID(), text, done: false }]);
+    setNewItemText('');
+  }
+
+  function updateItem(id: string, patch: Partial<ChecklistItem>) {
+    setChecklist((cs) => cs.map((c) => (c.id === id ? { ...c, ...patch } : c)));
+  }
+
+  function removeItem(id: string) {
+    setChecklist((cs) => cs.filter((c) => c.id !== id));
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!title.trim()) return;
+    setBusy(true);
+    try {
+      await onSubmit({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        targetDate: targetDate || undefined,
+        status,
+        checklist,
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="cc-card mb-3 space-y-4 p-5">
+      <label className="block">
+        <span className="cc-eyebrow mb-2 block">Title</span>
+        <input
+          type="text"
+          autoFocus
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="cc-input"
+          placeholder="e.g. Discovery complete"
+        />
+      </label>
+      <label className="block">
+        <span className="cc-eyebrow mb-2 block">Description</span>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="cc-textarea"
+          placeholder="What does this milestone cover? What does success look like?"
+        />
+      </label>
+      <div className="grid gap-3 md:grid-cols-2">
+        <label className="block">
+          <span className="cc-eyebrow mb-2 block">Target date</span>
+          <input
+            type="date"
+            value={targetDate}
+            onChange={(e) => setTargetDate(e.target.value)}
+            className="cc-input"
+          />
+        </label>
+        <label className="block">
+          <span className="cc-eyebrow mb-2 block">Status</span>
+          <select
+            className="cc-input"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as MilestoneStatus)}
+          >
+            {MILESTONE_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {MILESTONE_STATUS_LABEL[s]}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div>
+        <p className="cc-eyebrow mb-2">Measurable checklist</p>
+        {checklist.length > 0 && (
+          <ul className="mb-3 space-y-2">
+            {checklist.map((item) => (
+              <li key={item.id} className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={item.text}
+                  onChange={(e) => updateItem(item.id, { text: e.target.value })}
+                  className="cc-input"
+                />
+                <button
+                  type="button"
+                  className="cc-btn-danger shrink-0"
+                  onClick={() => removeItem(item.id)}
+                  style={{ padding: '0.3rem 0.7rem', fontSize: '0.75rem' }}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newItemText}
+            onChange={(e) => setNewItemText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addItem();
+              }
+            }}
+            className="cc-input"
+            placeholder="Add a success criterion and press Enter"
+          />
+          <button
+            type="button"
+            className="cc-btn-ghost shrink-0"
+            onClick={addItem}
+            disabled={!newItemText.trim()}
+          >
+            Add
+          </button>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <button type="submit" className="cc-btn-primary" disabled={busy || !title.trim()}>
+          {busy ? 'Saving…' : initial ? 'Save' : 'Add milestone'}
+        </button>
+        <button type="button" className="cc-btn-ghost" onClick={onCancel}>
+          Cancel
+        </button>
+        {onDelete && (
+          <button type="button" className="cc-btn-danger ml-auto" onClick={onDelete}>
+            Remove milestone
+          </button>
+        )}
+      </div>
+    </form>
+  );
 }

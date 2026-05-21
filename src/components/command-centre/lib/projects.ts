@@ -13,7 +13,15 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Project, ProjectStatus, Task, TaskPriority } from './types';
+import type {
+  ChecklistItem,
+  Milestone,
+  MilestoneStatus,
+  Project,
+  ProjectStatus,
+  Task,
+  TaskPriority,
+} from './types';
 
 const COL = 'projects';
 
@@ -144,6 +152,87 @@ export async function removeTask(
 ): Promise<void> {
   await updateDoc(doc(db, COL, projectId), {
     tasks: tasks.filter((t) => t.id !== taskId),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function addMilestone(
+  projectId: string,
+  milestones: Milestone[],
+  input: {
+    title: string;
+    description?: string;
+    targetDate?: string;
+    status?: MilestoneStatus;
+    checklist?: { text: string }[];
+  },
+): Promise<void> {
+  const newMilestone: Milestone = {
+    id: crypto.randomUUID(),
+    title: input.title.trim(),
+    status: input.status ?? 'planned',
+    checklist: (input.checklist ?? []).map((c) => ({
+      id: crypto.randomUUID(),
+      text: c.text.trim(),
+      done: false,
+    })),
+    createdAt: Timestamp.now(),
+    ...stripUndefined({
+      description: input.description,
+      targetDate: input.targetDate,
+    }),
+  };
+  await updateDoc(doc(db, COL, projectId), {
+    milestones: [...milestones, newMilestone],
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function updateMilestone(
+  projectId: string,
+  milestones: Milestone[],
+  milestoneId: string,
+  patch: Partial<Omit<Milestone, 'id' | 'createdAt' | 'checklist'>> & {
+    checklist?: ChecklistItem[];
+  },
+): Promise<void> {
+  const next = milestones.map((m) =>
+    m.id === milestoneId ? { ...m, ...stripUndefined(patch) } : m,
+  );
+  await updateDoc(doc(db, COL, projectId), {
+    milestones: next,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function removeMilestone(
+  projectId: string,
+  milestones: Milestone[],
+  milestoneId: string,
+): Promise<void> {
+  await updateDoc(doc(db, COL, projectId), {
+    milestones: milestones.filter((m) => m.id !== milestoneId),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function toggleChecklistItem(
+  projectId: string,
+  milestones: Milestone[],
+  milestoneId: string,
+  itemId: string,
+): Promise<void> {
+  const next = milestones.map((m) => {
+    if (m.id !== milestoneId) return m;
+    return {
+      ...m,
+      checklist: m.checklist.map((c) =>
+        c.id === itemId ? { ...c, done: !c.done } : c,
+      ),
+    };
+  });
+  await updateDoc(doc(db, COL, projectId), {
+    milestones: next,
     updatedAt: serverTimestamp(),
   });
 }

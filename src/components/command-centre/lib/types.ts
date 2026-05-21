@@ -48,6 +48,37 @@ export type Task = {
   completedAt?: Timestamp;
 };
 
+export const MILESTONE_STATUSES = [
+  'planned',
+  'in-progress',
+  'done',
+  'cancelled',
+] as const;
+export type MilestoneStatus = (typeof MILESTONE_STATUSES)[number];
+
+export const MILESTONE_STATUS_LABEL: Record<MilestoneStatus, string> = {
+  planned: 'Planned',
+  'in-progress': 'In progress',
+  done: 'Done',
+  cancelled: 'Cancelled',
+};
+
+export type ChecklistItem = {
+  id: string;
+  text: string;
+  done: boolean;
+};
+
+export type Milestone = {
+  id: string;
+  title: string;
+  description?: string;
+  targetDate?: string;
+  status: MilestoneStatus;
+  checklist: ChecklistItem[];
+  createdAt: Timestamp;
+};
+
 export type Project = {
   id: string;
   clientId: string;
@@ -58,6 +89,7 @@ export type Project = {
   startDate?: string;
   targetDate?: string;
   tasks: Task[];
+  milestones?: Milestone[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
