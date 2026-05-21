@@ -77,6 +77,7 @@ export async function createCorrespondence(input: {
   date: string;
   title: string;
   body: string;
+  transcript?: string;
   contactIds: string[];
 }): Promise<string> {
   const ref = await addDoc(collection(db, COL), {
@@ -103,6 +104,7 @@ export async function updateCorrespondence(
       | 'date'
       | 'title'
       | 'body'
+      | 'transcript'
       | 'contactIds'
     >
   >,

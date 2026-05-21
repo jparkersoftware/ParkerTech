@@ -231,6 +231,8 @@ function EntryCard({
         </p>
       )}
 
+      {entry.transcript && <TranscriptBlock transcript={entry.transcript} />}
+
       {tagged.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           {tagged.map((c) => (
@@ -271,6 +273,7 @@ export function EntryForm({
     date: string;
     title: string;
     body: string;
+    transcript?: string;
     contactIds: string[];
   }) => Promise<void>;
   onCancel: () => void;
@@ -280,6 +283,8 @@ export function EntryForm({
   const [date, setDate] = useState(initial?.date ?? new Date().toISOString().slice(0, 10));
   const [title, setTitle] = useState(initial?.title ?? '');
   const [body, setBody] = useState(initial?.body ?? '');
+  const [transcript, setTranscript] = useState(initial?.transcript ?? '');
+  const [showTranscript, setShowTranscript] = useState(!!initial?.transcript);
   const [clientId, setClientId] = useState(
     initial?.clientId ?? defaultClientId ?? clients[0]?.id ?? '',
   );
@@ -317,6 +322,7 @@ export function EntryForm({
         date,
         title: title.trim(),
         body,
+        transcript: transcript.trim() || undefined,
         contactIds,
       });
     } finally {
@@ -399,15 +405,55 @@ export function EntryForm({
       </label>
 
       <label className="block">
-        <span className="cc-eyebrow mb-2 block">Notes</span>
+        <span className="cc-eyebrow mb-2 block">Summary</span>
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
           className="cc-textarea"
           style={{ minHeight: '8rem' }}
-          placeholder="What was said, agreed, or actioned."
+          placeholder="What was said, agreed, or actioned. Short and human."
         />
       </label>
+
+      <div>
+        {!showTranscript ? (
+          <button
+            type="button"
+            onClick={() => setShowTranscript(true)}
+            className="cc-back-link"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+          >
+            ▸ Add full transcript / email / verbatim notes
+          </button>
+        ) : (
+          <label className="block">
+            <span className="cc-eyebrow mb-2 block">
+              Full transcript / email{' '}
+              <span style={{ color: 'var(--text-dim)', textTransform: 'none', letterSpacing: 0 }}>
+                · saved verbatim for future AI context
+              </span>
+            </span>
+            <textarea
+              value={transcript}
+              onChange={(e) => setTranscript(e.target.value)}
+              className="cc-textarea"
+              style={{ minHeight: '14rem', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}
+              placeholder="Paste the full transcript, email thread, or raw notes here."
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setTranscript('');
+                setShowTranscript(false);
+              }}
+              className="cc-back-link mt-2"
+              style={{ display: 'inline-block' }}
+            >
+              Remove transcript
+            </button>
+          </label>
+        )}
+      </div>
 
       {client && client.contacts.length > 0 && (
         <div>
@@ -448,6 +494,41 @@ export function EntryForm({
         )}
       </div>
     </form>
+  );
+}
+
+function TranscriptBlock({ transcript }: { transcript: string }) {
+  const [open, setOpen] = useState(false);
+  const wordCount = transcript.trim().split(/\s+/).length;
+  return (
+    <div className="mt-4">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="cc-back-link"
+        style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+      >
+        {open ? '▾' : '▸'} {open ? 'Hide' : 'Show'} full transcript / email
+        <span style={{ color: 'var(--text-dim)' }}>· {wordCount} words</span>
+      </button>
+      {open && (
+        <pre
+          className="mt-3 whitespace-pre-wrap rounded-md p-4"
+          style={{
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            color: 'var(--text-muted)',
+            fontSize: '0.82rem',
+            fontFamily: 'var(--font-mono)',
+            lineHeight: 1.6,
+            maxHeight: '32rem',
+            overflowY: 'auto',
+          }}
+        >
+          {transcript}
+        </pre>
+      )}
+    </div>
   );
 }
 

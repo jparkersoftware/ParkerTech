@@ -113,7 +113,10 @@ export type Correspondence = {
   type: CorrespondenceType;
   date: string;
   title: string;
+  /** Short human-readable digest — what was decided / next steps. */
   body: string;
+  /** Optional verbatim raw text — transcript, full email, etc. Preserved for AI context. */
+  transcript?: string;
   contactIds: string[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
