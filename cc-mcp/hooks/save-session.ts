@@ -24,6 +24,14 @@ import { dirname, join } from 'node:path';
 const VAULT = join(homedir(), 'Documents', 'Obsidian', 'ParkerTechFire');
 const SESSIONS_DIR = join(VAULT, 'Daily', 'Claude-Sessions');
 
+/**
+ * Only auto-save when the session's working directory matches one of these.
+ * Conservative by design: coding sessions in unrelated repos don't pollute
+ * the vault. Add another path here (or replace with a single permissive
+ * match) if you want a wider catch.
+ */
+const SAVE_FROM_CWDS = [VAULT];
+
 type HookPayload = {
   session_id?: string;
   transcript_path?: string;
@@ -41,6 +49,11 @@ void (async function main() {
 
     if (!transcriptPath || !existsSync(transcriptPath)) {
       log(`no transcript at ${transcriptPath}`);
+      process.exit(0);
+    }
+
+    if (!SAVE_FROM_CWDS.some((root) => cwd === root || cwd.startsWith(`${root}/`))) {
+      log(`cwd ${cwd} not in auto-save list, skipping`);
       process.exit(0);
     }
 
