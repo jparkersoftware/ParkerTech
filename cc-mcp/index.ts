@@ -639,6 +639,64 @@ server.tool(
 );
 
 server.tool(
+  'save_conversation_snapshot',
+  'Save the current conversation to the vault as a session transcript. Use this at the end of a Claude Desktop chat when you want to preserve it as persistent context (Claude Desktop doesn\'t fire the SessionEnd hook the CLI does, so this is the manual equivalent). Provide a short title and the formatted conversation body — ideally with ## User / ## Claude headings, but free-form prose works too.',
+  {
+    title: z.string().describe('Short title for the conversation (becomes part of the filename and the H1)'),
+    body: z.string().describe('Formatted markdown of the conversation as you (Claude) remember it. ## User / ## Claude headings preferred.'),
+    contextHint: z
+      .string()
+      .optional()
+      .describe('Optional one-word hint for the filename — e.g. project name or topic.'),
+  },
+  async ({ title, body, contextHint }) => {
+    const date = new Date().toISOString().slice(0, 10);
+    const time = new Date().toISOString().slice(11, 19);
+    const slug =
+      title
+        .normalize('NFKD')
+        .replace(/[̀-ͯ]/g, '')
+        .replace(/[^A-Za-z0-9 ]/g, '')
+        .trim()
+        .replace(/\s+/g, '-')
+        .toLowerCase()
+        .slice(0, 50) || 'untitled';
+    const hintSlug = contextHint
+      ? contextHint
+          .normalize('NFKD')
+          .replace(/[^A-Za-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '')
+          .toLowerCase()
+          .slice(0, 30)
+      : 'desktop';
+    const relPath = join('Daily', 'Claude-Sessions', `${date}-${hintSlug}-${slug}.md`);
+    const full = vaultPath(relPath);
+    ensureWritable(relPath);
+    mkdirSync(dirname(full), { recursive: true });
+
+    const fm = [
+      '---',
+      'type: claude-session',
+      `date: ${date}`,
+      `time: ${time}`,
+      `title: ${JSON.stringify(title)}`,
+      `context_hint: ${JSON.stringify(contextHint ?? '')}`,
+      'source: claude-desktop',
+      '---',
+      '',
+      `# ${title}`,
+      '',
+      body,
+      '',
+    ].join('\n');
+
+    writeFileSync(full, fm);
+    tryCommitVault(`session: ${title}`);
+    return ok({ ok: true, path: relPath });
+  },
+);
+
+server.tool(
   'vault_append_daily',
   'Append a note to today\'s Daily journal file. Creates Daily/{YYYY-MM-DD}.md if it doesn\'t exist. Use for time-stamped observations, micro-decisions, end-of-day summaries.',
   {
