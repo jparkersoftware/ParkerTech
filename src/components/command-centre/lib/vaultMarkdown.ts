@@ -6,6 +6,7 @@ import {
   type Client,
   type Contact,
   type Correspondence,
+  type InboxItem,
   type Project,
   type Quote,
 } from './types';
@@ -329,6 +330,35 @@ export function quoteFile(quote: Quote): VaultFile {
     path: `Quotes/${quote.number}.md`,
     content: frontmatter + body.join('\n'),
     message: `quote: ${quote.number}`,
+  };
+}
+
+export function inboxFile(item: InboxItem): VaultFile {
+  const date = item.createdAt?.toDate
+    ? item.createdAt.toDate().toISOString().slice(0, 10)
+    : new Date().toISOString().slice(0, 10);
+  const firstLine = item.text.split('\n')[0]!.slice(0, 50);
+  const slug = `${date}-${entitySlug(firstLine)}-${item.id.slice(0, 6)}`;
+
+  const frontmatter = yamlFrontmatter({
+    type: 'inbox',
+    id: item.id,
+    created: date,
+    tags: item.tags,
+    archived: item.archived,
+    archivedNote: item.archivedNote ?? '',
+    source: 'command-centre',
+  });
+
+  const body: string[] = [`# Inbox · ${date}`, '', item.text, ''];
+  if (item.archivedNote) {
+    body.push(`> Archived: ${item.archivedNote}`, '');
+  }
+
+  return {
+    path: `Inbox/${slug}.md`,
+    content: frontmatter + body.join('\n'),
+    message: `inbox: ${firstLine.replace(/\n/g, ' ')}`,
   };
 }
 

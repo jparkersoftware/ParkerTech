@@ -6,6 +6,7 @@ import {
   clientFile,
   contactFile,
   correspondenceFile,
+  inboxFile,
   projectFile,
   quoteFile,
   type VaultFile,
@@ -13,6 +14,7 @@ import {
 import type {
   Client,
   Correspondence,
+  InboxItem,
   Project,
   Quote,
 } from './types';
@@ -31,14 +33,15 @@ export async function syncAllToVault(
   try {
     onProgress?.({ phase: 'reading', written: 0, total: 0 });
 
-    const [clients, projects, correspondence, quotes] = await Promise.all([
+    const [clients, projects, correspondence, quotes, inbox] = await Promise.all([
       readAll<Client>('clients', 'name'),
       readAll<Project>('projects', 'updatedAt', 'desc'),
       readAll<Correspondence>('correspondence', 'date', 'desc'),
       readAll<Quote>('quotes', 'issueDate', 'desc'),
+      readAll<InboxItem>('inbox', 'createdAt', 'desc'),
     ]);
 
-    const files = generateFiles(clients, projects, correspondence, quotes);
+    const files = generateFiles(clients, projects, correspondence, quotes, inbox);
 
     let written = 0;
     onProgress?.({ phase: 'writing', written, total: files.length });
@@ -69,6 +72,7 @@ function generateFiles(
   projects: Project[],
   correspondence: Correspondence[],
   quotes: Quote[],
+  inbox: InboxItem[],
 ): VaultFile[] {
   const files: VaultFile[] = [];
 
@@ -105,6 +109,9 @@ function generateFiles(
   }
   for (const quote of quotes) {
     files.push(quoteFile(quote));
+  }
+  for (const item of inbox) {
+    files.push(inboxFile(item));
   }
 
   return files;

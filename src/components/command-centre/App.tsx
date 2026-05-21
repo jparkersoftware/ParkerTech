@@ -13,6 +13,7 @@ import Quotes from './routes/Quotes';
 import QuoteDetail from './routes/QuoteDetail';
 import QuotePrint from './routes/QuotePrint';
 import Correspondence from './routes/Correspondence';
+import Inbox from './routes/Inbox';
 import Settings from './routes/Settings';
 
 export default function App() {
@@ -44,6 +45,7 @@ function Gate() {
           <Route path="quotes/:id/print" element={<QuotePrint />} />
           <Route element={<AppShell />}>
             <Route index element={<Dashboard />} />
+            <Route path="inbox" element={<Inbox />} />
             <Route path="clients" element={<Clients />} />
             <Route path="clients/:id" element={<ClientDetail />} />
             <Route path="projects" element={<Projects />} />

@@ -160,3 +160,14 @@ export type Quote = {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };
+
+export type InboxItem = {
+  id: string;
+  text: string;
+  tags: string[];
+  archived: boolean;
+  archivedNote?: string;
+  archivedAt?: Timestamp;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};

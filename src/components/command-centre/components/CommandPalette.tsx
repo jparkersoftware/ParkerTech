@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { watchClients } from '../lib/clients';
 import { watchProjects } from '../lib/projects';
 import { watchCorrespondence } from '../lib/correspondence';
+import { watchInbox } from '../lib/inbox';
 import { watchQuotes } from '../lib/quotes';
 import {
   KIND_LABEL,
@@ -18,6 +19,7 @@ import {
 import type {
   Client,
   Correspondence,
+  InboxItem,
   Project,
   Quote,
 } from '../lib/types';
@@ -33,6 +35,7 @@ export default function CommandPalette({
   const [projects, setProjects] = useState<Project[]>([]);
   const [correspondence, setCorrespondence] = useState<Correspondence[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [inbox, setInbox] = useState<InboxItem[]>([]);
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -42,10 +45,11 @@ export default function CommandPalette({
   useEffect(() => watchProjects(setProjects), []);
   useEffect(() => watchCorrespondence(setCorrespondence), []);
   useEffect(() => watchQuotes(setQuotes), []);
+  useEffect(() => watchInbox(setInbox), []);
 
   const index = useMemo(
-    () => buildSearchIndex(clients, projects, correspondence, quotes),
-    [clients, projects, correspondence, quotes],
+    () => buildSearchIndex(clients, projects, correspondence, quotes, inbox),
+    [clients, projects, correspondence, quotes, inbox],
   );
 
   const hits = useMemo(() => searchItems(index, query), [index, query]);

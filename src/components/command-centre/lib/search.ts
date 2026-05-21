@@ -4,6 +4,7 @@ import {
   QUOTE_STATUS_LABEL,
   type Client,
   type Correspondence,
+  type InboxItem,
   type Project,
   type Quote,
 } from './types';
@@ -15,7 +16,8 @@ export type ItemKind =
   | 'milestone'
   | 'contact'
   | 'correspondence'
-  | 'quote';
+  | 'quote'
+  | 'inbox';
 
 export type SearchableItem = {
   id: string;
@@ -34,6 +36,7 @@ export function buildSearchIndex(
   projects: Project[],
   correspondence: Correspondence[],
   quotes: Quote[],
+  inbox: InboxItem[] = [],
 ): SearchableItem[] {
   const items: SearchableItem[] = [];
 
@@ -110,6 +113,19 @@ export function buildSearchIndex(
     });
   }
 
+  for (const i of inbox.filter((x) => !x.archived)) {
+    const firstLine = i.text.split('\n')[0]!.slice(0, 80);
+    items.push({
+      id: i.id,
+      kind: 'inbox',
+      title: firstLine,
+      subtitle: `Inbox · ${i.tags.length > 0 ? i.tags.join(', ') : 'no tags'}`,
+      haystack: lower(`${i.text} ${i.tags.join(' ')}`),
+      longText: i.text,
+      route: '/inbox',
+    });
+  }
+
   for (const q of quotes) {
     items.push({
       id: q.id,
@@ -183,4 +199,5 @@ export const KIND_LABEL: Record<ItemKind, string> = {
   contact: 'Contact',
   correspondence: 'Correspondence',
   quote: 'Quote',
+  inbox: 'Inbox',
 };

@@ -12,7 +12,7 @@ import { syncAllToVault } from './sync';
 import { watchSettings, type Settings } from './settings';
 
 const DEBOUNCE_MS = 15_000;
-const WATCHED = ['clients', 'projects', 'correspondence', 'quotes'] as const;
+const WATCHED = ['clients', 'projects', 'correspondence', 'quotes', 'inbox'] as const;
 
 export type AutoSyncStatus =
   | { kind: 'disabled' }
