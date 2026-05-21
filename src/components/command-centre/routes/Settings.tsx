@@ -1,6 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { pingRepo } from '../lib/github';
-import { updateGithubSettings, watchSettings, type Settings } from '../lib/settings';
+import {
+  setAutoSync,
+  updateGithubSettings,
+  watchSettings,
+  type Settings,
+} from '../lib/settings';
 import { syncAllToVault, type SyncProgress } from '../lib/sync';
 
 type TestState =
@@ -195,6 +200,27 @@ function VaultSection({ settings }: { settings: Settings }) {
           )}
         </div>
       </form>
+
+      <div className="cc-card mb-4 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-medium">Auto-sync on save</p>
+            <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
+              When on, every change in Command Centre (new client, edited
+              project, logged correspondence, etc.) is debounced 15s and pushed
+              to the vault automatically. Status shows in the header.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="cc-btn-ghost"
+            onClick={() => setAutoSync(!settings.sync?.autoSync)}
+            disabled={!settings.github?.pat}
+          >
+            {settings.sync?.autoSync ? 'Turn off' : 'Turn on'}
+          </button>
+        </div>
+      </div>
 
       <div className="cc-card p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">

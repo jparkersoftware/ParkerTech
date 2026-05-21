@@ -1,5 +1,6 @@
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth/AuthProvider';
+import { AutoSyncProvider } from './lib/autoSync';
 import SignIn from './auth/SignIn';
 import NotAuthorized from './auth/NotAuthorized';
 import AppShell from './shell/AppShell';
@@ -37,21 +38,23 @@ function Gate() {
     return <NotAuthorized email={state.user.email} />;
 
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="quotes/:id/print" element={<QuotePrint />} />
-        <Route element={<AppShell />}>
-          <Route index element={<Dashboard />} />
-          <Route path="clients" element={<Clients />} />
-          <Route path="clients/:id" element={<ClientDetail />} />
-          <Route path="projects" element={<Projects />} />
-          <Route path="projects/:id" element={<ProjectDetail />} />
-          <Route path="quotes" element={<Quotes />} />
-          <Route path="quotes/:id" element={<QuoteDetail />} />
-          <Route path="correspondence" element={<Correspondence />} />
-          <Route path="settings" element={<Settings />} />
-        </Route>
-      </Routes>
-    </HashRouter>
+    <AutoSyncProvider>
+      <HashRouter>
+        <Routes>
+          <Route path="quotes/:id/print" element={<QuotePrint />} />
+          <Route element={<AppShell />}>
+            <Route index element={<Dashboard />} />
+            <Route path="clients" element={<Clients />} />
+            <Route path="clients/:id" element={<ClientDetail />} />
+            <Route path="projects" element={<Projects />} />
+            <Route path="projects/:id" element={<ProjectDetail />} />
+            <Route path="quotes" element={<Quotes />} />
+            <Route path="quotes/:id" element={<QuoteDetail />} />
+            <Route path="correspondence" element={<Correspondence />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+        </Routes>
+      </HashRouter>
+    </AutoSyncProvider>
   );
 }

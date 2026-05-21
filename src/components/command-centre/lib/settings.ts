@@ -18,6 +18,7 @@ export type Settings = {
     pat: string;
   };
   sync?: {
+    autoSync?: boolean;
     lastSyncAt?: Timestamp;
     lastSyncResult?: SyncResult;
     lastSyncError?: string;
@@ -37,6 +38,10 @@ export async function updateGithubSettings(
   github: NonNullable<Settings['github']>,
 ): Promise<void> {
   await setDoc(REF, { github }, { merge: true });
+}
+
+export async function setAutoSync(enabled: boolean): Promise<void> {
+  await setDoc(REF, { sync: { autoSync: enabled } }, { merge: true });
 }
 
 export async function recordSyncResult(

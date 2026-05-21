@@ -723,3 +723,33 @@ select.cc-input {
   color: var(--text);
   line-height: 1.5;
 }
+.cc-sync-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: default;
+}
+.cc-sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-dim);
+  flex-shrink: 0;
+}
+.cc-sync-indicator.is-off .cc-sync-dot { background: #64748b; }
+.cc-sync-indicator.is-idle .cc-sync-dot { background: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.6); }
+.cc-sync-indicator.is-pending .cc-sync-dot { background: #fcd34d; }
+.cc-sync-indicator.is-syncing .cc-sync-dot { background: #a294ff; animation: cc-pulse 1.2s ease-in-out infinite; }
+.cc-sync-indicator.is-error { color: #fda4af; border-color: rgba(244, 63, 94, 0.4); }
+.cc-sync-indicator.is-error .cc-sync-dot { background: #f43f5e; }
+@keyframes cc-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.85); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
