@@ -12,6 +12,7 @@ import Quotes from './routes/Quotes';
 import QuoteDetail from './routes/QuoteDetail';
 import QuotePrint from './routes/QuotePrint';
 import Correspondence from './routes/Correspondence';
+import Settings from './routes/Settings';
 
 export default function App() {
   return (
@@ -48,6 +49,7 @@ function Gate() {
           <Route path="quotes" element={<Quotes />} />
           <Route path="quotes/:id" element={<QuoteDetail />} />
           <Route path="correspondence" element={<Correspondence />} />
+          <Route path="settings" element={<Settings />} />
         </Route>
       </Routes>
     </HashRouter>

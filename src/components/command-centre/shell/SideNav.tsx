@@ -6,6 +6,7 @@ const NAV_ITEMS = [
   { to: '/projects', label: 'Projects' },
   { to: '/quotes', label: 'Quotes' },
   { to: '/correspondence', label: 'Correspondence' },
+  { to: '/settings', label: 'Settings' },
 ];
 
 export default function SideNav() {
