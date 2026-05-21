@@ -24,6 +24,12 @@ import {
 } from 'firebase-admin/firestore';
 import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { homedir } from 'node:os';
+import { execSync } from 'node:child_process';
+
+const VAULT_ROOT = join(homedir(), 'Documents', 'Obsidian', 'ParkerTechFire');
 
 initializeApp({
   credential: applicationDefault(),
@@ -474,6 +480,190 @@ server.tool(
     });
     await ref.update({ milestones: next, updatedAt: FieldValue.serverTimestamp() });
     return ok({ ok: true });
+  },
+);
+
+// ── VAULT TOOLS ──────────────────────────────────────────────────
+// Direct read/write access to the Obsidian vault so Claude can record
+// knowledge and read past sessions even when launched from outside the
+// vault folder (e.g. while coding in another repo).
+
+const VAULT_WRITABLE_PREFIXES = ['Knowledge/', 'Daily/', 'Inbox/'];
+
+function vaultPath(relative: string): string {
+  const trimmed = relative.replace(/^\/+/, '');
+  if (trimmed.includes('..')) throw new Error('paths must not include ".."');
+  return join(VAULT_ROOT, trimmed);
+}
+
+function ensureWritable(relative: string): void {
+  if (!VAULT_WRITABLE_PREFIXES.some((p) => relative.startsWith(p))) {
+    throw new Error(
+      `Refusing to write outside writable areas. Allowed prefixes: ${VAULT_WRITABLE_PREFIXES.join(', ')}`,
+    );
+  }
+}
+
+function tryCommitVault(message: string): void {
+  try {
+    execSync('git add -A', { cwd: VAULT_ROOT, stdio: 'ignore' });
+    execSync('git diff --cached --quiet', { cwd: VAULT_ROOT, stdio: 'ignore' });
+  } catch {
+    try {
+      execSync(
+        `git -c user.name="Claude" -c user.email=claude@parkertech.local commit -m ${JSON.stringify(message)}`,
+        { cwd: VAULT_ROOT, stdio: 'ignore' },
+      );
+      execSync('git push origin HEAD', { cwd: VAULT_ROOT, stdio: 'ignore' });
+    } catch {
+      // Non-fatal — Obsidian Git will catch it later.
+    }
+  }
+}
+
+server.tool(
+  'vault_read',
+  'Read a markdown file from the Obsidian vault. Use relative paths like "Clients/St-Marys.md" or "Knowledge/Wonde-API.md". Useful when launched from a coding repo (without direct fs access to the vault).',
+  { path: z.string().describe('Relative path inside the vault') },
+  async ({ path }) => {
+    const full = vaultPath(path);
+    if (!existsSync(full)) return err(`No file at ${path}.`);
+    const content = readFileSync(full, 'utf-8');
+    return ok(content);
+  },
+);
+
+server.tool(
+  'vault_list',
+  'List markdown files in a vault folder (non-recursive). Defaults to listing top-level folders.',
+  { folder: z.string().default('').describe('Folder relative to vault root, e.g. "Knowledge" or "Daily/Claude-Sessions"') },
+  async ({ folder }) => {
+    const full = vaultPath(folder || '.');
+    if (!existsSync(full)) return err(`No folder at ${folder || 'vault root'}.`);
+    const entries = readdirSync(full)
+      .filter((name) => !name.startsWith('.'))
+      .map((name) => {
+        const path = join(full, name);
+        const isDir = statSync(path).isDirectory();
+        return isDir ? `${name}/` : name;
+      })
+      .sort();
+    return ok(entries);
+  },
+);
+
+server.tool(
+  'vault_write_knowledge',
+  'Write a Knowledge note to the vault. Use to record a durable fact, pattern, decision, or context worth remembering across sessions. Overwrites the file if it exists; use vault_append_knowledge to add without losing existing content.',
+  {
+    category: z
+      .enum(['Patterns', 'Decisions', 'Context', 'Mistakes', 'Systems', 'People', 'General'])
+      .describe('Subfolder under Knowledge/. Choose the best fit for the note.'),
+    title: z
+      .string()
+      .describe('Short title — used as both H1 and slugified into the filename.'),
+    body: z.string().describe('Markdown body. Frontmatter will be added automatically.'),
+    tags: z.array(z.string()).default([]),
+    related: z
+      .array(z.string())
+      .default([])
+      .describe('Optional list of wikilink targets like "Clients/St-Marys" to link from this note.'),
+  },
+  async ({ category, title, body, tags, related }) => {
+    const slug = title
+      .normalize('NFKD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^A-Za-z0-9 ]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .slice(0, 60) || 'untitled';
+    const relPath = join('Knowledge', category, `${slug}.md`);
+    const full = vaultPath(relPath);
+    ensureWritable(relPath);
+    mkdirSync(dirname(full), { recursive: true });
+
+    const fm: string[] = ['---'];
+    fm.push(`type: knowledge`);
+    fm.push(`category: ${category}`);
+    fm.push(`title: ${JSON.stringify(title)}`);
+    fm.push(`updated: ${new Date().toISOString()}`);
+    if (tags.length) fm.push(`tags: [${tags.map((t) => JSON.stringify(t)).join(', ')}]`);
+    if (related.length)
+      fm.push(`related:\n${related.map((r) => `  - "[[${r}]]"`).join('\n')}`);
+    fm.push('source: claude-code');
+    fm.push('---', '');
+
+    writeFileSync(full, `${fm.join('\n')}# ${title}\n\n${body}\n`);
+    tryCommitVault(`knowledge: ${category}/${title}`);
+    return ok({ ok: true, path: relPath });
+  },
+);
+
+server.tool(
+  'vault_append_knowledge',
+  'Append a section to an existing Knowledge note, or create it if missing. Use to grow a note over time without overwriting prior content.',
+  {
+    category: z.enum(['Patterns', 'Decisions', 'Context', 'Mistakes', 'Systems', 'People', 'General']),
+    title: z.string().describe('Note title — must match the existing file or a new one is created.'),
+    sectionHeading: z
+      .string()
+      .describe('A short heading for the new section (will be rendered as ## heading).'),
+    body: z.string(),
+  },
+  async ({ category, title, sectionHeading, body }) => {
+    const slug = title
+      .normalize('NFKD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^A-Za-z0-9 ]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .slice(0, 60) || 'untitled';
+    const relPath = join('Knowledge', category, `${slug}.md`);
+    const full = vaultPath(relPath);
+    ensureWritable(relPath);
+    mkdirSync(dirname(full), { recursive: true });
+
+    const date = new Date().toISOString().slice(0, 10);
+    const section = `\n## ${sectionHeading} — ${date}\n\n${body}\n`;
+
+    if (existsSync(full)) {
+      const current = readFileSync(full, 'utf-8');
+      writeFileSync(full, `${current.trimEnd()}\n${section}`);
+    } else {
+      const fm = `---\ntype: knowledge\ncategory: ${category}\ntitle: ${JSON.stringify(title)}\nupdated: ${new Date().toISOString()}\nsource: claude-code\n---\n\n# ${title}\n${section}`;
+      writeFileSync(full, fm);
+    }
+    tryCommitVault(`knowledge: append ${category}/${title}`);
+    return ok({ ok: true, path: relPath });
+  },
+);
+
+server.tool(
+  'vault_append_daily',
+  'Append a note to today\'s Daily journal file. Creates Daily/{YYYY-MM-DD}.md if it doesn\'t exist. Use for time-stamped observations, micro-decisions, end-of-day summaries.',
+  {
+    heading: z.string().describe('Short heading for this entry (rendered as ##).'),
+    body: z.string(),
+  },
+  async ({ heading, body }) => {
+    const date = new Date().toISOString().slice(0, 10);
+    const time = new Date().toISOString().slice(11, 16);
+    const relPath = join('Daily', `${date}.md`);
+    const full = vaultPath(relPath);
+    ensureWritable(relPath);
+    mkdirSync(dirname(full), { recursive: true });
+
+    const entry = `\n## ${heading} — ${time}\n\n${body}\n`;
+    if (existsSync(full)) {
+      writeFileSync(full, `${readFileSync(full, 'utf-8').trimEnd()}\n${entry}`);
+    } else {
+      writeFileSync(
+        full,
+        `---\ntype: daily\ndate: ${date}\nsource: claude-code\n---\n\n# ${date}\n${entry}`,
+      );
+    }
+    tryCommitVault(`daily: ${date} ${heading}`);
+    return ok({ ok: true, path: relPath });
   },
 );
 

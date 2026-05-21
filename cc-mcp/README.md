@@ -56,21 +56,32 @@ Claude should call the `list_clients` tool and respond with what's in Firestore.
 
 ## Tool reference
 
-Read-only:
+### Command Centre (Firestore)
+
+Reads:
 - `list_clients` — names + IDs + contact counts
 - `get_client` — full client by name or ID, plus their projects, last 10 correspondence entries, recent quotes
 - `list_projects` — across all clients, with optional status filter
 - `get_project` — full project including tasks, milestones, recent correspondence
 - `recent_correspondence` — filter by client/project, optional `includeTranscripts: true` for verbatim
 
-Writes:
+Writes (auto-sync back to the vault within 15s):
 - `add_task` — create a task on a project
 - `update_task` — mark done, change due date, etc.
 - `add_correspondence` — log a meeting / call / email / note (with optional verbatim transcript)
 - `add_inbox_item` — quick-capture for the Brain Dump Inbox
 - `toggle_checklist_item` — tick / untick a milestone success criterion
 
-All writes go directly to Firestore. The Command Centre's auto-sync picks them up within 15 seconds and regenerates the affected markdown files in the vault. Within a minute, the Obsidian Git plugin on your Mac pulls them down.
+### Vault (direct filesystem)
+
+For when Claude is running from a coding repo and doesn't have fs access to the vault:
+- `vault_read(path)` — read a vault file
+- `vault_list(folder?)` — list entries in a vault folder
+- `vault_write_knowledge(category, title, body, tags?, related?)` — create or overwrite a Knowledge note. Categories: `Patterns | Decisions | Context | Mistakes | Systems | People | General`
+- `vault_append_knowledge(category, title, sectionHeading, body)` — grow a Knowledge note over time without overwriting
+- `vault_append_daily(heading, body)` — append a timestamped section to today's Daily journal
+
+All vault writes are sandboxed to `Knowledge/`, `Daily/`, and `Inbox/` — Claude cannot edit auto-synced Command Centre files. Writes auto-commit and push from the vault repo.
 
 ## Updating the server
 
@@ -78,7 +89,11 @@ Edit `index.ts`. Claude Code re-runs the server fresh each launch (or you can re
 
 ## Auto-save every Claude session to the vault
 
-A SessionEnd hook in `hooks/save-session.ts` reads each finished session's transcript, distils it down to the plain user/assistant turns, and writes a markdown file at `Daily/Claude-Sessions/{date}-{session_id:8}.md` in the vault. The script also `git commit && git push` from the vault repo so the file is on GitHub immediately — Obsidian Git pulls it down the next interval.
+A SessionEnd hook in `hooks/save-session.ts` reads each finished session's transcript, distils it down to the plain user/assistant turns, and writes a markdown file at `Daily/Claude-Sessions/{date}-{cwd-slug}-{session_id:8}.md` in the vault. The cwd-slug makes coding sessions easy to identify amongst the rest. The script also `git commit && git push` from the vault repo so the file is on GitHub immediately — Obsidian Git pulls it down the next interval.
+
+**Default scope: every Claude Code session, anywhere on this Mac.** If you'd prefer to scope it to vault-only, edit `SCOPE_TO_VAULT_ONLY = true` near the top of `hooks/save-session.ts`.
+
+> **Privacy note.** Sessions launched in coding repos will include whatever you paste into the conversation — code snippets, debug logs, occasionally secrets if you're careless. Those land in your vault repo on GitHub. The vault repo is private, but treat it as you'd treat any place with that material. If you accidentally paste a credential, rotate it after.
 
 ### One-time hook registration
 

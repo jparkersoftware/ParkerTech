@@ -25,12 +25,12 @@ const VAULT = join(homedir(), 'Documents', 'Obsidian', 'ParkerTechFire');
 const SESSIONS_DIR = join(VAULT, 'Daily', 'Claude-Sessions');
 
 /**
- * Only auto-save when the session's working directory matches one of these.
- * Conservative by design: coding sessions in unrelated repos don't pollute
- * the vault. Add another path here (or replace with a single permissive
- * match) if you want a wider catch.
+ * Auto-save every Claude Code session as persistent memory. Set to true if
+ * you ever want to scope it down — e.g. only sessions from the vault or a
+ * specific project folder. With this off, EVERY session gets archived
+ * (coding sessions, vault sessions, anywhere on the Mac).
  */
-const SAVE_FROM_CWDS = [VAULT];
+const SCOPE_TO_VAULT_ONLY = false;
 
 type HookPayload = {
   session_id?: string;
@@ -52,8 +52,8 @@ void (async function main() {
       process.exit(0);
     }
 
-    if (!SAVE_FROM_CWDS.some((root) => cwd === root || cwd.startsWith(`${root}/`))) {
-      log(`cwd ${cwd} not in auto-save list, skipping`);
+    if (SCOPE_TO_VAULT_ONLY && !(cwd === VAULT || cwd.startsWith(`${VAULT}/`))) {
+      log(`cwd ${cwd} outside vault, skipping (SCOPE_TO_VAULT_ONLY=true)`);
       process.exit(0);
     }
 
@@ -66,7 +66,12 @@ void (async function main() {
     const date = new Date().toISOString().slice(0, 10);
     const time = new Date().toISOString().slice(11, 19);
     const shortId = sessionId.slice(0, 8);
-    const relPath = join('Daily', 'Claude-Sessions', `${date}-${shortId}.md`);
+    const cwdSlug = slugifyCwd(cwd);
+    const relPath = join(
+      'Daily',
+      'Claude-Sessions',
+      `${date}-${cwdSlug}-${shortId}.md`,
+    );
     const fullPath = join(VAULT, relPath);
 
     const markdown = renderMarkdown({ sessionId, date, time, cwd, turns });
@@ -186,6 +191,20 @@ function quoteYaml(s: string): string {
     return `"${s.replace(/"/g, '\\"')}"`;
   }
   return s;
+}
+
+function slugifyCwd(cwd: string): string {
+  if (!cwd) return 'unknown';
+  const base = cwd.split('/').filter(Boolean).pop() ?? 'unknown';
+  return (
+    base
+      .normalize('NFKD')
+      .replace(/[̀-ͯ]/g, '')
+      .replace(/[^A-Za-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .toLowerCase()
+      .slice(0, 40) || 'unknown'
+  );
 }
 
 function tryCommit(relPath: string, shortId: string): void {
