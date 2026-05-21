@@ -76,6 +76,35 @@ All writes go directly to Firestore. The Command Centre's auto-sync picks them u
 
 Edit `index.ts`. Claude Code re-runs the server fresh each launch (or you can restart Claude). No build step — `tsx` runs TypeScript directly.
 
+## Auto-save every Claude session to the vault
+
+A SessionEnd hook in `hooks/save-session.ts` reads each finished session's transcript, distils it down to the plain user/assistant turns, and writes a markdown file at `Daily/Claude-Sessions/{date}-{session_id:8}.md` in the vault. The script also `git commit && git push` from the vault repo so the file is on GitHub immediately — Obsidian Git pulls it down the next interval.
+
+### One-time hook registration
+
+Add this to `~/.claude/settings.json` (or run the equivalent `claude` CLI command if your version supports it):
+
+```json
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/jelst/Documents/ParkerTech Portfolio/cc-mcp/hooks/save-session.ts"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The script has a shebang line so it can be invoked directly — no `npx`/`tsx` prefix needed in the hook config. Make sure it's executable: `chmod +x "/Users/jelst/Documents/ParkerTech Portfolio/cc-mcp/hooks/save-session.ts"`.
+
+After every Claude Code session ends (Ctrl-D, `/exit`, window close), you should see a new file appear under `Daily/Claude-Sessions/`. The hook is non-blocking and silent on success; warnings go to stderr if anything goes wrong (visible in Claude Code's debug log).
+
 ## What's not here yet
 
 - **Update structured fields on clients/projects/quotes** (e.g. rename a client, change project status, edit a quote). Could be added; not yet exposed because Claude rarely needs to do those — they're more natural to do in the Command Centre UI.
