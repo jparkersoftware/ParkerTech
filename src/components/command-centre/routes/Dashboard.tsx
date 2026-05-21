@@ -2,7 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { watchClients } from '../lib/clients';
 import { watchProjects } from '../lib/projects';
-import type { Client, Project, Task } from '../lib/types';
+import { watchCorrespondence } from '../lib/correspondence';
+import {
+  formatLastContact,
+  staleRelationships,
+  type RelationshipStatus,
+} from '../lib/relationships';
+import type { Client, Correspondence, Project, Task } from '../lib/types';
 import StatusPill from '../components/StatusPill';
 import { formatISODate } from './Projects';
 
@@ -11,13 +17,19 @@ type DueTask = Task & { projectId: string; projectTitle: string; clientName: str
 export default function Dashboard() {
   const [projects, setProjects] = useState<Project[] | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
+  const [correspondence, setCorrespondence] = useState<Correspondence[]>([]);
 
   useEffect(() => watchProjects(setProjects), []);
   useEffect(() => watchClients(setClients), []);
+  useEffect(() => watchCorrespondence(setCorrespondence), []);
 
   const { overdue, dueSoon, activeProjects, upcomingTargets, openTaskCount } = useMemo(
     () => derive(projects ?? []),
     [projects],
+  );
+  const stale = useMemo(
+    () => staleRelationships(clients, correspondence),
+    [clients, correspondence],
   );
 
   if (projects === null) {
@@ -75,9 +87,49 @@ export default function Dashboard() {
               <UpcomingList projects={upcomingTargets} />
             </Section>
           )}
+
+          {stale.length > 0 && (
+            <Section title="Stale relationships">
+              <StaleList rows={stale} />
+            </Section>
+          )}
         </>
       )}
     </div>
+  );
+}
+
+function StaleList({ rows }: { rows: RelationshipStatus[] }) {
+  const navigate = useNavigate();
+  return (
+    <ul className="cc-card overflow-hidden p-0">
+      {rows.map((r) => (
+        <li key={`${r.clientId}-${r.contact.id}`}>
+          <button
+            type="button"
+            onClick={() => navigate(`/clients/${r.clientId}`)}
+            className="cc-due-row"
+          >
+            <div className="min-w-0 flex-1">
+              <p className="cc-task-title">{r.contact.name}</p>
+              <p className="cc-task-meta">
+                {r.contact.role && <span>{r.contact.role}</span>}
+                {r.contact.role && (
+                  <span style={{ color: 'var(--text-dim)' }}>·</span>
+                )}
+                <span>{r.clientName}</span>
+              </p>
+            </div>
+            <span
+              className="cc-due-date"
+              style={r.daysAgo === null ? { color: '#fda4af' } : undefined}
+            >
+              {formatLastContact(r)}
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
   );
 }
 

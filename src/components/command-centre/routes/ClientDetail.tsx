@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   addContact,
@@ -9,7 +9,14 @@ import {
   watchClient,
 } from '../lib/clients';
 import { watchProjectsForClient } from '../lib/projects';
-import type { Client, Contact, Project } from '../lib/types';
+import { watchCorrespondenceForClient } from '../lib/correspondence';
+import { lastContactMap, formatLastContact } from '../lib/relationships';
+import type {
+  Client,
+  Contact,
+  Correspondence,
+  Project,
+} from '../lib/types';
 import StatusPill from '../components/StatusPill';
 import CorrespondenceFeed from '../components/CorrespondenceFeed';
 import QuotesFeed from '../components/QuotesFeed';
@@ -203,6 +210,12 @@ function DetailsForm({
 
 function ContactsSection({ client }: { client: Client }) {
   const [adding, setAdding] = useState(false);
+  const [correspondence, setCorrespondence] = useState<Correspondence[]>([]);
+
+  useEffect(() => watchCorrespondenceForClient(client.id, setCorrespondence), [client.id]);
+
+  const lastMap = useMemo(() => lastContactMap(correspondence), [correspondence]);
+  const today = new Date().toISOString().slice(0, 10);
 
   return (
     <section>
@@ -231,7 +244,12 @@ function ContactsSection({ client }: { client: Client }) {
         <ul className="space-y-3">
           {(client.contacts ?? []).map((c) => (
             <li key={c.id}>
-              <ContactCard client={client} contact={c} />
+              <ContactCard
+                client={client}
+                contact={c}
+                lastContact={lastMap.get(c.id) ?? null}
+                today={today}
+              />
             </li>
           ))}
         </ul>
@@ -240,7 +258,17 @@ function ContactsSection({ client }: { client: Client }) {
   );
 }
 
-function ContactCard({ client, contact }: { client: Client; contact: Contact }) {
+function ContactCard({
+  client,
+  contact,
+  lastContact,
+  today,
+}: {
+  client: Client;
+  contact: Contact;
+  lastContact: string | null;
+  today: string;
+}) {
   const [editing, setEditing] = useState(false);
 
   if (editing) {
@@ -260,6 +288,24 @@ function ContactCard({ client, contact }: { client: Client; contact: Contact }) 
       />
     );
   }
+
+  const daysAgo = lastContact
+    ? Math.max(
+        0,
+        Math.floor(
+          (new Date(today).getTime() - new Date(lastContact).getTime()) /
+            86_400_000,
+        ),
+      )
+    : null;
+  const lastLabel = formatLastContact({
+    contact,
+    clientId: client.id,
+    clientName: client.name,
+    lastContact,
+    daysAgo,
+  });
+  const stale = daysAgo === null || daysAgo >= 30;
 
   return (
     <div className="cc-card p-4">
@@ -285,6 +331,12 @@ function ContactCard({ client, contact }: { client: Client; contact: Contact }) 
               {contact.notes}
             </p>
           )}
+          <p
+            className="mt-2 text-xs"
+            style={{ color: stale ? '#fda4af' : 'var(--text-dim)' }}
+          >
+            Last contacted: {lastLabel}
+          </p>
         </div>
         <button type="button" className="cc-btn-ghost shrink-0" onClick={() => setEditing(true)}>
           Edit
