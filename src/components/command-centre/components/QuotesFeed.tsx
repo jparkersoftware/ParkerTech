@@ -29,7 +29,11 @@ export default function QuotesFeed({
     return <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>;
   }
   if (quotes.length === 0) {
-    return <div className="cc-empty">No quotes yet.</div>;
+    return (
+      <p className="cc-empty-inline">
+        <span style={{ color: 'var(--text-dim)' }}>—</span> No quotes yet.
+      </p>
+    );
   }
 
   return (

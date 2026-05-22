@@ -26,7 +26,11 @@ export default function CorrespondenceFeed({
     return <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>;
   }
   if (entries.length === 0) {
-    return <div className="cc-empty">No correspondence logged yet.</div>;
+    return (
+      <p className="cc-empty-inline">
+        <span style={{ color: 'var(--text-dim)' }}>—</span> No correspondence logged yet.
+      </p>
+    );
   }
 
   return (
