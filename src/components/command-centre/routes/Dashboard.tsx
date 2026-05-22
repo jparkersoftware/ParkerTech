@@ -18,6 +18,7 @@ import type {
   Task,
 } from '../lib/types';
 import StatusPill from '../components/StatusPill';
+import Icon, { type IconName } from '../components/Icon';
 import { formatISODate } from './Projects';
 
 type DueTask = Task & {
@@ -802,56 +803,3 @@ function formatTodayLong(): string {
   });
 }
 
-// ── Icons ────────────────────────────────────────────────────────
-
-type IconName =
-  | 'calendar'
-  | 'briefcase'
-  | 'users'
-  | 'activity'
-  | 'target'
-  | 'flame'
-  | 'plus'
-  | 'check'
-  | 'alert'
-  | 'pound'
-  | 'message';
-
-const ICON_PATHS: Record<IconName, string> = {
-  calendar:
-    '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
-  briefcase:
-    '<rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
-  users:
-    '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
-  activity: '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
-  target:
-    '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
-  flame:
-    '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
-  plus: '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
-  check: '<polyline points="20 6 9 17 4 12"/>',
-  alert:
-    '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>',
-  pound:
-    '<path d="M18 7c0-5.333-8-5.333-8 0"/><path d="M10 7v12"/><path d="M6 13h8"/><path d="M6 21h12"/>',
-  message:
-    '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
-};
-
-function Icon({ name, className }: { name: IconName; className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      width="16"
-      height="16"
-      dangerouslySetInnerHTML={{ __html: ICON_PATHS[name] }}
-    />
-  );
-}

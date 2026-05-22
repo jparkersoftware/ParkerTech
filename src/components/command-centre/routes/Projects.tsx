@@ -32,8 +32,12 @@ export default function Projects() {
     <div>
       <header className="cc-page-head">
         <div>
-          <p className="cc-eyebrow">Section</p>
-          <h1 className="cc-page-title mt-2">Projects</h1>
+          <h1 className="cc-page-title">Projects</h1>
+          <p className="cc-page-head-meta">
+            {projects === null
+              ? 'Loading…'
+              : `${projects.length} project${projects.length === 1 ? '' : 's'} · ${projects.filter((p) => p.status === 'active').length} active`}
+          </p>
         </div>
         {!adding && (
           <button
@@ -66,9 +70,10 @@ export default function Projects() {
       {filtered === null ? (
         <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>
       ) : filtered.length === 0 ? (
-        <div className="cc-empty">
+        <p className="cc-empty-inline">
+          <span style={{ color: 'var(--text-dim)' }}>—</span>{' '}
           {filter === 'all' ? 'No projects yet.' : `No ${PROJECT_STATUS_LABEL[filter].toLowerCase()} projects.`}
-        </div>
+        </p>
       ) : (
         <ProjectsTable projects={filtered} />
       )}

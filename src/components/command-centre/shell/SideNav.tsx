@@ -1,13 +1,14 @@
 import { NavLink } from 'react-router-dom';
+import Icon, { type IconName } from '../components/Icon';
 
-const NAV_ITEMS = [
-  { to: '/', label: 'Dashboard', end: true },
-  { to: '/inbox', label: 'Inbox' },
-  { to: '/clients', label: 'Clients' },
-  { to: '/projects', label: 'Projects' },
-  { to: '/quotes', label: 'Quotes' },
-  { to: '/correspondence', label: 'Correspondence' },
-  { to: '/settings', label: 'Settings' },
+const NAV_ITEMS: { to: string; label: string; icon: IconName; end?: boolean }[] = [
+  { to: '/', label: 'Dashboard', icon: 'home', end: true },
+  { to: '/inbox', label: 'Inbox', icon: 'inbox' },
+  { to: '/clients', label: 'Clients', icon: 'users' },
+  { to: '/projects', label: 'Projects', icon: 'briefcase' },
+  { to: '/quotes', label: 'Quotes', icon: 'pound' },
+  { to: '/correspondence', label: 'Correspondence', icon: 'message' },
+  { to: '/settings', label: 'Settings', icon: 'settings' },
 ];
 
 export default function SideNav() {
@@ -22,7 +23,8 @@ export default function SideNav() {
             ['cc-nav-link', isActive ? 'is-active' : ''].join(' ')
           }
         >
-          {item.label}
+          <Icon name={item.icon} className="cc-nav-icon" />
+          <span>{item.label}</span>
         </NavLink>
       ))}
     </nav>

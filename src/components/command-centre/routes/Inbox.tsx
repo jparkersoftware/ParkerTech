@@ -35,12 +35,13 @@ export default function Inbox() {
     <div className="max-w-3xl">
       <header className="cc-page-head">
         <div>
-          <p className="cc-eyebrow">Section</p>
-          <h1 className="cc-page-title mt-2">Inbox</h1>
+          <h1 className="cc-page-title">Inbox</h1>
+          <p className="cc-page-head-meta">
+            {items === null
+              ? 'Loading…'
+              : `${open.length} open · ${(items?.filter((i) => i.archived) ?? []).length} archived`}
+          </p>
         </div>
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-          {open.length} open
-        </p>
       </header>
 
       <CaptureForm />
@@ -48,9 +49,9 @@ export default function Inbox() {
       {items === null ? (
         <p className="mt-8 text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>
       ) : open.length === 0 ? (
-        <div className="cc-empty mt-8">
-          Nothing in the inbox. Capture a thought above.
-        </div>
+        <p className="cc-empty-inline mt-8">
+          <span style={{ color: '#86efac' }}>✓</span> Nothing in the inbox. Capture a thought above.
+        </p>
       ) : (
         <ul className="mt-8 space-y-3">
           {open.map((item) => (

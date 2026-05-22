@@ -31,7 +31,17 @@ import StatusPill from '../components/StatusPill';
 import MilestoneStatusPill from '../components/MilestoneStatusPill';
 import CorrespondenceFeed from '../components/CorrespondenceFeed';
 import QuotesFeed from '../components/QuotesFeed';
+import Icon, { type IconName } from '../components/Icon';
 import { formatISODate } from './Projects';
+
+function SectionHead({ title, icon }: { title: string; icon: IconName }) {
+  return (
+    <div className="cc-section-head-v2">
+      <Icon name={icon} className="cc-section-icon" />
+      <h2 className="cc-section-title-v2">{title}</h2>
+    </div>
+  );
+}
 
 export default function ProjectDetail() {
   const { id = '' } = useParams<{ id: string }>();
@@ -65,24 +75,30 @@ export default function ProjectDetail() {
   }
 
   return (
-    <div className="max-w-3xl">
+    <div className="cc-page-content">
       <Link to="/projects" className="cc-eyebrow inline-block">
         ← Projects
       </Link>
 
       <DetailsSection project={project} clients={clients} onDelete={handleDelete} />
-      <RoadmapSection project={project} />
-      <TasksSection project={project} />
 
-      <section className="mt-10">
-        <h2 className="cc-display mb-3 text-xl">Quotes</h2>
-        <QuotesFeed scope="project" id={project.id} />
-      </section>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,_2fr)_minmax(0,_1fr)]">
+        <div className="space-y-8">
+          <RoadmapSection project={project} />
+          <TasksSection project={project} />
+        </div>
+        <aside className="space-y-8">
+          <section>
+            <SectionHead title="Quotes" icon="pound" />
+            <QuotesFeed scope="project" id={project.id} />
+          </section>
 
-      <section className="mt-10">
-        <h2 className="cc-display mb-3 text-xl">Correspondence</h2>
-        <CorrespondenceFeed scope="project" id={project.id} />
-      </section>
+          <section>
+            <SectionHead title="Correspondence" icon="message" />
+            <CorrespondenceFeed scope="project" id={project.id} />
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }
@@ -283,7 +299,7 @@ function TasksSection({ project }: { project: Project }) {
   return (
     <section>
       <div className="mb-3 flex items-end justify-between">
-        <h2 className="cc-display text-xl">Tasks</h2>
+        <SectionHead title="Tasks" icon="check-square" />
         {!adding && (
           <button type="button" className="cc-btn-ghost" onClick={() => setAdding(true)}>
             Add task
@@ -302,7 +318,9 @@ function TasksSection({ project }: { project: Project }) {
       )}
 
       {tasks.length === 0 && !adding ? (
-        <div className="cc-empty">No tasks yet.</div>
+        <p className="cc-empty-inline">
+          <span style={{ color: 'var(--text-dim)' }}>—</span> No tasks yet.
+        </p>
       ) : tasks.length > 0 ? (
         <ul className="cc-card overflow-hidden p-0">
           {tasks.map((t) => (
@@ -499,7 +517,7 @@ function RoadmapSection({ project }: { project: Project }) {
   return (
     <section className="mb-10">
       <div className="mb-3 flex items-end justify-between">
-        <h2 className="cc-display text-xl">Roadmap</h2>
+        <SectionHead title="Roadmap" icon="target" />
         {!adding && (
           <button type="button" className="cc-btn-ghost" onClick={() => setAdding(true)}>
             Add milestone
@@ -518,9 +536,9 @@ function RoadmapSection({ project }: { project: Project }) {
       )}
 
       {milestones.length === 0 && !adding ? (
-        <div className="cc-empty">
-          No milestones yet. Break a larger project into measurable sections.
-        </div>
+        <p className="cc-empty-inline">
+          <span style={{ color: 'var(--text-dim)' }}>—</span> No milestones yet. Break a larger project into measurable sections.
+        </p>
       ) : (
         <ul className="space-y-4">
           {milestones.map((m) => (

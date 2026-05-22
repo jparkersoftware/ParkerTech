@@ -36,8 +36,12 @@ export default function Quotes() {
     <div>
       <header className="cc-page-head">
         <div>
-          <p className="cc-eyebrow">Section</p>
-          <h1 className="cc-page-title mt-2">Quotes</h1>
+          <h1 className="cc-page-title">Quotes</h1>
+          <p className="cc-page-head-meta">
+            {quotes === null
+              ? 'Loading…'
+              : `${quotes.length} quote${quotes.length === 1 ? '' : 's'} · ${quotes.filter((q) => q.status === 'sent').length} sent · ${quotes.filter((q) => q.status === 'accepted').length} accepted`}
+          </p>
         </div>
         {!adding && (
           <button
@@ -69,11 +73,12 @@ export default function Quotes() {
       {filtered === null ? (
         <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>
       ) : filtered.length === 0 ? (
-        <div className="cc-empty">
+        <p className="cc-empty-inline">
+          <span style={{ color: 'var(--text-dim)' }}>—</span>{' '}
           {filter === 'all'
             ? 'No quotes yet.'
             : `No ${QUOTE_STATUS_LABEL[filter].toLowerCase()} quotes.`}
-        </div>
+        </p>
       ) : (
         <QuotesTable quotes={filtered} />
       )}

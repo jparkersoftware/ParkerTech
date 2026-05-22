@@ -24,9 +24,9 @@ export default function AppShell() {
   return (
     <div className="flex min-h-screen">
       <aside className="hidden w-60 shrink-0 border-r border-[var(--border)] bg-[var(--bg-soft)] md:flex md:flex-col">
-        <div className="border-b border-[var(--border)] px-5 py-5">
+        <div className="cc-sidebar-brand">
           <p className="cc-eyebrow">ParkerTech</p>
-          <p className="cc-display mt-1 text-lg">Command Centre</p>
+          <p className="cc-sidebar-brand-title">Command Centre</p>
         </div>
         <SideNav />
       </aside>

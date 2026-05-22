@@ -31,8 +31,12 @@ export default function Clients() {
     <div>
       <header className="cc-page-head">
         <div>
-          <p className="cc-eyebrow">Section</p>
-          <h1 className="cc-page-title mt-2">Clients</h1>
+          <h1 className="cc-page-title">Clients</h1>
+          <p className="cc-page-head-meta">
+            {clients === null
+              ? 'Loading…'
+              : `${clients.length} client${clients.length === 1 ? '' : 's'}`}
+          </p>
         </div>
         {!adding && (
           <button type="button" className="cc-btn-primary" onClick={() => setAdding(true)}>

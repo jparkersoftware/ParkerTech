@@ -20,6 +20,7 @@ import type {
 import StatusPill from '../components/StatusPill';
 import CorrespondenceFeed from '../components/CorrespondenceFeed';
 import QuotesFeed from '../components/QuotesFeed';
+import Icon from '../components/Icon';
 
 export default function ClientDetail() {
   const { id = '' } = useParams<{ id: string }>();
@@ -51,24 +52,40 @@ export default function ClientDetail() {
   }
 
   return (
-    <div className="max-w-3xl">
+    <div className="cc-page-content">
       <Link to="/clients" className="cc-eyebrow inline-block">
         ← Clients
       </Link>
 
       <DetailsSection client={client} onDelete={handleDeleteClient} />
-      <ContactsSection client={client} />
-      <ProjectsForClient clientId={client.id} />
 
-      <section className="mt-10">
-        <h2 className="cc-display mb-3 text-xl">Quotes</h2>
-        <QuotesFeed scope="client" id={client.id} />
-      </section>
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,_2fr)_minmax(0,_1fr)]">
+        <div className="space-y-8">
+          <ContactsSection client={client} />
+        </div>
+        <aside className="space-y-8">
+          <ProjectsForClient clientId={client.id} />
 
-      <section className="mt-10">
-        <h2 className="cc-display mb-3 text-xl">Correspondence</h2>
-        <CorrespondenceFeed scope="client" id={client.id} />
-      </section>
+          <section>
+            <SectionHead title="Quotes" icon="pound" />
+            <QuotesFeed scope="client" id={client.id} />
+          </section>
+
+          <section>
+            <SectionHead title="Correspondence" icon="message" />
+            <CorrespondenceFeed scope="client" id={client.id} />
+          </section>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function SectionHead({ title, icon }: { title: string; icon: React.ComponentProps<typeof Icon>['name'] }) {
+  return (
+    <div className="cc-section-head-v2">
+      <Icon name={icon} className="cc-section-icon" />
+      <h2 className="cc-section-title-v2">{title}</h2>
     </div>
   );
 }
@@ -79,12 +96,14 @@ function ProjectsForClient({ clientId }: { clientId: string }) {
   useEffect(() => watchProjectsForClient(clientId, setProjects), [clientId]);
 
   return (
-    <section className="mt-10">
-      <h2 className="cc-display mb-3 text-xl">Projects</h2>
+    <section>
+      <SectionHead title="Projects" icon="briefcase" />
       {projects === null ? (
         <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>
       ) : projects.length === 0 ? (
-        <div className="cc-empty">No projects for this client yet.</div>
+        <p className="cc-empty-inline">
+          <span style={{ color: 'var(--text-dim)' }}>—</span> No projects for this client yet.
+        </p>
       ) : (
         <ul className="space-y-2">
           {projects.map((p) => (
@@ -92,7 +111,7 @@ function ProjectsForClient({ clientId }: { clientId: string }) {
               <button
                 type="button"
                 onClick={() => navigate(`/projects/${p.id}`)}
-                className="cc-card flex w-full items-center justify-between gap-3 p-4 text-left transition hover:bg-[var(--surface-hover)]"
+                className="cc-card cc-stripe-violet flex w-full items-center justify-between gap-3 p-4 text-left transition hover:bg-[var(--surface-hover)]"
               >
                 <span className="font-medium">{p.title}</span>
                 <StatusPill status={p.status} />
@@ -142,7 +161,9 @@ function DetailsSection({
           {client.notes}
         </div>
       ) : (
-        <div className="cc-empty">No notes yet.</div>
+        <p className="cc-empty-inline">
+          <span style={{ color: 'var(--text-dim)' }}>—</span> No notes yet. Click <em>Edit details</em> to add some context about this school.
+        </p>
       )}
     </section>
   );
@@ -219,8 +240,8 @@ function ContactsSection({ client }: { client: Client }) {
 
   return (
     <section>
-      <div className="mb-3 flex items-end justify-between">
-        <h2 className="cc-display text-xl">Contacts</h2>
+      <div className="mb-3 flex items-end justify-between gap-3">
+        <SectionHead title="Contacts" icon="users" />
         {!adding && (
           <button type="button" className="cc-btn-ghost" onClick={() => setAdding(true)}>
             Add contact
@@ -239,7 +260,9 @@ function ContactsSection({ client }: { client: Client }) {
       )}
 
       {(client.contacts?.length ?? 0) === 0 && !adding ? (
-        <div className="cc-empty">No contacts yet.</div>
+        <p className="cc-empty-inline">
+          <span style={{ color: 'var(--text-dim)' }}>—</span> No contacts yet. Click <em>Add contact</em>.
+        </p>
       ) : (
         <ul className="space-y-3">
           {(client.contacts ?? []).map((c) => (
@@ -308,9 +331,9 @@ function ContactCard({
   const stale = daysAgo === null || daysAgo >= 30;
 
   return (
-    <div className="cc-card p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+    <div className={`cc-card cc-contact-card cc-stripe-${stale ? 'rose' : 'slate'}`}>
+      <div className="cc-contact-card-grid">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <p className="font-medium">{contact.name}</p>
             {contact.role && (
@@ -331,12 +354,10 @@ function ContactCard({
               {contact.notes}
             </p>
           )}
-          <p
-            className="mt-2 text-xs"
-            style={{ color: stale ? '#fda4af' : 'var(--text-dim)' }}
-          >
-            Last contacted: {lastLabel}
-          </p>
+          <div className={`cc-contact-meta ${stale ? 'cc-contact-meta-stale' : ''}`}>
+            <span>Last contacted</span>
+            <span className={`cc-badge-${stale ? 'rose' : 'slate'}`}>{lastLabel}</span>
+          </div>
         </div>
         <button type="button" className="cc-btn-ghost shrink-0" onClick={() => setEditing(true)}>
           Edit

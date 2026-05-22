@@ -27,8 +27,11 @@ export default function SettingsPage() {
     <div className="max-w-3xl">
       <header className="cc-page-head">
         <div>
-          <p className="cc-eyebrow">Section</p>
-          <h1 className="cc-page-title mt-2">Settings</h1>
+          <h1 className="cc-page-title">Settings</h1>
+          <p className="cc-page-head-meta">
+            {settings.github?.pat ? 'Vault configured · ' : 'Vault not configured yet · '}
+            {settings.sync?.autoSync ? 'Auto-sync on' : 'Auto-sync off'}
+          </p>
         </div>
       </header>
 

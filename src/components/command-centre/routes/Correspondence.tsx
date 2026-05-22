@@ -47,8 +47,12 @@ export default function CorrespondencePage() {
     <div>
       <header className="cc-page-head">
         <div>
-          <p className="cc-eyebrow">Section</p>
-          <h1 className="cc-page-title mt-2">Correspondence</h1>
+          <h1 className="cc-page-title">Correspondence</h1>
+          <p className="cc-page-head-meta">
+            {entries === null
+              ? 'Loading…'
+              : `${entries.length} logged · ${entries.filter((e) => e.transcript).length} with verbatim transcripts`}
+          </p>
         </div>
         {!adding && canAdd && (
           <button type="button" className="cc-btn-primary" onClick={() => setAdding(true)}>
@@ -58,7 +62,9 @@ export default function CorrespondencePage() {
       </header>
 
       {!canAdd && (
-        <div className="cc-empty mb-6">Add a client first — correspondence belongs to a client.</div>
+        <p className="cc-empty-inline mb-6">
+          <span style={{ color: 'var(--text-dim)' }}>—</span> Add a client first — correspondence belongs to a client.
+        </p>
       )}
 
       {adding && (
@@ -84,11 +90,12 @@ export default function CorrespondencePage() {
       {filtered === null ? (
         <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>
       ) : filtered.length === 0 ? (
-        <div className="cc-empty">
+        <p className="cc-empty-inline">
+          <span style={{ color: 'var(--text-dim)' }}>—</span>{' '}
           {entries && entries.length === 0
             ? 'Nothing logged yet.'
             : 'Nothing matches those filters.'}
-        </div>
+        </p>
       ) : (
         <ul className="space-y-4">
           {filtered.map((e) => (
