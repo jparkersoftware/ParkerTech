@@ -322,6 +322,50 @@ server.tool(
 // ── WRITE TOOLS ──────────────────────────────────────────────────
 
 server.tool(
+  'create_project',
+  'Create a new project under a client. Resolves the client by ID or name. Errors if a project with the same name already exists under that client (case-insensitive). Returns the new project ID.',
+  {
+    clientIdOrName: z.string(),
+    name: z.string().min(1).describe('Project title.'),
+    description: z.string().optional().describe('Short summary — stored as the project brief.'),
+    status: z
+      .enum(['discovery', 'active', 'on-hold', 'delivered', 'lost'])
+      .default('discovery'),
+  },
+  async ({ clientIdOrName, name, description, status }) => {
+    const client = await findClientByNameOrId(clientIdOrName);
+    if (!client) return err(`No client matched "${clientIdOrName}".`);
+    const trimmed = name.trim();
+    const lower = trimmed.toLowerCase();
+    const existingSnap = await db
+      .collection('projects')
+      .where('clientId', '==', client.id)
+      .get();
+    const duplicate = existingSnap.docs.find(
+      (d) => (d.data().title as string)?.toLowerCase() === lower,
+    );
+    if (duplicate) {
+      return err(
+        `A project named "${trimmed}" already exists under client "${client.name}" (id: ${duplicate.id}).`,
+      );
+    }
+    const doc: Record<string, unknown> = {
+      clientId: client.id,
+      clientName: client.name,
+      title: trimmed,
+      status,
+      brief: description ?? '',
+      tasks: [],
+      milestones: [],
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    const ref = await db.collection('projects').add(doc);
+    return ok({ ok: true, id: ref.id, name: trimmed, clientId: client.id });
+  },
+);
+
+server.tool(
   'add_task',
   'Add a task to a project. Returns the new task ID. Auto-sync will pick the change up within 15s and the vault will update.',
   {
