@@ -41,6 +41,7 @@ import MilestoneStatusPill from '../components/MilestoneStatusPill';
 import FeatureRequestStatusPill from '../components/FeatureRequestStatusPill';
 import CorrespondenceFeed from '../components/CorrespondenceFeed';
 import QuotesFeed from '../components/QuotesFeed';
+import InvoicesFeed from '../components/InvoicesFeed';
 import Icon, { type IconName } from '../components/Icon';
 import AutoLinkText from '../components/AutoLinkText';
 import ObsidianLink from '../components/ObsidianLink';
@@ -135,6 +136,11 @@ export default function ProjectDetail() {
           <section>
             <SectionHead title="Quotes" icon="pound" />
             <QuotesFeed scope="project" id={project.id} />
+          </section>
+
+          <section>
+            <SectionHead title="Invoices" icon="receipt" />
+            <InvoicesFeed scope="project" id={project.id} />
           </section>
 
           <section>

@@ -7,6 +7,7 @@ import {
   contactFile,
   correspondenceFile,
   inboxFile,
+  invoiceFile,
   projectFile,
   quoteFile,
   type VaultFile,
@@ -15,6 +16,7 @@ import type {
   Client,
   Correspondence,
   InboxItem,
+  Invoice,
   Project,
   Quote,
 } from './types';
@@ -33,15 +35,16 @@ export async function syncAllToVault(
   try {
     onProgress?.({ phase: 'reading', written: 0, total: 0 });
 
-    const [clients, projects, correspondence, quotes, inbox] = await Promise.all([
+    const [clients, projects, correspondence, quotes, invoices, inbox] = await Promise.all([
       readAll<Client>('clients', 'name'),
       readAll<Project>('projects', 'updatedAt', 'desc'),
       readAll<Correspondence>('correspondence', 'date', 'desc'),
       readAll<Quote>('quotes', 'issueDate', 'desc'),
+      readAll<Invoice>('invoices', 'issueDate', 'desc'),
       readAll<InboxItem>('inbox', 'createdAt', 'desc'),
     ]);
 
-    const files = generateFiles(clients, projects, correspondence, quotes, inbox);
+    const files = generateFiles(clients, projects, correspondence, quotes, invoices, inbox);
 
     let written = 0;
     onProgress?.({ phase: 'writing', written, total: files.length });
@@ -72,6 +75,7 @@ function generateFiles(
   projects: Project[],
   correspondence: Correspondence[],
   quotes: Quote[],
+  invoices: Invoice[],
   inbox: InboxItem[],
 ): VaultFile[] {
   const files: VaultFile[] = [];
@@ -88,7 +92,7 @@ function generateFiles(
   const clientById = new Map(clients.map((c) => [c.id, c]));
 
   for (const client of clients) {
-    files.push(clientFile(client, projects, quotes, correspondence));
+    files.push(clientFile(client, projects, quotes, invoices, correspondence));
     for (const contact of client.contacts ?? []) {
       files.push(
         contactFile(
@@ -100,7 +104,7 @@ function generateFiles(
     }
   }
   for (const project of projects) {
-    files.push(projectFile(project, correspondence, quotes));
+    files.push(projectFile(project, correspondence, quotes, invoices));
   }
   for (const entry of correspondence) {
     const client = clientById.get(entry.clientId);
@@ -109,6 +113,9 @@ function generateFiles(
   }
   for (const quote of quotes) {
     files.push(quoteFile(quote));
+  }
+  for (const invoice of invoices) {
+    files.push(invoiceFile(invoice));
   }
   for (const item of inbox) {
     files.push(inboxFile(item));

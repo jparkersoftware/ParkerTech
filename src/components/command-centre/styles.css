@@ -863,6 +863,49 @@ select.cc-input {
   border-color: rgba(244, 63, 94, 0.4);
   color: #fda4af;
 }
+.cc-invoice-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid;
+}
+.cc-invoice-pill.is-draft {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+}
+.cc-invoice-pill.is-sent {
+  background: rgba(125, 104, 255, 0.16);
+  border-color: rgba(125, 104, 255, 0.5);
+  color: var(--accent-bright);
+}
+.cc-invoice-pill.is-paid {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #86efac;
+}
+.cc-invoice-pill.is-void {
+  background: rgba(148, 163, 184, 0.08);
+  border-color: rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+.cc-overdue-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(244, 63, 94, 0.45);
+  background: rgba(244, 63, 94, 0.14);
+  color: #fda4af;
+}
 .cc-fr-pill {
   display: inline-flex;
   align-items: center;

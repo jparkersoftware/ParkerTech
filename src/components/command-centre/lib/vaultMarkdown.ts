@@ -1,5 +1,6 @@
 import {
   CORRESPONDENCE_TYPE_LABEL,
+  INVOICE_STATUS_LABEL,
   MILESTONE_STATUS_LABEL,
   PROJECT_STATUS_LABEL,
   QUOTE_STATUS_LABEL,
@@ -7,10 +8,12 @@ import {
   type Contact,
   type Correspondence,
   type InboxItem,
+  type Invoice,
   type Project,
   type Quote,
 } from './types';
 import { quoteTotals, GBP } from './quotes';
+import { invoiceTotals } from './invoices';
 
 /**
  * One file per entity. File paths are slug-based for human readability;
@@ -24,11 +27,13 @@ export function clientFile(
   client: Client,
   projects: Project[],
   quotes: Quote[],
+  invoices: Invoice[],
   correspondence: Correspondence[],
 ): VaultFile {
   const slug = entitySlug(client.name);
   const clientProjects = projects.filter((p) => p.clientId === client.id);
   const clientQuotes = quotes.filter((q) => q.clientId === client.id);
+  const clientInvoices = invoices.filter((i) => i.clientId === client.id);
   const clientCorr = correspondence.filter((c) => c.clientId === client.id);
 
   const frontmatter = yamlFrontmatter({
@@ -72,6 +77,17 @@ export function clientFile(
     body.push('');
   }
 
+  if (clientInvoices.length > 0) {
+    body.push('## Invoices', '');
+    for (const inv of clientInvoices) {
+      const { total } = invoiceTotals(inv);
+      body.push(
+        `- [[Invoices/${inv.number}]] · ${INVOICE_STATUS_LABEL[inv.status]} · ${GBP.format(total)}`,
+      );
+    }
+    body.push('');
+  }
+
   if (clientCorr.length > 0) {
     body.push('## Correspondence', '');
     for (const c of clientCorr.slice(0, 30)) {
@@ -93,10 +109,12 @@ export function projectFile(
   project: Project,
   correspondence: Correspondence[],
   quotes: Quote[],
+  invoices: Invoice[],
 ): VaultFile {
   const slug = entitySlug(project.title);
   const projCorr = correspondence.filter((c) => c.projectId === project.id);
   const projQuotes = quotes.filter((q) => q.projectId === project.id);
+  const projInvoices = invoices.filter((i) => i.projectId === project.id);
 
   const frontmatter = yamlFrontmatter({
     type: 'project',
@@ -158,6 +176,17 @@ export function projectFile(
       const { total } = quoteTotals(q);
       body.push(
         `- [[Quotes/${q.number}]] · ${QUOTE_STATUS_LABEL[q.status]} · ${GBP.format(total)}`,
+      );
+    }
+    body.push('');
+  }
+
+  if (projInvoices.length > 0) {
+    body.push('## Invoices', '');
+    for (const inv of projInvoices) {
+      const { total } = invoiceTotals(inv);
+      body.push(
+        `- [[Invoices/${inv.number}]] · ${INVOICE_STATUS_LABEL[inv.status]} · ${GBP.format(total)}`,
       );
     }
     body.push('');
@@ -330,6 +359,100 @@ export function quoteFile(quote: Quote): VaultFile {
     path: `Quotes/${quote.number}.md`,
     content: frontmatter + body.join('\n'),
     message: `quote: ${quote.number}`,
+  };
+}
+
+export function invoiceFile(invoice: Invoice): VaultFile {
+  const { subtotal, vat, total } = invoiceTotals(invoice);
+  const paid = invoice.status === 'paid';
+  const paidDate = invoice.paidAt?.toDate
+    ? invoice.paidAt.toDate().toISOString().slice(0, 10)
+    : '';
+
+  const frontmatter = yamlFrontmatter({
+    type: 'invoice',
+    id: invoice.id,
+    number: invoice.number,
+    status: invoice.status,
+    client:
+      invoice.clientName
+        ? `[[Clients/${entitySlug(invoice.clientName)}]]`
+        : '',
+    project: invoice.projectId && invoice.projectTitle
+      ? `[[Projects/${entitySlug(invoice.projectTitle)}]]`
+      : '',
+    issued: invoice.issueDate,
+    due: invoice.dueDate ?? '',
+    total: total,
+    paid: paid,
+    paid_amount: invoice.paidAmount ?? '',
+    paid_date: paidDate,
+    source: 'command-centre',
+  });
+
+  const headerBits: string[] = [
+    INVOICE_STATUS_LABEL[invoice.status],
+    GBP.format(total),
+  ];
+  if (invoice.clientName) {
+    headerBits.push(
+      `[[Clients/${entitySlug(invoice.clientName)}|${invoice.clientName}]]`,
+    );
+  }
+
+  const body: string[] = [
+    `# ${invoice.number}`,
+    '',
+    headerBits.join(' · '),
+  ];
+  if (invoice.projectId && invoice.projectTitle) {
+    body[body.length - 1] +=
+      ` · [[Projects/${entitySlug(invoice.projectTitle)}|${invoice.projectTitle}]]`;
+  }
+  body.push(
+    '',
+    `Issued ${invoice.issueDate}${invoice.dueDate ? ` · due ${invoice.dueDate}` : ''}`,
+    '',
+  );
+
+  if (invoice.introNote) body.push(invoice.introNote, '');
+
+  if ((invoice.lineItems ?? []).length > 0) {
+    body.push('## Line items', '');
+    body.push('| Description | Qty | Unit | Unit price | Total |');
+    body.push('| --- | ---:| --- | ---:| ---:|');
+    for (const li of invoice.lineItems) {
+      const lineTotal = (li.quantity || 0) * (li.unitPrice || 0);
+      body.push(
+        `| ${mdEscape(li.description)} | ${li.quantity} | ${li.unit ?? ''} | ${GBP.format(li.unitPrice)} | ${GBP.format(lineTotal)} |`,
+      );
+    }
+    body.push('');
+    body.push(`Subtotal: ${GBP.format(subtotal)}`);
+    if (invoice.vatRate > 0) body.push(`VAT (${invoice.vatRate}%): ${GBP.format(vat)}`);
+    body.push(`**Total: ${GBP.format(total)}**`, '');
+  }
+
+  if (paid) {
+    body.push('## Payment', '');
+    if (invoice.paidAmount !== undefined) {
+      body.push(`- Amount: ${GBP.format(invoice.paidAmount)}`);
+    }
+    if (invoice.paymentMethod) {
+      body.push(`- Method: ${invoice.paymentMethod}`);
+    }
+    if (paidDate) {
+      body.push(`- Date: ${paidDate}`);
+    }
+    body.push('');
+  }
+
+  if (invoice.termsNote) body.push('## Terms', '', invoice.termsNote, '');
+
+  return {
+    path: `Invoices/${invoice.number}.md`,
+    content: frontmatter + body.join('\n'),
+    message: `invoice: ${invoice.number}`,
   };
 }
 

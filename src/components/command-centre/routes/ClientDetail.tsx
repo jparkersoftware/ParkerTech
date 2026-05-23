@@ -20,6 +20,7 @@ import type {
 import StatusPill from '../components/StatusPill';
 import CorrespondenceFeed from '../components/CorrespondenceFeed';
 import QuotesFeed from '../components/QuotesFeed';
+import InvoicesFeed from '../components/InvoicesFeed';
 import Icon from '../components/Icon';
 import ObsidianLink from '../components/ObsidianLink';
 import { entitySlug } from '../lib/vaultMarkdown';
@@ -71,6 +72,11 @@ export default function ClientDetail() {
           <section>
             <SectionHead title="Quotes" icon="pound" />
             <QuotesFeed scope="client" id={client.id} />
+          </section>
+
+          <section>
+            <SectionHead title="Invoices" icon="receipt" />
+            <InvoicesFeed scope="client" id={client.id} />
           </section>
 
           <section>

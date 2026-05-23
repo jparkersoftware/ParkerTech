@@ -224,6 +224,44 @@ export type Quote = {
   updatedAt: Timestamp;
 };
 
+export const INVOICE_STATUSES = ['draft', 'sent', 'paid', 'void'] as const;
+export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
+
+export const INVOICE_STATUS_LABEL: Record<InvoiceStatus, string> = {
+  draft: 'Draft',
+  sent: 'Sent',
+  paid: 'Paid',
+  void: 'Void',
+};
+
+// Reuse QuoteLineItem — identical shape. Re-export as InvoiceLineItem alias.
+export type InvoiceLineItem = QuoteLineItem;
+
+export type Invoice = {
+  id: string;
+  number: string;            // INV-2026-001
+  clientId?: string;         // optional per locked-in decision
+  clientName?: string;
+  projectId?: string;
+  projectTitle?: string;
+  quoteId?: string;          // optional back-link if generated from a quote
+  status: InvoiceStatus;
+  issueDate: string;         // ISO YYYY-MM-DD
+  dueDate?: string;          // ISO
+  introNote?: string;
+  lineItems: InvoiceLineItem[];
+  vatRate: number;
+  termsNote?: string;
+  // Status timestamps
+  sentAt?: Timestamp;
+  paidAt?: Timestamp;
+  paidAmount?: number;       // captured at mark-paid time; supports partial later
+  paymentMethod?: string;    // freeform: "bank transfer", "stripe", etc.
+  voidedAt?: Timestamp;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
 export type InboxItem = {
   id: string;
   text: string;

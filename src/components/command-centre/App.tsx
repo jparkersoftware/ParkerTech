@@ -12,6 +12,9 @@ import ProjectDetail from './routes/ProjectDetail';
 import Quotes from './routes/Quotes';
 import QuoteDetail from './routes/QuoteDetail';
 import QuotePrint from './routes/QuotePrint';
+import Invoices from './routes/Invoices';
+import InvoiceDetail from './routes/InvoiceDetail';
+import InvoicePrint from './routes/InvoicePrint';
 import Correspondence from './routes/Correspondence';
 import Inbox from './routes/Inbox';
 import Settings from './routes/Settings';
@@ -43,6 +46,7 @@ function Gate() {
       <HashRouter>
         <Routes>
           <Route path="quotes/:id/print" element={<QuotePrint />} />
+          <Route path="invoices/:id/print" element={<InvoicePrint />} />
           <Route element={<AppShell />}>
             <Route index element={<Dashboard />} />
             <Route path="inbox" element={<Inbox />} />
@@ -52,6 +56,8 @@ function Gate() {
             <Route path="projects/:id" element={<ProjectDetail />} />
             <Route path="quotes" element={<Quotes />} />
             <Route path="quotes/:id" element={<QuoteDetail />} />
+            <Route path="invoices" element={<Invoices />} />
+            <Route path="invoices/:id" element={<InvoiceDetail />} />
             <Route path="correspondence" element={<Correspondence />} />
             <Route path="settings" element={<Settings />} />
           </Route>

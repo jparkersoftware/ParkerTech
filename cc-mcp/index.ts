@@ -192,6 +192,41 @@ function projectSummary(d: ProjectDoc) {
   };
 }
 
+type InvoiceLineItemDoc = {
+  id: string;
+  description: string;
+  quantity: number;
+  unit?: string;
+  unitPrice: number;
+};
+
+function invoiceTotalFromDoc(data: FirebaseFirestore.DocumentData): number {
+  const lineItems = (data.lineItems ?? []) as InvoiceLineItemDoc[];
+  const subtotal = lineItems.reduce(
+    (sum, li) => sum + (Number(li.quantity) || 0) * (Number(li.unitPrice) || 0),
+    0,
+  );
+  const vat = subtotal * ((Number(data.vatRate) || 0) / 100);
+  return subtotal + vat;
+}
+
+/**
+ * Year-aware counter. INV-YYYY-NNN, resets on calendar year.
+ */
+async function nextInvoiceNumber(): Promise<string> {
+  const year = new Date().getFullYear();
+  const ref = db.collection('meta').doc('invoiceCounter');
+  const next = await db.runTransaction(async (tx) => {
+    const snap = await tx.get(ref);
+    const data = snap.exists ? snap.data() : undefined;
+    const sameYear = data && (data.year as number | undefined) === year;
+    const current = sameYear ? ((data!.next as number) || 1) : 1;
+    tx.set(ref, { year, next: current + 1 }, { merge: true });
+    return current;
+  });
+  return `INV-${year}-${String(next).padStart(3, '0')}`;
+}
+
 // ── READ TOOLS ───────────────────────────────────────────────────
 
 server.tool(
@@ -216,7 +251,7 @@ server.tool(
   async ({ idOrName }) => {
     const client = await findClientByNameOrId(idOrName);
     if (!client) return err(`No client matched "${idOrName}".`);
-    const [projectsSnap, correspondenceSnap, quotesSnap] = await Promise.all([
+    const [projectsSnap, correspondenceSnap, quotesSnap, invoicesSnap] = await Promise.all([
       db.collection('projects').where('clientId', '==', client.id).get(),
       db
         .collection('correspondence')
@@ -226,6 +261,12 @@ server.tool(
         .get(),
       db
         .collection('quotes')
+        .where('clientId', '==', client.id)
+        .orderBy('issueDate', 'desc')
+        .limit(10)
+        .get(),
+      db
+        .collection('invoices')
         .where('clientId', '==', client.id)
         .orderBy('issueDate', 'desc')
         .limit(10)
@@ -251,6 +292,14 @@ server.tool(
         number: d.data().number,
         status: d.data().status,
         issueDate: d.data().issueDate,
+      })),
+      invoices: invoicesSnap.docs.map((d) => ({
+        id: d.id,
+        number: d.data().number,
+        status: d.data().status,
+        issueDate: d.data().issueDate,
+        dueDate: d.data().dueDate ?? '',
+        total: invoiceTotalFromDoc(d.data()),
       })),
     });
   },
@@ -636,6 +685,279 @@ server.tool(
       updatedAt: FieldValue.serverTimestamp(),
     });
     return ok({ ok: true, id: ref.id });
+  },
+);
+
+// ── INVOICE TOOLS ────────────────────────────────────────────────
+
+server.tool(
+  'add_invoice',
+  'Create a draft invoice. Client and project are both optional. If `quoteId` is provided, the invoice is back-linked to that quote (use `invoice_from_quote` to actually clone line items). Returns the new invoice ID and number.',
+  {
+    clientIdOrName: z.string().optional(),
+    projectIdOrName: z.string().optional(),
+    quoteId: z.string().optional().describe('Optional back-link to a quote.'),
+    lineItems: z
+      .array(
+        z.object({
+          description: z.string(),
+          quantity: z.number(),
+          unitPrice: z.number(),
+          unit: z.string().optional(),
+        }),
+      )
+      .optional(),
+    vatRate: z.number().default(0).describe('VAT percentage; default 0 (Joseph is not yet VAT-registered).'),
+    issueDate: z.string().optional().describe('ISO YYYY-MM-DD; defaults to today.'),
+    dueDate: z.string().optional().describe('ISO YYYY-MM-DD.'),
+    introNote: z.string().optional(),
+    termsNote: z.string().optional(),
+  },
+  async ({
+    clientIdOrName,
+    projectIdOrName,
+    quoteId,
+    lineItems,
+    vatRate,
+    issueDate,
+    dueDate,
+    introNote,
+    termsNote,
+  }) => {
+    let clientId: string | undefined;
+    let clientName: string | undefined;
+    if (clientIdOrName) {
+      const client = await findClientByNameOrId(clientIdOrName);
+      if (!client) return err(`No client matched "${clientIdOrName}".`);
+      clientId = client.id;
+      clientName = client.name;
+    }
+    let projectId: string | undefined;
+    let projectTitle: string | undefined;
+    if (projectIdOrName) {
+      const project = await findProjectByNameOrId(projectIdOrName);
+      if (!project) return err(`No project matched "${projectIdOrName}".`);
+      projectId = project.id;
+      projectTitle = project.title;
+    }
+    const number = await nextInvoiceNumber();
+    const items = (lineItems ?? []).map((li) => ({
+      id: randomUUID(),
+      description: li.description,
+      quantity: li.quantity,
+      unitPrice: li.unitPrice,
+      ...(li.unit ? { unit: li.unit } : {}),
+    }));
+    const doc: Record<string, unknown> = {
+      number,
+      status: 'draft',
+      issueDate: issueDate ?? new Date().toISOString().slice(0, 10),
+      lineItems: items,
+      vatRate: vatRate ?? 0,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    if (clientId) {
+      doc.clientId = clientId;
+      doc.clientName = clientName;
+    }
+    if (projectId) {
+      doc.projectId = projectId;
+      doc.projectTitle = projectTitle;
+    }
+    if (quoteId) doc.quoteId = quoteId;
+    if (dueDate) doc.dueDate = dueDate;
+    if (introNote) doc.introNote = introNote;
+    if (termsNote) doc.termsNote = termsNote;
+
+    const ref = await db.collection('invoices').add(doc);
+    return ok({ ok: true, invoiceId: ref.id, number, clientId, projectId });
+  },
+);
+
+server.tool(
+  'update_invoice',
+  'Patch fields on an existing invoice. Pass any of: lineItems, introNote, termsNote, issueDate, dueDate, vatRate, status. lineItems replaces the full array.',
+  {
+    invoiceId: z.string(),
+    lineItems: z
+      .array(
+        z.object({
+          id: z.string().optional(),
+          description: z.string(),
+          quantity: z.number(),
+          unitPrice: z.number(),
+          unit: z.string().optional(),
+        }),
+      )
+      .optional(),
+    introNote: z.string().optional(),
+    termsNote: z.string().optional(),
+    issueDate: z.string().optional(),
+    dueDate: z.string().optional(),
+    vatRate: z.number().optional(),
+    status: z.enum(['draft', 'sent', 'paid', 'void']).optional(),
+  },
+  async ({ invoiceId, lineItems, ...rest }) => {
+    const ref = db.collection('invoices').doc(invoiceId);
+    const snap = await ref.get();
+    if (!snap.exists) return err(`No invoice with id "${invoiceId}".`);
+    const patch: Record<string, unknown> = {
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    for (const [k, v] of Object.entries(rest)) {
+      if (v !== undefined) patch[k] = v;
+    }
+    if (lineItems) {
+      patch.lineItems = lineItems.map((li) => ({
+        id: li.id ?? randomUUID(),
+        description: li.description,
+        quantity: li.quantity,
+        unitPrice: li.unitPrice,
+        ...(li.unit ? { unit: li.unit } : {}),
+      }));
+    }
+    await ref.update(patch);
+    return ok({ ok: true, invoiceId });
+  },
+);
+
+server.tool(
+  'mark_invoice_sent',
+  'Set an invoice status to `sent` and stamp `sentAt` with the server timestamp.',
+  { invoiceId: z.string() },
+  async ({ invoiceId }) => {
+    const ref = db.collection('invoices').doc(invoiceId);
+    const snap = await ref.get();
+    if (!snap.exists) return err(`No invoice with id "${invoiceId}".`);
+    await ref.update({
+      status: 'sent',
+      sentAt: Timestamp.now(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    return ok({ ok: true, invoiceId });
+  },
+);
+
+server.tool(
+  'mark_invoice_paid',
+  'Set an invoice status to `paid`, stamp `paidAt`, and record the paid amount + payment method. paidAmount defaults to the invoice total if omitted.',
+  {
+    invoiceId: z.string(),
+    paidAmount: z.number().optional(),
+    paymentMethod: z.string().optional(),
+  },
+  async ({ invoiceId, paidAmount, paymentMethod }) => {
+    const ref = db.collection('invoices').doc(invoiceId);
+    const snap = await ref.get();
+    if (!snap.exists) return err(`No invoice with id "${invoiceId}".`);
+    const data = snap.data()!;
+    const amount = paidAmount ?? invoiceTotalFromDoc(data);
+    const patch: Record<string, unknown> = {
+      status: 'paid',
+      paidAt: Timestamp.now(),
+      paidAmount: amount,
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    if (paymentMethod) patch.paymentMethod = paymentMethod;
+    await ref.update(patch);
+    return ok({ ok: true, invoiceId, paidAmount: amount });
+  },
+);
+
+server.tool(
+  'void_invoice',
+  'Set an invoice status to `void`. Optional `reason` is appended to the existing termsNote so the audit trail is preserved on the document itself.',
+  {
+    invoiceId: z.string(),
+    reason: z.string().optional(),
+  },
+  async ({ invoiceId, reason }) => {
+    const ref = db.collection('invoices').doc(invoiceId);
+    const snap = await ref.get();
+    if (!snap.exists) return err(`No invoice with id "${invoiceId}".`);
+    const patch: Record<string, unknown> = {
+      status: 'void',
+      voidedAt: Timestamp.now(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    if (reason) {
+      const existing = (snap.data()?.termsNote as string | undefined) ?? '';
+      const stamp = new Date().toISOString().slice(0, 10);
+      const appended = existing
+        ? `${existing}\n\n[voided ${stamp}] ${reason}`
+        : `[voided ${stamp}] ${reason}`;
+      patch.termsNote = appended;
+    }
+    await ref.update(patch);
+    return ok({ ok: true, invoiceId });
+  },
+);
+
+server.tool(
+  'list_invoices',
+  'List invoices with an optional status filter. Returns id, number, client, project, status, issue and due dates, and total.',
+  {
+    status: z.enum(['draft', 'sent', 'paid', 'void']).optional(),
+  },
+  async ({ status }) => {
+    const snap = await db.collection('invoices').orderBy('issueDate', 'desc').get();
+    const rows = snap.docs.map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        number: data.number,
+        clientName: data.clientName ?? '',
+        projectTitle: data.projectTitle ?? '',
+        status: data.status,
+        issueDate: data.issueDate,
+        dueDate: data.dueDate ?? '',
+        total: invoiceTotalFromDoc(data),
+      };
+    });
+    return ok(status ? rows.filter((r) => r.status === status) : rows);
+  },
+);
+
+server.tool(
+  'invoice_from_quote',
+  'Clone a quote into a new draft invoice. Copies clientId, projectId, line items, vatRate, intro and terms notes. Stamps the new invoice with `quoteId` pointing back to the source quote. Returns the new invoice ID and number.',
+  { quoteId: z.string() },
+  async ({ quoteId }) => {
+    const qref = db.collection('quotes').doc(quoteId);
+    const qsnap = await qref.get();
+    if (!qsnap.exists) return err(`No quote with id "${quoteId}".`);
+    const q = qsnap.data()!;
+    const number = await nextInvoiceNumber();
+    const items = ((q.lineItems ?? []) as InvoiceLineItemDoc[]).map((li) => ({
+      id: randomUUID(),
+      description: li.description,
+      quantity: li.quantity,
+      unitPrice: li.unitPrice,
+      ...(li.unit ? { unit: li.unit } : {}),
+    }));
+    const doc: Record<string, unknown> = {
+      number,
+      status: 'draft',
+      issueDate: new Date().toISOString().slice(0, 10),
+      lineItems: items,
+      vatRate: q.vatRate ?? 0,
+      quoteId,
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    if (q.clientId) {
+      doc.clientId = q.clientId;
+      doc.clientName = q.clientName;
+    }
+    if (q.projectId) {
+      doc.projectId = q.projectId;
+      doc.projectTitle = q.projectTitle;
+    }
+    if (q.introNote) doc.introNote = q.introNote;
+    if (q.termsNote) doc.termsNote = q.termsNote;
+    const ref = await db.collection('invoices').add(doc);
+    return ok({ ok: true, invoiceId: ref.id, number });
   },
 );
 

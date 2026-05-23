@@ -25,7 +25,8 @@ export type IconName =
   | 'file-text'
   | 'cloud'
   | 'refresh'
-  | 'lightbulb';
+  | 'lightbulb'
+  | 'receipt';
 
 const PATHS: Record<IconName, string> = {
   calendar:
@@ -66,6 +67,9 @@ const PATHS: Record<IconName, string> = {
     '<polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>',
   lightbulb:
     '<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/>',
+  // A receipt with a torn / zig-zag bottom edge — Lucide-style.
+  receipt:
+    '<path d="M4 2v20l3-2 3 2 3-2 3 2 3-2 1 2V2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/>',
 };
 
 export default function Icon({
