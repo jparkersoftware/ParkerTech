@@ -81,6 +81,11 @@ void (async function main() {
     log(`saved ${turns.length} turns to ${relPath}`);
 
     tryCommit(relPath, shortId);
+
+    // Refresh the vault's Knowledge/Index.md so it stays current between
+    // sessions. Non-blocking — if it fails, the session save still succeeded.
+    tryRebuildVaultIndex();
+
     process.exit(0);
   } catch (err) {
     log(`error: ${err instanceof Error ? err.message : String(err)}`);
@@ -230,6 +235,25 @@ function tryCommit(relPath: string, shortId: string): void {
 
 function shellQuote(s: string): string {
   return `'${s.replace(/'/g, "'\\''")}'`;
+}
+
+function tryRebuildVaultIndex(): void {
+  try {
+    // Sibling script in the same hooks/ folder. Absolute path so the call
+    // is portable across cwds.
+    const scriptPath = join(
+      homedir(),
+      'Documents',
+      'ParkerTech Portfolio',
+      'cc-mcp',
+      'hooks',
+      'rebuild-vault-index.ts',
+    );
+    execSync(shellQuote(scriptPath), { stdio: 'ignore', timeout: 30_000 });
+    log('rebuilt vault index');
+  } catch (err) {
+    log(`vault index rebuild failed (non-fatal): ${err instanceof Error ? err.message : err}`);
+  }
 }
 
 function log(message: string): void {
