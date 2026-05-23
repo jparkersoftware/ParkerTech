@@ -23,6 +23,21 @@
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
+/* Inbox row variant — give every captured thought equal visual weight,
+   so a 4-char "idea" feels like an object, not a glitch. */
+.cc-inbox-card {
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+}
+.cc-inbox-card .cc-inbox-actions {
+  opacity: 0;
+  transition: opacity 0.15s var(--ease);
+}
+.cc-inbox-card:hover .cc-inbox-actions,
+.cc-inbox-card:focus-within .cc-inbox-actions {
+  opacity: 1;
+}
 .cc-input {
   background: var(--surface);
   border: 1px solid var(--border);

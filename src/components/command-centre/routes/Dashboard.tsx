@@ -20,6 +20,7 @@ import type {
 import StatusPill from '../components/StatusPill';
 import Icon, { type IconName } from '../components/Icon';
 import { formatISODate } from './Projects';
+import { formatRelativeDate, fullTimestamp } from '../lib/dateFormat';
 
 type DueTask = Task & {
   projectId: string;
@@ -314,7 +315,7 @@ function StatRow({
             ? `+${GBP.format(pipeline.acceptedThisMonth)} accepted`
             : undefined
         }
-        tone="accent"
+        tone={pipeline.outstanding > 0 ? 'accent' : 'default'}
       />
     </div>
   );
@@ -333,8 +334,12 @@ function Stat({
   sub?: string;
   tone?: 'default' | 'danger' | 'accent';
 }) {
+  const isZero = value === 0 || value === '0';
   return (
-    <div className={`cc-stat cc-stat-v2 ${tone === 'danger' ? 'is-danger' : ''} ${tone === 'accent' ? 'is-accent' : ''}`}>
+    <div
+      className={`cc-stat cc-stat-v2 ${tone === 'danger' ? 'is-danger' : ''} ${tone === 'accent' ? 'is-accent' : ''}`}
+      style={isZero ? { opacity: 0.6 } : undefined}
+    >
       <div className="cc-stat-head">
         <Icon name={icon} className="cc-stat-icon" />
         <p className="cc-stat-label">{label}</p>
@@ -401,7 +406,10 @@ function TaskList({ tasks }: { tasks: DueTask[] }) {
                   )}
                 </p>
               </div>
-              <span className={`cc-due-date cc-badge-${stripe}`}>
+              <span
+                className={`cc-due-date cc-badge-${stripe}`}
+                title={fullTimestamp(t.dueDate)}
+              >
                 {formatRelativeDate(t.dueDate)}
               </span>
             </button>
@@ -561,7 +569,9 @@ function ActivityFeed({ items }: { items: ActivityItem[] }) {
                 <span>{a.detail}</span>
               </p>
             </div>
-            <span className="cc-due-date">{formatRelativeDate(a.date)}</span>
+            <span className="cc-due-date" title={fullTimestamp(a.date)}>
+              {formatRelativeDate(a.date)}
+            </span>
           </button>
         </li>
       ))}
@@ -777,22 +787,6 @@ function daysBetween(isoFrom: string, isoTo: string): number {
 function isPast(iso: string): boolean {
   if (!iso) return false;
   return iso < isoToday();
-}
-
-function formatRelativeDate(iso?: string): string {
-  if (!iso) return '—';
-  const today = isoToday();
-  if (iso === today) return 'today';
-  if (iso === isoOffset(1)) return 'tomorrow';
-  if (iso === isoOffset(-1)) return 'yesterday';
-  const days = daysBetween(iso, today);
-  if (iso < today) {
-    if (days < 7) return `${days}d ago`;
-    return formatISODate(iso);
-  }
-  const ahead = daysBetween(today, iso);
-  if (ahead < 7) return `in ${ahead}d`;
-  return formatISODate(iso);
 }
 
 function formatTodayLong(): string {

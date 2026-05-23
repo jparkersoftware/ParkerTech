@@ -15,6 +15,7 @@ import {
   watchInbox,
 } from '../lib/inbox';
 import type { InboxItem } from '../lib/types';
+import { formatRelativeDate, fullTimestamp } from '../lib/dateFormat';
 
 export default function Inbox() {
   const [items, setItems] = useState<InboxItem[] | null>(null);
@@ -193,7 +194,7 @@ function InboxCard({ item }: { item: InboxItem }) {
   }
 
   return (
-    <div className="cc-card p-5">
+    <div className="cc-card cc-inbox-card p-5">
       <p
         className="whitespace-pre-wrap text-sm"
         style={{ color: 'var(--text)' }}
@@ -209,28 +210,31 @@ function InboxCard({ item }: { item: InboxItem }) {
           ))}
         </div>
       )}
-      <div className="mt-4 flex flex-wrap items-center gap-2">
+      <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
         <span
           className="text-xs"
           style={{ color: 'var(--text-dim)' }}
+          title={fullTimestamp(item.createdAt)}
         >
-          {formatCreated(item.createdAt)}
+          {formatRelativeDate(item.createdAt)}
         </span>
         <span style={{ flex: 1 }} />
-        <button
-          type="button"
-          className="cc-btn-ghost"
-          onClick={() => setEditing(true)}
-        >
-          Edit
-        </button>
-        <button
-          type="button"
-          className="cc-btn-ghost"
-          onClick={() => setArchiving(true)}
-        >
-          Archive
-        </button>
+        <div className="cc-inbox-actions flex flex-wrap gap-2">
+          <button
+            type="button"
+            className="cc-btn-ghost"
+            onClick={() => setEditing(true)}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            className="cc-btn-ghost"
+            onClick={() => setArchiving(true)}
+          >
+            Archive
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -314,8 +318,12 @@ function ArchivedCard({ item }: { item: InboxItem }) {
         </p>
       )}
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
-          {formatCreated(item.createdAt)}
+        <span
+          className="text-xs"
+          style={{ color: 'var(--text-dim)' }}
+          title={fullTimestamp(item.createdAt)}
+        >
+          {formatRelativeDate(item.createdAt)}
         </span>
         <span style={{ flex: 1 }} />
         <button
@@ -341,17 +349,3 @@ function ArchivedCard({ item }: { item: InboxItem }) {
   );
 }
 
-function formatCreated(ts: { toDate?: () => Date } | undefined): string {
-  if (!ts?.toDate) return '';
-  const d = ts.toDate();
-  const now = Date.now();
-  const diff = now - d.getTime();
-  if (diff < 60_000) return 'just now';
-  if (diff < 3600_000) return `${Math.floor(diff / 60_000)}m ago`;
-  if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}h ago`;
-  return d.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}

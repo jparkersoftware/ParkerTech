@@ -17,6 +17,8 @@ import {
   type Project,
 } from '../lib/types';
 import TypePill from '../components/TypePill';
+import AutoLinkText from '../components/AutoLinkText';
+import { formatRelativeDate, fullTimestamp } from '../lib/dateFormat';
 
 type Filter = 'all' | CorrespondenceType;
 
@@ -205,8 +207,12 @@ function EntryCard({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <TypePill type={entry.type} />
-            <span className="text-sm" style={{ color: 'var(--text-dim)' }}>
-              {formatLongDate(entry.date)}
+            <span
+              className="text-sm"
+              style={{ color: 'var(--text-dim)' }}
+              title={fullTimestamp(entry.date)}
+            >
+              {formatRelativeDate(entry.date)}
             </span>
           </div>
           <h3 className="cc-display mt-2 text-lg">{entry.title}</h3>
@@ -234,7 +240,7 @@ function EntryCard({
           className="mt-4 whitespace-pre-wrap text-sm"
           style={{ color: 'var(--text)' }}
         >
-          {entry.body}
+          <AutoLinkText text={entry.body} />
         </p>
       )}
 
@@ -539,13 +545,3 @@ function TranscriptBlock({ transcript }: { transcript: string }) {
   );
 }
 
-function formatLongDate(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return d.toLocaleDateString('en-GB', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}

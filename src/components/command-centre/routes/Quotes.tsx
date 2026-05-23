@@ -12,6 +12,7 @@ import {
   type QuoteStatus,
 } from '../lib/types';
 import QuoteStatusPill from '../components/QuoteStatusPill';
+import { formatRelativeDate } from '../lib/dateFormat';
 
 type Filter = 'all' | QuoteStatus;
 
@@ -134,7 +135,12 @@ function QuotesTable({ quotes }: { quotes: Quote[] }) {
                 <td className="font-medium">{q.number}</td>
                 <td style={{ color: 'var(--text-muted)' }}>{q.clientName}</td>
                 <td style={{ color: 'var(--text-muted)' }}>{q.projectTitle ?? '—'}</td>
-                <td style={{ color: 'var(--text-dim)' }}>{formatISODate(q.issueDate)}</td>
+                <td
+                  style={{ color: 'var(--text-dim)' }}
+                  title={q.issueDate ?? ''}
+                >
+                  {formatISODate(q.issueDate)}
+                </td>
                 <td>
                   <QuoteStatusPill status={q.status} />
                 </td>
@@ -241,13 +247,8 @@ function NewQuoteForm({
   );
 }
 
-export function formatISODate(iso?: string): string {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
+/**
+ * @deprecated Prefer `formatRelativeDate` from `lib/dateFormat`. Kept as a
+ * thin wrapper so existing callers keep working without churn.
+ */
+export const formatISODate = formatRelativeDate;

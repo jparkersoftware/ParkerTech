@@ -21,6 +21,8 @@ import StatusPill from '../components/StatusPill';
 import CorrespondenceFeed from '../components/CorrespondenceFeed';
 import QuotesFeed from '../components/QuotesFeed';
 import Icon from '../components/Icon';
+import ObsidianLink from '../components/ObsidianLink';
+import { entitySlug } from '../lib/vaultMarkdown';
 
 export default function ClientDetail() {
   const { id = '' } = useParams<{ id: string }>();
@@ -97,7 +99,9 @@ function ProjectsForClient({ clientId }: { clientId: string }) {
 
   return (
     <section>
-      <SectionHead title="Projects" icon="briefcase" />
+      <div className="mb-3 flex items-end justify-between gap-3">
+        <SectionHead title="Projects" icon="briefcase" />
+      </div>
       {projects === null ? (
         <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>
       ) : projects.length === 0 ? (
@@ -147,7 +151,8 @@ function DetailsSection({
     <section className="mt-3 mb-8">
       <header className="cc-page-head">
         <h1 className="cc-page-title">{client.name}</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <ObsidianLink file={`Clients/${entitySlug(client.name)}`} />
           <button type="button" className="cc-btn-ghost" onClick={() => setEditing(true)}>
             Edit details
           </button>
@@ -414,6 +419,7 @@ function ContactForm({
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="cc-input"
+            placeholder="e.g. Jane Smith"
           />
         </label>
         <label className="block">
@@ -433,6 +439,7 @@ function ContactForm({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="cc-input"
+            placeholder="e.g. jane@school.org.uk"
           />
         </label>
         <label className="block">
@@ -442,6 +449,7 @@ function ContactForm({
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             className="cc-input"
+            placeholder="e.g. 020 7946 1234"
           />
         </label>
       </div>

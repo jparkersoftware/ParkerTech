@@ -13,6 +13,7 @@ import {
 } from '../lib/quotes';
 import type { Client, Project, Quote, QuoteLineItem, QuoteStatus } from '../lib/types';
 import QuoteStatusPill from '../components/QuoteStatusPill';
+import ObsidianLink from '../components/ObsidianLink';
 import { formatISODate } from './Quotes';
 
 export default function QuoteDetail() {
@@ -76,6 +77,7 @@ export default function QuoteDetail() {
         <div className="flex flex-wrap items-center gap-2">
           <QuoteStatusPill status={quote.status} />
           <StatusActions quote={quote} />
+          <ObsidianLink file={`Quotes/${quote.number}`} />
           <Link to={`/quotes/${quote.id}/print`} className="cc-btn-ghost" target="_blank">
             Print / PDF
           </Link>

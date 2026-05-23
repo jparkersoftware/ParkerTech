@@ -1,8 +1,10 @@
 import {
+  Fragment,
   useEffect,
   useMemo,
   useRef,
   useState,
+  type ReactNode,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { watchClients } from '../lib/clients';
@@ -133,10 +135,14 @@ export default function CommandPalette({
               >
                 <span className="cc-palette-kind">{KIND_LABEL[hit.item.kind]}</span>
                 <div className="min-w-0 flex-1">
-                  <p className="cc-palette-title">{hit.item.title}</p>
+                  <p className="cc-palette-title">
+                    {highlight(hit.item.title, query)}
+                  </p>
                   <p className="cc-palette-sub">{hit.item.subtitle}</p>
                   {hit.snippet && (
-                    <p className="cc-palette-snippet">{hit.snippet}</p>
+                    <p className="cc-palette-snippet">
+                      {highlight(hit.snippet, query)}
+                    </p>
                   )}
                 </div>
               </li>
@@ -145,5 +151,42 @@ export default function CommandPalette({
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Case-insensitively wraps each query token in <mark>.
+ * Multi-word queries highlight each token independently.
+ */
+function highlight(text: string, query: string): ReactNode {
+  const tokens = query
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (tokens.length === 0) return text;
+  const escaped = tokens
+    .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|');
+  // Capturing group so `split` keeps the matched delimiters.
+  const splitRe = new RegExp(`(${escaped})`, 'gi');
+  const matchRe = new RegExp(`^(?:${escaped})$`, 'i');
+  const parts = text.split(splitRe);
+  return parts.map((part, i) =>
+    matchRe.test(part) ? (
+      <mark
+        key={i}
+        style={{
+          background: 'rgba(125, 104, 255, 0.28)',
+          color: 'var(--accent-bright)',
+          padding: 0,
+          borderRadius: 2,
+        }}
+      >
+        {part}
+      </mark>
+    ) : (
+      <Fragment key={i}>{part}</Fragment>
+    ),
   );
 }

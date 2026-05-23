@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { watchClients } from '../lib/clients';
 import { createProject, watchProjects } from '../lib/projects';
+import { formatRelativeDate } from '../lib/dateFormat';
 import {
   PROJECT_STATUSES,
   PROJECT_STATUS_LABEL,
@@ -137,7 +138,12 @@ function ProjectsTable({ projects }: { projects: Project[] }) {
                 <td>
                   <StatusPill status={p.status} />
                 </td>
-                <td style={{ color: 'var(--text-dim)' }}>{formatISODate(p.targetDate)}</td>
+                <td
+                  style={{ color: 'var(--text-dim)' }}
+                  title={p.targetDate ?? ''}
+                >
+                  {formatISODate(p.targetDate)}
+                </td>
                 <td>
                   <span className="cc-pill">{open}</span>
                 </td>
@@ -222,13 +228,10 @@ function NewProjectForm({
   );
 }
 
-export function formatISODate(iso?: string): string {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
-  return d.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
+/**
+ * @deprecated Prefer `formatRelativeDate` from `lib/dateFormat` — it produces
+ * the same absolute output for dates > 7 days from today, but also gives
+ * "Today" / "Yesterday" / "N days ago" for nearby dates. Kept as a thin
+ * wrapper for callers that haven't migrated yet.
+ */
+export const formatISODate = formatRelativeDate;

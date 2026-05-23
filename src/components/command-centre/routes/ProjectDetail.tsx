@@ -32,6 +32,9 @@ import MilestoneStatusPill from '../components/MilestoneStatusPill';
 import CorrespondenceFeed from '../components/CorrespondenceFeed';
 import QuotesFeed from '../components/QuotesFeed';
 import Icon, { type IconName } from '../components/Icon';
+import AutoLinkText from '../components/AutoLinkText';
+import ObsidianLink from '../components/ObsidianLink';
+import { entitySlug } from '../lib/vaultMarkdown';
 import { formatISODate } from './Projects';
 
 function SectionHead({ title, icon }: { title: string; icon: IconName }) {
@@ -95,7 +98,11 @@ export default function ProjectDetail() {
 
           <section>
             <SectionHead title="Correspondence" icon="message" />
-            <CorrespondenceFeed scope="project" id={project.id} />
+            <CorrespondenceFeed
+              scope="project"
+              id={project.id}
+              fallbackClientId={project.clientId}
+            />
           </section>
         </aside>
       </div>
@@ -138,6 +145,7 @@ function DetailsSection({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <StatusPill status={project.status} />
+          <ObsidianLink file={`Projects/${entitySlug(project.title)}`} />
           <button type="button" className="cc-btn-ghost" onClick={() => setEditing(true)}>
             Edit details
           </button>
@@ -381,7 +389,11 @@ function TaskRow({ project, task }: { project: Project; task: Task }) {
             {task.priority && task.priority !== 'normal' && (
               <span className="cc-pill">{task.priority}</span>
             )}
-            {task.notes && <span>{task.notes}</span>}
+            {task.notes && (
+              <span>
+                <AutoLinkText text={task.notes} />
+              </span>
+            )}
           </div>
         )}
       </div>

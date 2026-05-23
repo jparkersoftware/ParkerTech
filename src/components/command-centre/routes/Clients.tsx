@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createClient, watchClients } from '../lib/clients';
 import type { Client } from '../lib/types';
+import { formatRelativeDate, fullTimestamp } from '../lib/dateFormat';
 
 export default function Clients() {
   const [clients, setClients] = useState<Client[] | null>(null);
@@ -112,7 +113,12 @@ export default function Clients() {
                   <td>
                     <span className="cc-pill">{c.contacts?.length ?? 0}</span>
                   </td>
-                  <td className="text-[var(--text-dim)]">{formatDate(c.updatedAt)}</td>
+                  <td
+                    className="text-[var(--text-dim)]"
+                    title={fullTimestamp(c.updatedAt)}
+                  >
+                    {formatRelativeDate(c.updatedAt)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -123,12 +129,3 @@ export default function Clients() {
   );
 }
 
-function formatDate(ts: { toDate?: () => Date } | null | undefined): string {
-  if (!ts?.toDate) return '—';
-  const d = ts.toDate();
-  return d.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
