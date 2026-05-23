@@ -18,22 +18,56 @@ export type Client = {
   updatedAt: Timestamp;
 };
 
+/**
+ * Canonical project statuses. `delivered` is a *legacy* value kept in the enum
+ * for backward-compat with existing Firestore documents; new writes should use
+ * `completed`. Read paths should funnel raw Firestore values through
+ * `normaliseProjectStatus` so the rest of the app never has to think about it.
+ */
 export const PROJECT_STATUSES = [
   'discovery',
   'active',
   'on-hold',
+  'completed',
   'delivered',
   'lost',
 ] as const;
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 
+/** Statuses we actually offer in the UI (legacy `delivered` excluded). */
+export const PROJECT_STATUSES_UI: ProjectStatus[] = [
+  'discovery',
+  'active',
+  'on-hold',
+  'completed',
+  'lost',
+];
+
 export const PROJECT_STATUS_LABEL: Record<ProjectStatus, string> = {
   discovery: 'Discovery',
   active: 'Active',
   'on-hold': 'On hold',
-  delivered: 'Delivered',
+  completed: 'Completed',
+  // Legacy alias — render as "Completed" everywhere in the UI.
+  delivered: 'Completed',
   lost: 'Lost',
 };
+
+/** Maps any raw Firestore status string to the canonical UI value. */
+export function normaliseProjectStatus(raw: string | undefined): ProjectStatus {
+  if (raw === 'delivered') return 'completed';
+  if (
+    raw === 'discovery' ||
+    raw === 'active' ||
+    raw === 'on-hold' ||
+    raw === 'completed' ||
+    raw === 'lost'
+  ) {
+    return raw;
+  }
+  // Unknown / missing → treat as discovery to avoid breaking the UI.
+  return 'discovery';
+}
 
 export type TaskPriority = 'low' | 'normal' | 'high';
 
@@ -44,8 +78,36 @@ export type Task = {
   dueDate?: string;
   priority?: TaskPriority;
   notes?: string;
+  /** Optional link to a feature request on the same project. */
+  featureRequestId?: string;
   createdAt: Timestamp;
   completedAt?: Timestamp;
+};
+
+export const FEATURE_REQUEST_STATUSES = [
+  'proposed',
+  'planned',
+  'in-progress',
+  'done',
+  'rejected',
+] as const;
+export type FeatureRequestStatus = (typeof FEATURE_REQUEST_STATUSES)[number];
+
+export const FEATURE_REQUEST_STATUS_LABEL: Record<FeatureRequestStatus, string> = {
+  proposed: 'Proposed',
+  planned: 'Planned',
+  'in-progress': 'In progress',
+  done: 'Done',
+  rejected: 'Rejected',
+};
+
+export type FeatureRequest = {
+  id: string;
+  title: string;
+  description?: string;
+  status: FeatureRequestStatus;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 };
 
 export const MILESTONE_STATUSES = [
@@ -90,6 +152,7 @@ export type Project = {
   targetDate?: string;
   tasks: Task[];
   milestones?: Milestone[];
+  featureRequests?: FeatureRequest[];
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };

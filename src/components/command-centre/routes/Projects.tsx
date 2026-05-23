@@ -4,8 +4,9 @@ import { watchClients } from '../lib/clients';
 import { createProject, watchProjects } from '../lib/projects';
 import { formatRelativeDate } from '../lib/dateFormat';
 import {
-  PROJECT_STATUSES,
+  PROJECT_STATUSES_UI,
   PROJECT_STATUS_LABEL,
+  normaliseProjectStatus,
   type Client,
   type Project,
   type ProjectStatus,
@@ -18,16 +19,31 @@ export default function Projects() {
   const [projects, setProjects] = useState<Project[] | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
   const [filter, setFilter] = useState<Filter>('all');
+  const [showCompleted, setShowCompleted] = useState(false);
   const [adding, setAdding] = useState(false);
 
   useEffect(() => watchProjects(setProjects), []);
   useEffect(() => watchClients(setClients), []);
 
+  const completedCount = useMemo(
+    () =>
+      (projects ?? []).filter(
+        (p) => normaliseProjectStatus(p.status) === 'completed',
+      ).length,
+    [projects],
+  );
+
   const filtered = useMemo(() => {
     if (!projects) return null;
-    if (filter === 'all') return projects;
-    return projects.filter((p) => p.status === filter);
-  }, [projects, filter]);
+    return projects.filter((p) => {
+      const canonical = normaliseProjectStatus(p.status);
+      if (filter === 'all') {
+        if (!showCompleted && canonical === 'completed') return false;
+        return true;
+      }
+      return canonical === filter;
+    });
+  }, [projects, filter, showCompleted]);
 
   return (
     <div>
@@ -37,7 +53,7 @@ export default function Projects() {
           <p className="cc-page-head-meta">
             {projects === null
               ? 'Loading…'
-              : `${projects.length} project${projects.length === 1 ? '' : 's'} · ${projects.filter((p) => p.status === 'active').length} active`}
+              : `${projects.length} project${projects.length === 1 ? '' : 's'} · ${projects.filter((p) => normaliseProjectStatus(p.status) === 'active').length} active`}
           </p>
         </div>
         {!adding && (
@@ -66,7 +82,13 @@ export default function Projects() {
         />
       )}
 
-      <FilterBar value={filter} onChange={setFilter} />
+      <FilterBar
+        value={filter}
+        onChange={setFilter}
+        showCompleted={showCompleted}
+        completedCount={completedCount}
+        onToggleCompleted={() => setShowCompleted((v) => !v)}
+      />
 
       {filtered === null ? (
         <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>
@@ -85,17 +107,25 @@ export default function Projects() {
 function FilterBar({
   value,
   onChange,
+  showCompleted,
+  completedCount,
+  onToggleCompleted,
 }: {
   value: Filter;
   onChange: (v: Filter) => void;
+  showCompleted: boolean;
+  completedCount: number;
+  onToggleCompleted: () => void;
 }) {
+  // Hide "Completed" from the filter chip list — it's behind the toggle.
+  const filterableStatuses = PROJECT_STATUSES_UI.filter((s) => s !== 'completed');
   const options: { value: Filter; label: string }[] = [
     { value: 'all', label: 'All' },
-    ...PROJECT_STATUSES.map((s) => ({ value: s, label: PROJECT_STATUS_LABEL[s] })),
+    ...filterableStatuses.map((s) => ({ value: s, label: PROJECT_STATUS_LABEL[s] })),
   ];
 
   return (
-    <div className="mb-4 flex flex-wrap gap-2">
+    <div className="mb-4 flex flex-wrap items-center gap-2">
       {options.map((opt) => (
         <button
           key={opt.value}
@@ -106,6 +136,14 @@ function FilterBar({
           {opt.label}
         </button>
       ))}
+      <button
+        type="button"
+        onClick={onToggleCompleted}
+        className={showCompleted ? 'cc-filter is-active' : 'cc-filter'}
+        style={{ marginLeft: 'auto' }}
+      >
+        {showCompleted ? 'Hide' : 'Show'} completed ({completedCount})
+      </button>
     </div>
   );
 }

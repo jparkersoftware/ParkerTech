@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
+  addFeatureRequest,
   addMilestone,
   addTask,
   deleteProject,
+  markProjectCompleted,
+  removeFeatureRequest,
   removeMilestone,
   removeTask,
   toggleChecklistItem,
+  updateFeatureRequest,
   updateMilestone,
   updateProjectFields,
   updateTask,
@@ -14,12 +18,17 @@ import {
 } from '../lib/projects';
 import { watchClients } from '../lib/clients';
 import {
+  FEATURE_REQUEST_STATUSES,
+  FEATURE_REQUEST_STATUS_LABEL,
   MILESTONE_STATUSES,
   MILESTONE_STATUS_LABEL,
-  PROJECT_STATUSES,
+  PROJECT_STATUSES_UI,
   PROJECT_STATUS_LABEL,
+  normaliseProjectStatus,
   type ChecklistItem,
   type Client,
+  type FeatureRequest,
+  type FeatureRequestStatus,
   type Milestone,
   type MilestoneStatus,
   type Project,
@@ -29,6 +38,7 @@ import {
 } from '../lib/types';
 import StatusPill from '../components/StatusPill';
 import MilestoneStatusPill from '../components/MilestoneStatusPill';
+import FeatureRequestStatusPill from '../components/FeatureRequestStatusPill';
 import CorrespondenceFeed from '../components/CorrespondenceFeed';
 import QuotesFeed from '../components/QuotesFeed';
 import Icon, { type IconName } from '../components/Icon';
@@ -51,9 +61,16 @@ export default function ProjectDetail() {
   const navigate = useNavigate();
   const [project, setProject] = useState<Project | null | undefined>(undefined);
   const [clients, setClients] = useState<Client[]>([]);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => watchProject(id, setProject), [id]);
   useEffect(() => watchClients(setClients), []);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 3500);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   if (project === undefined) {
     return <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>;
@@ -77,17 +94,41 @@ export default function ProjectDetail() {
     navigate('/projects');
   }
 
+  async function handleMarkComplete() {
+    await markProjectCompleted(project!.id);
+    setToast('Project marked complete.');
+  }
+
   return (
     <div className="cc-page-content">
       <Link to="/projects" className="cc-eyebrow inline-block">
         ← Projects
       </Link>
 
-      <DetailsSection project={project} clients={clients} onDelete={handleDelete} />
+      <DetailsSection
+        project={project}
+        clients={clients}
+        onDelete={handleDelete}
+        onMarkComplete={handleMarkComplete}
+      />
+
+      {toast && (
+        <div className="mb-4">
+          <span key={toast} className="cc-toast-inline">
+            <Icon name="check" /> {toast}
+          </span>
+        </div>
+      )}
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,_2fr)_minmax(0,_1fr)]">
         <div className="space-y-8">
           <RoadmapSection project={project} />
+          <FeatureRequestsSection
+            project={project}
+            onReopened={() =>
+              setToast('Project reopened — status set to Active.')
+            }
+          />
           <TasksSection project={project} />
         </div>
         <aside className="space-y-8">
@@ -114,12 +155,16 @@ function DetailsSection({
   project,
   clients,
   onDelete,
+  onMarkComplete,
 }: {
   project: Project;
   clients: Client[];
   onDelete: () => void;
+  onMarkComplete: () => void;
 }) {
   const [editing, setEditing] = useState(false);
+  const canonicalStatus = normaliseProjectStatus(project.status);
+  const isCompleted = canonicalStatus === 'completed';
 
   if (editing) {
     return (
@@ -149,6 +194,11 @@ function DetailsSection({
           <button type="button" className="cc-btn-ghost" onClick={() => setEditing(true)}>
             Edit details
           </button>
+          {!isCompleted && (
+            <button type="button" className="cc-btn-ghost" onClick={onMarkComplete}>
+              Mark complete
+            </button>
+          )}
           <button type="button" className="cc-btn-danger" onClick={onDelete}>
             Delete project
           </button>
@@ -195,7 +245,9 @@ function DetailsForm({
 }) {
   const [title, setTitle] = useState(project.title);
   const [clientId, setClientId] = useState(project.clientId);
-  const [status, setStatus] = useState<ProjectStatus>(project.status);
+  const [status, setStatus] = useState<ProjectStatus>(
+    normaliseProjectStatus(project.status),
+  );
   const [brief, setBrief] = useState(project.brief ?? '');
   const [startDate, setStartDate] = useState(project.startDate ?? '');
   const [targetDate, setTargetDate] = useState(project.targetDate ?? '');
@@ -253,7 +305,7 @@ function DetailsForm({
             value={status}
             onChange={(e) => setStatus(e.target.value as ProjectStatus)}
           >
-            {PROJECT_STATUSES.map((s) => (
+            {PROJECT_STATUSES_UI.map((s) => (
               <option key={s} value={s}>
                 {PROJECT_STATUS_LABEL[s]}
               </option>
@@ -496,6 +548,271 @@ function TaskForm({
         {onDelete && (
           <button type="button" className="cc-btn-danger ml-auto" onClick={onDelete}>
             Remove task
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}
+
+// ── Feature requests ────────────────────────────────────────────
+
+function FeatureRequestsSection({
+  project,
+  onReopened,
+}: {
+  project: Project;
+  onReopened: () => void;
+}) {
+  const [adding, setAdding] = useState(false);
+  const featureRequests = project.featureRequests ?? [];
+
+  return (
+    <section>
+      <div className="mb-3 flex items-end justify-between">
+        <SectionHead title="Feature Requests" icon="lightbulb" />
+        {!adding && (
+          <button type="button" className="cc-btn-ghost" onClick={() => setAdding(true)}>
+            Add
+          </button>
+        )}
+      </div>
+
+      {adding && (
+        <FeatureRequestForm
+          onCancel={() => setAdding(false)}
+          onSubmit={async (data) => {
+            const result = await addFeatureRequest(project.id, data);
+            setAdding(false);
+            if (result.reopened) onReopened();
+          }}
+        />
+      )}
+
+      {featureRequests.length === 0 && !adding ? (
+        <p className="cc-empty-inline">
+          <span style={{ color: 'var(--text-dim)' }}>—</span> No feature requests yet. What would make this project better?
+        </p>
+      ) : featureRequests.length > 0 ? (
+        <ul className="space-y-3">
+          {featureRequests.map((fr) => (
+            <li key={fr.id}>
+              <FeatureRequestCard project={project} featureRequest={fr} />
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </section>
+  );
+}
+
+function FeatureRequestCard({
+  project,
+  featureRequest,
+}: {
+  project: Project;
+  featureRequest: FeatureRequest;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [tasksOpen, setTasksOpen] = useState(false);
+  const [addingTask, setAddingTask] = useState(false);
+
+  const linkedTasks = (project.tasks ?? []).filter(
+    (t) => t.featureRequestId === featureRequest.id,
+  );
+
+  if (editing) {
+    return (
+      <FeatureRequestForm
+        initial={featureRequest}
+        onCancel={() => setEditing(false)}
+        onSubmit={async (data) => {
+          await updateFeatureRequest(
+            project.id,
+            project.featureRequests ?? [],
+            featureRequest.id,
+            data,
+          );
+          setEditing(false);
+        }}
+        onDelete={async () => {
+          if (!confirm(`Remove feature request "${featureRequest.title}"?`)) return;
+          await removeFeatureRequest(
+            project.id,
+            project.featureRequests ?? [],
+            project.tasks ?? [],
+            featureRequest.id,
+          );
+          setEditing(false);
+        }}
+      />
+    );
+  }
+
+  return (
+    <div className="cc-card p-5">
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <FeatureRequestStatusPill status={featureRequest.status} />
+          </div>
+          <h3 className="cc-display mt-2 text-lg font-semibold">{featureRequest.title}</h3>
+          {featureRequest.description && (
+            <p
+              className="mt-2 whitespace-pre-wrap text-sm"
+              style={{ color: 'var(--text-muted)' }}
+            >
+              {featureRequest.description}
+            </p>
+          )}
+        </div>
+        <button type="button" className="cc-btn-ghost shrink-0" onClick={() => setEditing(true)}>
+          Edit
+        </button>
+      </header>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          className="cc-btn-ghost"
+          onClick={() => setTasksOpen((v) => !v)}
+        >
+          {tasksOpen ? 'Hide' : 'Show'} tasks
+          <span className="cc-pill" style={{ marginLeft: '0.5rem' }}>
+            {linkedTasks.length}
+          </span>
+        </button>
+        {!addingTask && (
+          <button
+            type="button"
+            className="cc-btn-ghost"
+            onClick={() => {
+              setAddingTask(true);
+              setTasksOpen(true);
+            }}
+          >
+            Add task to this feature
+          </button>
+        )}
+      </div>
+
+      {addingTask && (
+        <div className="mt-3">
+          <TaskForm
+            onCancel={() => setAddingTask(false)}
+            onSubmit={async (data) => {
+              await addTask(project.id, project.tasks ?? [], {
+                ...data,
+                featureRequestId: featureRequest.id,
+              });
+              setAddingTask(false);
+            }}
+          />
+        </div>
+      )}
+
+      {tasksOpen && linkedTasks.length > 0 && (
+        <ul className="cc-card mt-3 overflow-hidden p-0">
+          {sortTasks(linkedTasks).map((t) => (
+            <li key={t.id}>
+              <TaskRow project={project} task={t} />
+            </li>
+          ))}
+        </ul>
+      )}
+      {tasksOpen && linkedTasks.length === 0 && !addingTask && (
+        <p className="cc-empty-inline mt-3">
+          <span style={{ color: 'var(--text-dim)' }}>—</span> No tasks linked yet.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function FeatureRequestForm({
+  initial,
+  onSubmit,
+  onCancel,
+  onDelete,
+}: {
+  initial?: FeatureRequest;
+  onSubmit: (data: {
+    title: string;
+    description?: string;
+    status: FeatureRequestStatus;
+  }) => Promise<void>;
+  onCancel: () => void;
+  onDelete?: () => Promise<void>;
+}) {
+  const [title, setTitle] = useState(initial?.title ?? '');
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const [status, setStatus] = useState<FeatureRequestStatus>(
+    initial?.status ?? 'proposed',
+  );
+  const [busy, setBusy] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    if (!title.trim()) return;
+    setBusy(true);
+    try {
+      await onSubmit({
+        title: title.trim(),
+        description: description.trim() || undefined,
+        status,
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="cc-card mb-3 space-y-3 p-5">
+      <label className="block">
+        <span className="cc-eyebrow mb-2 block">Title</span>
+        <input
+          type="text"
+          autoFocus
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className="cc-input"
+          placeholder="e.g. Export attendance to CSV"
+        />
+      </label>
+      <label className="block">
+        <span className="cc-eyebrow mb-2 block">Description</span>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className="cc-textarea"
+          placeholder="What would make this project better? Why does it matter?"
+        />
+      </label>
+      <label className="block">
+        <span className="cc-eyebrow mb-2 block">Status</span>
+        <select
+          className="cc-input"
+          value={status}
+          onChange={(e) => setStatus(e.target.value as FeatureRequestStatus)}
+        >
+          {FEATURE_REQUEST_STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {FEATURE_REQUEST_STATUS_LABEL[s]}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="flex flex-wrap gap-2">
+        <button type="submit" className="cc-btn-primary" disabled={busy || !title.trim()}>
+          {busy ? 'Saving…' : initial ? 'Save' : 'Add'}
+        </button>
+        <button type="button" className="cc-btn-ghost" onClick={onCancel}>
+          Cancel
+        </button>
+        {onDelete && (
+          <button type="button" className="cc-btn-danger ml-auto" onClick={onDelete}>
+            Remove
           </button>
         )}
       </div>

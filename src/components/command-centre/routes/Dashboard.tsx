@@ -10,12 +10,13 @@ import {
   staleRelationships,
   type RelationshipStatus,
 } from '../lib/relationships';
-import type {
-  Client,
-  Correspondence,
-  Project,
-  Quote,
-  Task,
+import {
+  normaliseProjectStatus,
+  type Client,
+  type Correspondence,
+  type Project,
+  type Quote,
+  type Task,
 } from '../lib/types';
 import StatusPill from '../components/StatusPill';
 import Icon, { type IconName } from '../components/Icon';
@@ -631,16 +632,15 @@ function derive(projects: Project[]): {
     .sort((a, b) => (a.dueDate! < b.dueDate! ? -1 : 1));
 
   const activeProjects = projects
-    .filter((p) => p.status === 'active')
+    .filter((p) => normaliseProjectStatus(p.status) === 'active')
     .sort((a, b) => a.title.localeCompare(b.title));
 
   const upcomingTargets = projects
-    .filter(
-      (p) =>
-        p.targetDate &&
-        p.targetDate >= today &&
-        (p.status === 'active' || p.status === 'discovery'),
-    )
+    .filter((p) => {
+      if (!p.targetDate || p.targetDate < today) return false;
+      const s = normaliseProjectStatus(p.status);
+      return s === 'active' || s === 'discovery';
+    })
     .sort((a, b) => (a.targetDate! < b.targetDate! ? -1 : 1))
     .slice(0, 5);
 

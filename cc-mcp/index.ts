@@ -82,7 +82,15 @@ type ProjectDoc = {
   brief?: string;
   startDate?: string;
   targetDate?: string;
-  tasks?: { id: string; title: string; done: boolean; dueDate?: string; priority?: string; notes?: string }[];
+  tasks?: {
+    id: string;
+    title: string;
+    done: boolean;
+    dueDate?: string;
+    priority?: string;
+    notes?: string;
+    featureRequestId?: string;
+  }[];
   milestones?: {
     id: string;
     title: string;
@@ -90,6 +98,12 @@ type ProjectDoc = {
     targetDate?: string;
     status: string;
     checklist?: { id: string; text: string; done: boolean }[];
+  }[];
+  featureRequests?: {
+    id: string;
+    title: string;
+    description?: string;
+    status: string;
   }[];
 };
 
@@ -132,14 +146,28 @@ function clientSummary(d: ClientDoc) {
   };
 }
 
+/**
+ * Normalise legacy `delivered` to canonical `completed`. The web app does the
+ * same on every read path; this keeps the MCP responses consistent.
+ */
+function normaliseStatus(raw: string | undefined): string {
+  if (raw === 'delivered') return 'completed';
+  return raw ?? '';
+}
+
 function projectSummary(d: ProjectDoc) {
   const tasks = d.tasks ?? [];
+  const featureRequests = (d.featureRequests ?? []) as Array<{
+    id: string;
+    title: string;
+    status: string;
+  }>;
   return {
     id: d.id,
     title: d.title,
     clientId: d.clientId,
     clientName: d.clientName,
-    status: d.status,
+    status: normaliseStatus(d.status),
     brief: d.brief ?? '',
     startDate: d.startDate ?? '',
     targetDate: d.targetDate ?? '',
@@ -152,6 +180,14 @@ function projectSummary(d: ProjectDoc) {
         m.checklist && m.checklist.length > 0
           ? `${m.checklist.filter((c) => c.done).length}/${m.checklist.length}`
           : 'no checklist',
+    })),
+    featureRequests: featureRequests.map((fr) => ({
+      id: fr.id,
+      title: fr.title,
+      status: fr.status,
+      openTaskCount: tasks.filter(
+        (t) => (t as { featureRequestId?: string }).featureRequestId === fr.id && !t.done,
+      ).length,
     })),
   };
 }
@@ -222,31 +258,28 @@ server.tool(
 
 server.tool(
   'list_projects',
-  'List every project with status, client, and open task count. Optional status filter.',
+  'List every project with status, client, and open task count. Optional status filter. Note: legacy `delivered` rows are normalised to `completed` in the response.',
   {
     status: z
-      .enum(['discovery', 'active', 'on-hold', 'delivered', 'lost'])
+      .enum(['discovery', 'active', 'on-hold', 'completed', 'lost'])
       .optional()
-      .describe('Filter to one status. Omit to get all.'),
+      .describe('Filter to one status. Omit to get all. Use `completed` for archived projects.'),
   },
   async ({ status }) => {
-    let q: FirebaseFirestore.Query = db.collection('projects');
-    if (status) q = q.where('status', '==', status);
-    const snap = await q.orderBy('updatedAt', 'desc').get();
-    return ok(
-      snap.docs.map((d) => {
-        const data = d.data();
-        const tasks = (data.tasks ?? []) as { done: boolean }[];
-        return {
-          id: d.id,
-          title: data.title,
-          clientName: data.clientName,
-          status: data.status,
-          targetDate: data.targetDate ?? '',
-          openTaskCount: tasks.filter((t) => !t.done).length,
-        };
-      }),
-    );
+    const snap = await db.collection('projects').orderBy('updatedAt', 'desc').get();
+    const rows = snap.docs.map((d) => {
+      const data = d.data();
+      const tasks = (data.tasks ?? []) as { done: boolean }[];
+      return {
+        id: d.id,
+        title: data.title,
+        clientName: data.clientName,
+        status: normaliseStatus(data.status),
+        targetDate: data.targetDate ?? '',
+        openTaskCount: tasks.filter((t) => !t.done).length,
+      };
+    });
+    return ok(status ? rows.filter((r) => r.status === status) : rows);
   },
 );
 
@@ -329,7 +362,7 @@ server.tool(
     name: z.string().min(1).describe('Project title.'),
     description: z.string().optional().describe('Short summary — stored as the project brief.'),
     status: z
-      .enum(['discovery', 'active', 'on-hold', 'delivered', 'lost'])
+      .enum(['discovery', 'active', 'on-hold', 'completed', 'lost'])
       .default('discovery'),
   },
   async ({ clientIdOrName, name, description, status }) => {
@@ -367,17 +400,29 @@ server.tool(
 
 server.tool(
   'add_task',
-  'Add a task to a project. Returns the new task ID. Auto-sync will pick the change up within 15s and the vault will update.',
+  'Add a task to a project. Returns the new task ID. Auto-sync will pick the change up within 15s and the vault will update. Pass featureRequestId to link the task to a specific feature request on the project.',
   {
     projectIdOrName: z.string(),
     title: z.string().min(1),
     dueDate: z.string().optional().describe('ISO date YYYY-MM-DD'),
     priority: z.enum(['low', 'normal', 'high']).optional(),
     notes: z.string().optional(),
+    featureRequestId: z
+      .string()
+      .optional()
+      .describe('Optional — link this task to a feature request on the same project.'),
   },
-  async ({ projectIdOrName, title, dueDate, priority, notes }) => {
+  async ({ projectIdOrName, title, dueDate, priority, notes, featureRequestId }) => {
     const project = await findProjectByNameOrId(projectIdOrName);
     if (!project) return err(`No project matched "${projectIdOrName}".`);
+    if (featureRequestId) {
+      const exists = (project.featureRequests ?? []).some((fr) => fr.id === featureRequestId);
+      if (!exists) {
+        return err(
+          `No feature request with id "${featureRequestId}" on project "${project.title}".`,
+        );
+      }
+    }
     const id = randomUUID();
     const newTask: Record<string, unknown> = {
       id,
@@ -388,12 +433,110 @@ server.tool(
     if (dueDate) newTask.dueDate = dueDate;
     if (priority) newTask.priority = priority;
     if (notes) newTask.notes = notes;
+    if (featureRequestId) newTask.featureRequestId = featureRequestId;
     const ref = db.collection('projects').doc(project.id);
     await ref.update({
       tasks: FieldValue.arrayUnion(newTask),
       updatedAt: FieldValue.serverTimestamp(),
     });
     return ok({ ok: true, taskId: id, projectId: project.id, projectTitle: project.title });
+  },
+);
+
+server.tool(
+  'add_feature_request',
+  'Add a feature request to a project. If the project status is currently `completed` (or legacy `delivered`), the project is auto-reopened to `active` and the response flags `reopened: true`. Default FR status is `proposed`.',
+  {
+    projectIdOrName: z.string(),
+    title: z.string().min(1),
+    description: z.string().optional(),
+    status: z
+      .enum(['proposed', 'planned', 'in-progress', 'done', 'rejected'])
+      .default('proposed'),
+  },
+  async ({ projectIdOrName, title, description, status }) => {
+    const project = await findProjectByNameOrId(projectIdOrName);
+    if (!project) return err(`No project matched "${projectIdOrName}".`);
+    const featureRequestId = randomUUID();
+    const now = Timestamp.now();
+    const fr: Record<string, unknown> = {
+      id: featureRequestId,
+      title: title.trim(),
+      status,
+      createdAt: now,
+      updatedAt: now,
+    };
+    if (description) fr.description = description;
+
+    const currentStatus = normaliseStatus(project.status);
+    const reopened = currentStatus === 'completed';
+    const patch: Record<string, unknown> = {
+      featureRequests: FieldValue.arrayUnion(fr),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    if (reopened) patch.status = 'active';
+
+    await db.collection('projects').doc(project.id).update(patch);
+    return ok({
+      ok: true,
+      featureRequestId,
+      projectId: project.id,
+      projectTitle: project.title,
+      reopened,
+    });
+  },
+);
+
+server.tool(
+  'update_feature_request',
+  'Patch fields on an existing feature request (title, description, status). Reads the project, mutates the FR in place, writes back.',
+  {
+    projectId: z.string(),
+    featureRequestId: z.string(),
+    title: z.string().optional(),
+    description: z.string().optional(),
+    status: z
+      .enum(['proposed', 'planned', 'in-progress', 'done', 'rejected'])
+      .optional(),
+  },
+  async ({ projectId, featureRequestId, ...patch }) => {
+    const ref = db.collection('projects').doc(projectId);
+    const snap = await ref.get();
+    if (!snap.exists) return err(`No project with id "${projectId}".`);
+    const frs = (snap.data()?.featureRequests ?? []) as Record<string, unknown>[];
+    const idx = frs.findIndex((fr) => fr.id === featureRequestId);
+    if (idx < 0) {
+      return err(`No feature request with id "${featureRequestId}" in this project.`);
+    }
+    const next = [...frs];
+    const merged: Record<string, unknown> = { ...next[idx] };
+    for (const [k, v] of Object.entries(patch)) {
+      if (v !== undefined) merged[k] = v;
+    }
+    merged.updatedAt = Timestamp.now();
+    next[idx] = merged;
+    await ref.update({
+      featureRequests: next,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    return ok({ ok: true, projectId, featureRequestId });
+  },
+);
+
+server.tool(
+  'mark_project_completed',
+  'Mark a project as completed (the archive action). Completed projects are hidden from the dashboard and the default Projects list view. Returns the project id and title.',
+  {
+    projectIdOrName: z.string(),
+  },
+  async ({ projectIdOrName }) => {
+    const project = await findProjectByNameOrId(projectIdOrName);
+    if (!project) return err(`No project matched "${projectIdOrName}".`);
+    await db.collection('projects').doc(project.id).update({
+      status: 'completed',
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    return ok({ ok: true, projectId: project.id, projectTitle: project.title });
   },
 );
 

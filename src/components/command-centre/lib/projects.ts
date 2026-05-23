@@ -4,6 +4,7 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   onSnapshot,
   orderBy,
   query,
@@ -13,14 +14,17 @@ import {
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type {
-  ChecklistItem,
-  Milestone,
-  MilestoneStatus,
-  Project,
-  ProjectStatus,
-  Task,
-  TaskPriority,
+import {
+  normaliseProjectStatus,
+  type ChecklistItem,
+  type FeatureRequest,
+  type FeatureRequestStatus,
+  type Milestone,
+  type MilestoneStatus,
+  type Project,
+  type ProjectStatus,
+  type Task,
+  type TaskPriority,
 } from './types';
 
 const COL = 'projects';
@@ -107,7 +111,13 @@ export async function deleteProject(id: string): Promise<void> {
 export async function addTask(
   projectId: string,
   tasks: Task[],
-  input: { title: string; dueDate?: string; priority?: TaskPriority; notes?: string },
+  input: {
+    title: string;
+    dueDate?: string;
+    priority?: TaskPriority;
+    notes?: string;
+    featureRequestId?: string;
+  },
 ): Promise<void> {
   const newTask: Task = {
     id: crypto.randomUUID(),
@@ -118,6 +128,7 @@ export async function addTask(
       dueDate: input.dueDate,
       priority: input.priority,
       notes: input.notes,
+      featureRequestId: input.featureRequestId,
     }),
   };
   await updateDoc(doc(db, COL, projectId), {
@@ -233,6 +244,99 @@ export async function toggleChecklistItem(
   });
   await updateDoc(doc(db, COL, projectId), {
     milestones: next,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Set a project's status to `completed`. The "archive" action — completed
+ * projects are hidden from the dashboard and the default Projects list view.
+ */
+export async function markProjectCompleted(projectId: string): Promise<void> {
+  await updateDoc(doc(db, COL, projectId), {
+    status: 'completed',
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/**
+ * Append a feature request to a project. If the project is currently
+ * `completed` (or legacy `delivered`), also flip its status back to `active`
+ * — adding new work means the project isn't really done. Returns a flag so
+ * the UI can surface a "project reopened" toast.
+ */
+export async function addFeatureRequest(
+  projectId: string,
+  input: {
+    title: string;
+    description?: string;
+    status?: FeatureRequestStatus;
+  },
+): Promise<{ featureRequestId: string; reopened: boolean }> {
+  const ref = doc(db, COL, projectId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) throw new Error(`No project with id ${projectId}`);
+  const data = snap.data() as Project;
+  const existing = data.featureRequests ?? [];
+  const fr: FeatureRequest = {
+    id: crypto.randomUUID(),
+    title: input.title.trim(),
+    status: input.status ?? 'proposed',
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+    ...stripUndefined({ description: input.description }),
+  };
+  const currentStatus = normaliseProjectStatus(data.status);
+  const reopen = currentStatus === 'completed';
+  const patch: Record<string, unknown> = {
+    featureRequests: [...existing, fr],
+    updatedAt: serverTimestamp(),
+  };
+  if (reopen) patch.status = 'active';
+  await updateDoc(ref, patch);
+  return { featureRequestId: fr.id, reopened: reopen };
+}
+
+export async function updateFeatureRequest(
+  projectId: string,
+  featureRequests: FeatureRequest[],
+  featureRequestId: string,
+  patch: Partial<Pick<FeatureRequest, 'title' | 'description' | 'status'>>,
+): Promise<void> {
+  const next = featureRequests.map((fr) => {
+    if (fr.id !== featureRequestId) return fr;
+    return {
+      ...fr,
+      ...stripUndefined(patch),
+      updatedAt: Timestamp.now(),
+    };
+  });
+  await updateDoc(doc(db, COL, projectId), {
+    featureRequests: next,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+export async function removeFeatureRequest(
+  projectId: string,
+  featureRequests: FeatureRequest[],
+  tasks: Task[],
+  featureRequestId: string,
+): Promise<void> {
+  // Drop the FR and unlink any tasks pointing to it (tasks themselves stay).
+  const nextFrs = featureRequests.filter((fr) => fr.id !== featureRequestId);
+  const nextTasks = tasks.map((t) =>
+    t.featureRequestId === featureRequestId
+      ? (() => {
+          const { featureRequestId: _unused, ...rest } = t;
+          void _unused;
+          return rest as Task;
+        })()
+      : t,
+  );
+  await updateDoc(doc(db, COL, projectId), {
+    featureRequests: nextFrs,
+    tasks: nextTasks,
     updatedAt: serverTimestamp(),
   });
 }
