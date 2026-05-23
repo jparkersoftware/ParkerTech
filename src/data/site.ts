@@ -125,7 +125,7 @@ export const site = {
       quote:
         "The standard of Joseph's work is exceptional. He has expertly supported the school to automate a wide range of systems and processes that have resulted in significant efficiency improvements, whilst freeing up leaders to work strategically and be that all important visible presence around the school. No task has proven too small or insurmountable for Joseph, and the quality of creativity, support and guidance he has provided is simply outstanding. Thank you Joseph.",
       name: 'Dan Walton',
-      role: 'Associate Headteacher',
+      role: 'Associate Headteacher & Ofsted Inspector',
       org: "St John's Catholic Comprehensive",
     },
   ],
