@@ -667,6 +667,61 @@ server.tool(
 );
 
 server.tool(
+  'update_correspondence',
+  'Patch fields on an existing correspondence entry. Pass any of: projectIdOrName (link/relink to project), clearProject (true to remove a project link), body, transcript, contactIds, title, date, type. Use this to retroactively attach a project to entries that were created client-linked only.',
+  {
+    correspondenceId: z.string(),
+    projectIdOrName: z.string().optional(),
+    clearProject: z.boolean().optional().describe('Set true to remove the project link entirely.'),
+    type: z.enum(['meeting', 'call', 'email', 'note']).optional(),
+    date: z.string().optional().describe('ISO date YYYY-MM-DD.'),
+    title: z.string().min(1).optional(),
+    body: z.string().optional(),
+    transcript: z.string().optional(),
+    contactIds: z.array(z.string()).optional(),
+  },
+  async ({
+    correspondenceId,
+    projectIdOrName,
+    clearProject,
+    type,
+    date,
+    title,
+    body,
+    transcript,
+    contactIds,
+  }) => {
+    const ref = db.collection('correspondence').doc(correspondenceId);
+    const snap = await ref.get();
+    if (!snap.exists) return err(`No correspondence with id "${correspondenceId}".`);
+    if (projectIdOrName && clearProject) {
+      return err('Pass either projectIdOrName or clearProject, not both.');
+    }
+    const patch: Record<string, unknown> = {
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    if (projectIdOrName) {
+      const project = await findProjectByNameOrId(projectIdOrName);
+      if (!project) return err(`No project matched "${projectIdOrName}".`);
+      patch.projectId = project.id;
+      patch.projectTitle = project.title;
+    }
+    if (clearProject) {
+      patch.projectId = FieldValue.delete();
+      patch.projectTitle = FieldValue.delete();
+    }
+    if (type !== undefined) patch.type = type;
+    if (date !== undefined) patch.date = date;
+    if (title !== undefined) patch.title = title.trim();
+    if (body !== undefined) patch.body = body;
+    if (transcript !== undefined) patch.transcript = transcript;
+    if (contactIds !== undefined) patch.contactIds = contactIds;
+    await ref.update(patch);
+    return ok({ ok: true, id: correspondenceId });
+  },
+);
+
+server.tool(
   'add_inbox_item',
   'Quick-capture a stray thought, idea, or observation to Joseph\'s inbox. Use this when something needs to be remembered but isn\'t yet a structured task or project. Optional: pre-tag with @-mentions, set a snooze date, or pin to the top of the list.',
   {
@@ -1383,6 +1438,69 @@ server.tool(
     });
     await ref.update({ milestones: next, updatedAt: FieldValue.serverTimestamp() });
     return ok({ ok: true });
+  },
+);
+
+// ── EMAIL INTEGRATION TOOLS (read-only Phase 1) ─────────────────
+// Approval / conversion stays in the web UI; MCP is read-only so Claude can
+// see what's awaiting triage without touching the queue.
+
+server.tool(
+  'list_email_candidates',
+  'List email candidates pulled from Gmail. Defaults to status=pending (the unprocessed queue). Use status=approved or status=skipped to inspect the history. Returns from/to/subject/date/snippet plus the candidate id.',
+  {
+    status: z
+      .enum(['pending', 'approved', 'skipped'])
+      .default('pending')
+      .describe('Which queue to list. Pending = awaiting Joseph\'s triage.'),
+    limit: z.number().int().min(1).max(200).default(50),
+  },
+  async ({ status, limit }) => {
+    const snap = await db
+      .collection('emailCandidates')
+      .where('status', '==', status)
+      .orderBy('receivedAt', 'desc')
+      .limit(limit)
+      .get();
+    return ok(
+      snap.docs.map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          messageId: data.messageId,
+          subject: data.subject ?? '',
+          from: data.from ?? '',
+          to: (data.to as string[] | undefined) ?? [],
+          cc: (data.cc as string[] | undefined) ?? [],
+          date: data.date ?? '',
+          bodySnippet: data.bodySnippet ?? '',
+          status: data.status,
+          correspondenceId: data.correspondenceId ?? '',
+          skipReason: data.skipReason ?? '',
+        };
+      }),
+    );
+  },
+);
+
+server.tool(
+  'list_gmail_integration_status',
+  'Returns whether the Gmail integration is connected, the connected email, and last-fetch metadata. Use to check before suggesting a Gmail pull.',
+  {},
+  async () => {
+    const snap = await db.collection('integrations').doc('gmail').get();
+    if (!snap.exists) return ok({ connected: false });
+    const data = snap.data() ?? {};
+    return ok({
+      connected: true,
+      email: data.email ?? '',
+      connectedAt: tsToIso(data.connectedAt),
+      lastFetchAt: tsToIso(data.lastFetchAt),
+      lastFetchFetched: data.lastFetchFetched ?? 0,
+      lastFetchAlreadyKnown: data.lastFetchAlreadyKnown ?? 0,
+      lastFetchErrors: data.lastFetchErrors ?? 0,
+      lastFetchDays: data.lastFetchDays ?? 0,
+    });
   },
 );
 

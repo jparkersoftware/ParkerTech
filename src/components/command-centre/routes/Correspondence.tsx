@@ -18,6 +18,7 @@ import {
 } from '../lib/types';
 import TypePill from '../components/TypePill';
 import AutoLinkText from '../components/AutoLinkText';
+import EmailCandidateQueue from '../components/EmailCandidateQueue';
 import { formatRelativeDate, fullTimestamp } from '../lib/dateFormat';
 
 type Filter = 'all' | CorrespondenceType;
@@ -68,6 +69,8 @@ export default function CorrespondencePage() {
           <span style={{ color: 'var(--text-dim)' }}>—</span> Add a client first — correspondence belongs to a client.
         </p>
       )}
+
+      <EmailCandidateQueue clients={clients} projects={projects} />
 
       {adding && (
         <EntryForm

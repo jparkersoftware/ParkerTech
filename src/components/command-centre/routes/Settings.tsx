@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { pingRepo } from '../lib/github';
 import {
   setAutoSync,
@@ -7,6 +7,16 @@ import {
   type Settings,
 } from '../lib/settings';
 import { syncAllToVault, type SyncProgress } from '../lib/sync';
+import {
+  connectGmail,
+  disconnectGmail,
+  fetchGmailNow,
+  watchGmailIntegration,
+  type GmailIntegration,
+} from '../lib/integrations';
+import { watchClients } from '../lib/clients';
+import { emailDomain } from '../lib/emailCandidates';
+import type { Client } from '../lib/types';
 
 type TestState =
   | { kind: 'idle' }
@@ -36,7 +46,243 @@ export default function SettingsPage() {
       </header>
 
       <VaultSection settings={settings} />
+      <GmailSection />
     </div>
+  );
+}
+
+function GmailSection() {
+  const [integration, setIntegration] = useState<GmailIntegration | null | undefined>(
+    undefined,
+  );
+  const [clients, setClients] = useState<Client[]>([]);
+  const [busy, setBusy] = useState<'connect' | 'disconnect' | 'fetch' | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [fetchResult, setFetchResult] = useState<string | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [domainsInput, setDomainsInput] = useState<string>('');
+
+  useEffect(() => watchGmailIntegration(setIntegration), []);
+  useEffect(() => watchClients(setClients), []);
+
+  // Auto-suggest domains parsed from contact emails — Joseph can edit before
+  // hitting Fetch.
+  const suggestedDomains = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of clients) {
+      for (const contact of c.contacts ?? []) {
+        if (!contact.email) continue;
+        const d = emailDomain(contact.email);
+        if (d) set.add(d);
+      }
+    }
+    return Array.from(set).sort();
+  }, [clients]);
+
+  async function handleConnect() {
+    setBusy('connect');
+    setError(null);
+    try {
+      await connectGmail();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function handleDisconnect() {
+    if (!confirm('Disconnect Gmail? Pending email candidates stay in the queue.')) return;
+    setBusy('disconnect');
+    setError(null);
+    try {
+      await disconnectGmail();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function handleFetch() {
+    setBusy('fetch');
+    setError(null);
+    setFetchResult(null);
+    try {
+      const parsedDomains = domainsInput
+        .split(/[\s,]+/)
+        .map((d) => d.trim())
+        .filter(Boolean);
+      const res = await fetchGmailNow({
+        days: 7,
+        clientDomains: parsedDomains.length > 0 ? parsedDomains : undefined,
+      });
+      setFetchResult(
+        `${res.fetched} new · ${res.alreadyKnown} already known${
+          res.errors.length ? ` · ${res.errors.length} errored` : ''
+        }`,
+      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  if (integration === undefined) {
+    return (
+      <section className="mb-10">
+        <h2 className="cc-display mb-3 text-xl">Gmail integration</h2>
+        <p className="text-sm" style={{ color: 'var(--text-dim)' }}>Loading…</p>
+      </section>
+    );
+  }
+
+  const connected = integration !== null && integration.email;
+  const lastFetch = integration?.lastFetchAt?.toDate?.();
+  const connectedAt = integration?.connectedAt?.toDate?.();
+
+  return (
+    <section className="mb-10">
+      <h2 className="cc-display mb-3 text-xl">Gmail integration</h2>
+      <p className="mb-4 text-sm" style={{ color: 'var(--text-muted)' }}>
+        Pulls new mail from <code>joseph@parkermarker.co.uk</code> and queues
+        it on the Correspondence page for one-tap conversion to logged
+        correspondence. Read-only scope; never sends or modifies mail.
+      </p>
+
+      {!connected ? (
+        <div className="cc-card p-6">
+          <p className="font-medium">Not connected</p>
+          <p className="mt-1 text-sm" style={{ color: 'var(--text-muted)' }}>
+            Click below to grant Command Centre read-only access to your
+            Google Workspace mailbox.
+          </p>
+          <div className="mt-4">
+            <button
+              type="button"
+              className="cc-btn-primary"
+              onClick={handleConnect}
+              disabled={busy !== null}
+            >
+              {busy === 'connect' ? 'Waiting for Google…' : 'Connect Gmail'}
+            </button>
+          </div>
+          {error && <p className="cc-error mt-4">{error}</p>}
+        </div>
+      ) : (
+        <div className="cc-card space-y-4 p-6">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="font-medium">
+                Connected as <code>{integration!.email}</code>
+              </p>
+              <p className="mt-1 text-xs" style={{ color: 'var(--text-dim)' }}>
+                {connectedAt
+                  ? `Linked ${connectedAt.toLocaleDateString('en-GB')}`
+                  : 'Linked recently'}
+                {lastFetch && (
+                  <>
+                    {' · '}
+                    Last pull {lastFetch.toLocaleString('en-GB')} · {' '}
+                    {integration!.lastFetchFetched ?? 0} new ·{' '}
+                    {integration!.lastFetchAlreadyKnown ?? 0} already known
+                  </>
+                )}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="cc-btn-primary"
+                onClick={handleFetch}
+                disabled={busy !== null}
+              >
+                {busy === 'fetch' ? 'Pulling…' : 'Pull new correspondence'}
+              </button>
+              <button
+                type="button"
+                className="cc-btn-ghost"
+                onClick={handleDisconnect}
+                disabled={busy !== null}
+              >
+                Disconnect
+              </button>
+            </div>
+          </div>
+
+          {fetchResult && (
+            <p className="text-xs" style={{ color: '#86efac' }}>
+              {fetchResult}
+            </p>
+          )}
+          {error && <p className="cc-error">{error}</p>}
+
+          <div>
+            <button
+              type="button"
+              className="cc-back-link"
+              onClick={() => setShowFilters((v) => !v)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+            >
+              {showFilters ? '▾' : '▸'} Configure filters
+            </button>
+            {showFilters && (
+              <div className="mt-3 space-y-3">
+                <label className="block">
+                  <span className="cc-eyebrow mb-2 block">Client domains (optional)</span>
+                  <input
+                    type="text"
+                    className="cc-input"
+                    value={domainsInput}
+                    onChange={(e) => setDomainsInput(e.target.value)}
+                    placeholder={
+                      suggestedDomains.length
+                        ? suggestedDomains.join(', ')
+                        : 'example.org, another.school'
+                    }
+                  />
+                  <span
+                    className="mt-1 block text-xs"
+                    style={{ color: 'var(--text-dim)' }}
+                  >
+                    Comma-separated. When set, only emails to/from these
+                    domains are pulled. Leave empty to fetch everything in
+                    the last 7 days.
+                  </span>
+                </label>
+                {suggestedDomains.length > 0 && (
+                  <div>
+                    <p className="cc-eyebrow mb-2">Auto-suggested from your contacts</p>
+                    <div className="flex flex-wrap gap-2">
+                      {suggestedDomains.map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          className="cc-chip"
+                          onClick={() => {
+                            const current = domainsInput
+                              .split(/[\s,]+/)
+                              .map((s) => s.trim())
+                              .filter(Boolean);
+                            if (current.includes(d)) return;
+                            setDomainsInput(
+                              [...current, d].join(', '),
+                            );
+                          }}
+                        >
+                          + {d}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </section>
   );
 }
 
