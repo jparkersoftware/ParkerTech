@@ -314,6 +314,36 @@ export type Expense = {
   updatedAt: Timestamp;
 };
 
+/**
+ * Entities an inbox item can @-mention. The id + type combo points at a
+ * Firestore doc; displayName is denormalised so the chip in the rendered
+ * item stays readable even if the source entity is later renamed (or the
+ * user is offline). Re-render paths can re-resolve from id if needed.
+ */
+export type InboxItemMentionType = 'client' | 'project' | 'contact' | 'quote';
+
+export type InboxItemMention = {
+  type: InboxItemMentionType;
+  id: string;
+  displayName: string;
+};
+
+/**
+ * Generic file attached to an inbox item — image or PDF. Mirrors
+ * ExpenseAttachment shape so the Storage helpers feel consistent.
+ * Path pattern: `inbox/{itemId}/{uuid}.{ext}` (rules-covered by the
+ * catch-all `match /{allPaths=**}` in storage.rules).
+ */
+export type InboxItemAttachment = {
+  id: string;
+  storagePath: string;
+  downloadUrl: string;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  uploadedAt: Timestamp;
+};
+
 export type InboxItem = {
   id: string;
   text: string;
@@ -321,6 +351,14 @@ export type InboxItem = {
   archived: boolean;
   archivedNote?: string;
   archivedAt?: Timestamp;
+  /** @-mention chips parsed at capture time. */
+  mentions?: InboxItemMention[];
+  /** Image / PDF attachments uploaded to Storage. */
+  attachments?: InboxItemAttachment[];
+  /** ISO YYYY-MM-DD. Hides the item from the main list until this date. */
+  snoozedUntil?: string;
+  /** Pinned items sort to the top of the open list. */
+  pinned?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 };

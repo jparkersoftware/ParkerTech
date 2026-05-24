@@ -623,6 +623,9 @@ export function inboxFile(item: InboxItem): VaultFile {
   const firstLine = item.text.split('\n')[0]!.slice(0, 50);
   const slug = `${date}-${entitySlug(firstLine)}-${item.id.slice(0, 6)}`;
 
+  const mentions = item.mentions ?? [];
+  const mentionLinks = mentions.map((m) => mentionWikilink(m));
+
   const frontmatter = yamlFrontmatter({
     type: 'inbox',
     id: item.id,
@@ -630,10 +633,34 @@ export function inboxFile(item: InboxItem): VaultFile {
     tags: item.tags,
     archived: item.archived,
     archivedNote: item.archivedNote ?? '',
+    pinned: item.pinned ?? false,
+    snoozedUntil: item.snoozedUntil ?? '',
+    mentions: mentionLinks,
     source: 'command-centre',
   });
 
   const body: string[] = [`# Inbox · ${date}`, '', item.text, ''];
+
+  if (mentions.length > 0) {
+    body.push('## Mentions', '');
+    for (const m of mentions) {
+      body.push(`- ${m.type}: ${mentionWikilink(m)}`);
+    }
+    body.push('');
+  }
+
+  const attachments = item.attachments ?? [];
+  if (attachments.length > 0) {
+    body.push('## Attachments', '');
+    for (const att of attachments) {
+      const sizeKb = Math.max(1, Math.round(att.sizeBytes / 1024));
+      body.push(
+        `- [${att.fileName}](${att.downloadUrl}) (${att.contentType}, ${sizeKb} KB)`,
+      );
+    }
+    body.push('');
+  }
+
   if (item.archivedNote) {
     body.push(`> Archived: ${item.archivedNote}`, '');
   }
@@ -643,6 +670,21 @@ export function inboxFile(item: InboxItem): VaultFile {
     content: frontmatter + body.join('\n'),
     message: `inbox: ${firstLine.replace(/\n/g, ' ')}`,
   };
+}
+
+function mentionWikilink(m: {
+  type: 'client' | 'project' | 'contact' | 'quote';
+  displayName: string;
+}): string {
+  const folder =
+    m.type === 'client'
+      ? 'Clients'
+      : m.type === 'project'
+        ? 'Projects'
+        : m.type === 'contact'
+          ? 'People'
+          : 'Quotes';
+  return `[[${folder}/${entitySlug(m.displayName)}|${m.displayName}]]`;
 }
 
 // ── slugs and helpers ───────────────────────────────────────────

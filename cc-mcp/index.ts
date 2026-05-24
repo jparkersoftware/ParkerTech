@@ -668,23 +668,150 @@ server.tool(
 
 server.tool(
   'add_inbox_item',
-  'Quick-capture a stray thought, idea, or observation to Joseph\'s inbox. Use this when something needs to be remembered but isn\'t yet a structured task or project.',
+  'Quick-capture a stray thought, idea, or observation to Joseph\'s inbox. Use this when something needs to be remembered but isn\'t yet a structured task or project. Optional: pre-tag with @-mentions, set a snooze date, or pin to the top of the list.',
   {
     text: z.string().min(1),
     tags: z.array(z.string()).default([]),
+    mentions: z
+      .array(
+        z.object({
+          type: z.enum(['client', 'project', 'contact', 'quote']),
+          id: z.string(),
+          displayName: z.string(),
+        }),
+      )
+      .optional()
+      .describe('Optional entity mentions to attach to the item.'),
+    snoozedUntil: z
+      .string()
+      .optional()
+      .describe('ISO date YYYY-MM-DD — hide from the main list until this date.'),
+    pinned: z
+      .boolean()
+      .optional()
+      .describe('Pin to the top of the inbox list.'),
   },
-  async ({ text, tags }) => {
+  async ({ text, tags, mentions, snoozedUntil, pinned }) => {
     const cleanTags = Array.from(
       new Set(tags.map((t) => t.trim().toLowerCase()).filter(Boolean)),
     );
-    const ref = await db.collection('inbox').add({
+    const doc: Record<string, unknown> = {
       text: text.trim(),
       tags: cleanTags,
       archived: false,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
-    });
+    };
+    if (mentions && mentions.length > 0) doc.mentions = mentions;
+    if (snoozedUntil) doc.snoozedUntil = snoozedUntil;
+    if (pinned) doc.pinned = true;
+    const ref = await db.collection('inbox').add(doc);
     return ok({ ok: true, id: ref.id });
+  },
+);
+
+server.tool(
+  'list_inbox_items',
+  'List inbox items with optional filters. By default returns open (non-archived, not currently snoozed) items, newest first. Use `archived: true` to see the archive, `snoozed_active: true` to see items snoozed for a future date, or `tag` to filter by a single tag.',
+  {
+    archived: z.boolean().optional().describe('true to list archived items; false (default) lists open items.'),
+    pinned: z.boolean().optional().describe('Filter by pinned state.'),
+    snoozed_active: z
+      .boolean()
+      .optional()
+      .describe('true to list items currently in snooze (snoozedUntil > today). When false / omitted, snoozed items are excluded from open list.'),
+    tag: z.string().optional().describe('Single tag to filter by (case-insensitive).'),
+    limit: z.number().optional().default(50),
+  },
+  async ({ archived, pinned, snoozed_active, tag, limit }) => {
+    const snap = await db
+      .collection('inbox')
+      .orderBy('createdAt', 'desc')
+      .limit(Math.min(Math.max(limit, 1), 500))
+      .get();
+    const today = new Date().toISOString().slice(0, 10);
+    const tagLower = tag?.trim().toLowerCase();
+
+    const rows = snap.docs
+      .map((d) => {
+        const data = d.data() as Record<string, unknown>;
+        return {
+          id: d.id,
+          text: (data.text as string) ?? '',
+          tags: ((data.tags as string[]) ?? []),
+          archived: (data.archived as boolean) ?? false,
+          archivedNote: (data.archivedNote as string) ?? '',
+          archivedAt: tsToIso(data.archivedAt),
+          pinned: (data.pinned as boolean) ?? false,
+          snoozedUntil: (data.snoozedUntil as string | undefined) ?? '',
+          mentions: (data.mentions as unknown[]) ?? [],
+          attachments: (data.attachments as unknown[]) ?? [],
+          createdAt: tsToIso(data.createdAt),
+          updatedAt: tsToIso(data.updatedAt),
+        };
+      })
+      .filter((r) => {
+        const isSnoozed = r.snoozedUntil !== '' && r.snoozedUntil > today;
+        if (archived === true) {
+          if (!r.archived) return false;
+        } else {
+          // Default: open (not archived).
+          if (r.archived) return false;
+          if (snoozed_active === true) {
+            if (!isSnoozed) return false;
+          } else {
+            if (isSnoozed) return false;
+          }
+        }
+        if (pinned !== undefined && r.pinned !== pinned) return false;
+        if (tagLower && !r.tags.map((t) => t.toLowerCase()).includes(tagLower)) {
+          return false;
+        }
+        return true;
+      });
+
+    return ok(rows);
+  },
+);
+
+server.tool(
+  'pin_inbox_item',
+  'Pin or unpin an inbox item. Pinned items sort to the top of the open list.',
+  {
+    itemId: z.string(),
+    pinned: z.boolean(),
+  },
+  async ({ itemId, pinned }) => {
+    const ref = db.collection('inbox').doc(itemId);
+    const snap = await ref.get();
+    if (!snap.exists) return err(`No inbox item with id "${itemId}".`);
+    await ref.update({
+      pinned: pinned ? true : false,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    return ok({ ok: true, itemId, pinned });
+  },
+);
+
+server.tool(
+  'snooze_inbox_item',
+  'Set or clear a snooze on an inbox item. Pass an ISO date (YYYY-MM-DD) in `until` to snooze; omit `until` to clear the snooze and bring it back to the main list.',
+  {
+    itemId: z.string(),
+    until: z
+      .string()
+      .optional()
+      .describe('ISO date YYYY-MM-DD. Omit to clear the snooze.'),
+  },
+  async ({ itemId, until }) => {
+    const ref = db.collection('inbox').doc(itemId);
+    const snap = await ref.get();
+    if (!snap.exists) return err(`No inbox item with id "${itemId}".`);
+    await ref.update({
+      snoozedUntil: until ?? null,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    return ok({ ok: true, itemId, snoozedUntil: until ?? null });
   },
 );
 
