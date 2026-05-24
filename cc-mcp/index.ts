@@ -961,6 +961,273 @@ server.tool(
   },
 );
 
+// ── EXPENSE TOOLS ────────────────────────────────────────────────
+// Attachments (receipts/PDFs) are web-UI only — Claude has no way to upload
+// binaries through MCP. These tools cover everything else: the create/edit/
+// list/summary flow.
+
+const EXPENSE_CATEGORY_ENUM = z.enum([
+  'travel',
+  'subscriptions',
+  'equipment',
+  'software',
+  'office',
+  'professional-services',
+  'marketing',
+  'other',
+]);
+
+server.tool(
+  'add_expense',
+  'Log a new expense. Attachments (receipts) can only be added later via the web UI — Claude has no way to upload binaries through MCP. Returns the new expense ID.',
+  {
+    date: z
+      .string()
+      .optional()
+      .describe('ISO YYYY-MM-DD when the expense happened. Defaults to today.'),
+    description: z.string().min(1),
+    amount: z.number().describe('Gross GBP amount, e.g. 24.50.'),
+    category: EXPENSE_CATEGORY_ENUM,
+    vendor: z.string().optional().describe('e.g. "Trainline", "Anthropic".'),
+    clientIdOrName: z.string().optional(),
+    projectIdOrName: z.string().optional(),
+    vatAmount: z
+      .number()
+      .optional()
+      .describe('Optional VAT portion of the amount (for later reclaim).'),
+    billable: z
+      .boolean()
+      .default(false)
+      .describe('True if this expense should be rebilled to the client.'),
+    notes: z.string().optional(),
+  },
+  async ({
+    date,
+    description,
+    amount,
+    category,
+    vendor,
+    clientIdOrName,
+    projectIdOrName,
+    vatAmount,
+    billable,
+    notes,
+  }) => {
+    let clientId: string | undefined;
+    let clientName: string | undefined;
+    if (clientIdOrName) {
+      const client = await findClientByNameOrId(clientIdOrName);
+      if (!client) return err(`No client matched "${clientIdOrName}".`);
+      clientId = client.id;
+      clientName = client.name;
+    }
+    let projectId: string | undefined;
+    let projectTitle: string | undefined;
+    if (projectIdOrName) {
+      const project = await findProjectByNameOrId(projectIdOrName);
+      if (!project) return err(`No project matched "${projectIdOrName}".`);
+      projectId = project.id;
+      projectTitle = project.title;
+    }
+    const doc: Record<string, unknown> = {
+      date: date ?? new Date().toISOString().slice(0, 10),
+      description: description.trim(),
+      amount,
+      category,
+      billable: billable ?? false,
+      attachments: [],
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    if (vatAmount !== undefined) doc.vatAmount = vatAmount;
+    if (vendor) doc.vendor = vendor;
+    if (clientId) {
+      doc.clientId = clientId;
+      doc.clientName = clientName;
+    }
+    if (projectId) {
+      doc.projectId = projectId;
+      doc.projectTitle = projectTitle;
+    }
+    if (notes) doc.notes = notes;
+    const ref = await db.collection('expenses').add(doc);
+    return ok({ ok: true, expenseId: ref.id });
+  },
+);
+
+server.tool(
+  'update_expense',
+  'Patch fields on an existing expense. Cannot touch the attachments array — receipts are managed through the web UI.',
+  {
+    expenseId: z.string(),
+    date: z.string().optional(),
+    description: z.string().optional(),
+    amount: z.number().optional(),
+    vatAmount: z.number().optional(),
+    category: EXPENSE_CATEGORY_ENUM.optional(),
+    vendor: z.string().optional(),
+    clientIdOrName: z.string().optional(),
+    projectIdOrName: z.string().optional(),
+    billable: z.boolean().optional(),
+    notes: z.string().optional(),
+  },
+  async ({
+    expenseId,
+    clientIdOrName,
+    projectIdOrName,
+    ...rest
+  }) => {
+    const ref = db.collection('expenses').doc(expenseId);
+    const snap = await ref.get();
+    if (!snap.exists) return err(`No expense with id "${expenseId}".`);
+    const patch: Record<string, unknown> = {
+      updatedAt: FieldValue.serverTimestamp(),
+    };
+    for (const [k, v] of Object.entries(rest)) {
+      if (v !== undefined) patch[k] = v;
+    }
+    if (clientIdOrName !== undefined) {
+      if (clientIdOrName === '') {
+        patch.clientId = FieldValue.delete();
+        patch.clientName = FieldValue.delete();
+      } else {
+        const client = await findClientByNameOrId(clientIdOrName);
+        if (!client) return err(`No client matched "${clientIdOrName}".`);
+        patch.clientId = client.id;
+        patch.clientName = client.name;
+      }
+    }
+    if (projectIdOrName !== undefined) {
+      if (projectIdOrName === '') {
+        patch.projectId = FieldValue.delete();
+        patch.projectTitle = FieldValue.delete();
+      } else {
+        const project = await findProjectByNameOrId(projectIdOrName);
+        if (!project) return err(`No project matched "${projectIdOrName}".`);
+        patch.projectId = project.id;
+        patch.projectTitle = project.title;
+      }
+    }
+    await ref.update(patch);
+    return ok({ ok: true, expenseId });
+  },
+);
+
+server.tool(
+  'delete_expense',
+  'Delete an expense document. WARNING: Storage cleanup is handled by the web UI — if this expense has uploaded attachments, the binaries in Firebase Storage will be orphaned. Use the web app to delete expenses that have attachments, OR run a manual Storage cleanup afterwards.',
+  { expenseId: z.string() },
+  async ({ expenseId }) => {
+    const ref = db.collection('expenses').doc(expenseId);
+    const snap = await ref.get();
+    if (!snap.exists) return err(`No expense with id "${expenseId}".`);
+    const attachmentCount = ((snap.data()?.attachments ?? []) as unknown[]).length;
+    await ref.delete();
+    const warning =
+      attachmentCount > 0
+        ? `Deleted Firestore doc but ${attachmentCount} attachment(s) remain in Firebase Storage and must be cleaned up manually (or delete via the web UI next time).`
+        : undefined;
+    return ok({ ok: true, expenseId, ...(warning ? { warning } : {}) });
+  },
+);
+
+server.tool(
+  'list_expenses',
+  'List expenses with optional filters. Returns id, date, description, vendor, category, amount, vatAmount, client/project links, and attachment count.',
+  {
+    from: z.string().optional().describe('ISO YYYY-MM-DD lower bound (inclusive).'),
+    to: z.string().optional().describe('ISO YYYY-MM-DD upper bound (inclusive).'),
+    category: EXPENSE_CATEGORY_ENUM.optional(),
+    clientIdOrName: z.string().optional(),
+  },
+  async ({ from, to, category, clientIdOrName }) => {
+    let clientId: string | undefined;
+    if (clientIdOrName) {
+      const client = await findClientByNameOrId(clientIdOrName);
+      if (!client) return err(`No client matched "${clientIdOrName}".`);
+      clientId = client.id;
+    }
+    let q: FirebaseFirestore.Query = db.collection('expenses');
+    if (clientId) q = q.where('clientId', '==', clientId);
+    if (category) q = q.where('category', '==', category);
+    const snap = await q.orderBy('date', 'desc').get();
+    const rows = snap.docs
+      .map((d) => {
+        const data = d.data();
+        return {
+          id: d.id,
+          date: data.date as string,
+          description: data.description ?? '',
+          vendor: data.vendor ?? '',
+          category: data.category ?? 'other',
+          amount: Number(data.amount) || 0,
+          vatAmount:
+            data.vatAmount === undefined ? null : Number(data.vatAmount),
+          clientId: data.clientId ?? '',
+          clientName: data.clientName ?? '',
+          projectId: data.projectId ?? '',
+          projectTitle: data.projectTitle ?? '',
+          billable: Boolean(data.billable),
+          attachmentCount: ((data.attachments ?? []) as unknown[]).length,
+        };
+      })
+      .filter((r) => (from ? r.date >= from : true))
+      .filter((r) => (to ? r.date <= to : true));
+    return ok(rows);
+  },
+);
+
+server.tool(
+  'expense_summary',
+  'Totals by category over a date range. Useful for "what did I spend last month". Both `from` and `to` are required ISO YYYY-MM-DD bounds (inclusive).',
+  {
+    from: z.string().describe('ISO YYYY-MM-DD lower bound (inclusive).'),
+    to: z.string().describe('ISO YYYY-MM-DD upper bound (inclusive).'),
+  },
+  async ({ from, to }) => {
+    const snap = await db.collection('expenses').get();
+    const inRange = snap.docs
+      .map((d) => d.data())
+      .filter((d) => {
+        const date = (d.date as string) ?? '';
+        return date >= from && date <= to;
+      });
+    let totalAmount = 0;
+    let totalVat = 0;
+    const byCategory: Record<string, { count: number; total: number }> = {};
+    for (const cat of [
+      'travel',
+      'subscriptions',
+      'equipment',
+      'software',
+      'office',
+      'professional-services',
+      'marketing',
+      'other',
+    ]) {
+      byCategory[cat] = { count: 0, total: 0 };
+    }
+    for (const d of inRange) {
+      const amount = Number(d.amount) || 0;
+      const vat = Number(d.vatAmount) || 0;
+      totalAmount += amount;
+      totalVat += vat;
+      const cat = (typeof d.category === 'string' ? d.category : 'other') as string;
+      const bucket = byCategory[cat] ?? byCategory.other!;
+      bucket.count += 1;
+      bucket.total += amount;
+    }
+    return ok({
+      from,
+      to,
+      count: inRange.length,
+      totalAmount,
+      totalVat,
+      byCategory,
+    });
+  },
+);
+
 server.tool(
   'toggle_checklist_item',
   'Tick or untick a checklist item on a project milestone.',

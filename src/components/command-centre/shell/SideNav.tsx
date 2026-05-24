@@ -8,6 +8,7 @@ const NAV_ITEMS: { to: string; label: string; icon: IconName; end?: boolean }[] 
   { to: '/projects', label: 'Projects', icon: 'briefcase' },
   { to: '/quotes', label: 'Quotes', icon: 'pound' },
   { to: '/invoices', label: 'Invoices', icon: 'receipt' },
+  { to: '/expenses', label: 'Expenses', icon: 'wallet' },
   { to: '/correspondence', label: 'Correspondence', icon: 'message' },
   { to: '/settings', label: 'Settings', icon: 'settings' },
 ];

@@ -6,6 +6,8 @@ import {
   clientFile,
   contactFile,
   correspondenceFile,
+  expenseFile,
+  expenseMonthSummaryFile,
   inboxFile,
   invoiceFile,
   projectFile,
@@ -15,6 +17,7 @@ import {
 import type {
   Client,
   Correspondence,
+  Expense,
   InboxItem,
   Invoice,
   Project,
@@ -35,16 +38,25 @@ export async function syncAllToVault(
   try {
     onProgress?.({ phase: 'reading', written: 0, total: 0 });
 
-    const [clients, projects, correspondence, quotes, invoices, inbox] = await Promise.all([
+    const [clients, projects, correspondence, quotes, invoices, expenses, inbox] = await Promise.all([
       readAll<Client>('clients', 'name'),
       readAll<Project>('projects', 'updatedAt', 'desc'),
       readAll<Correspondence>('correspondence', 'date', 'desc'),
       readAll<Quote>('quotes', 'issueDate', 'desc'),
       readAll<Invoice>('invoices', 'issueDate', 'desc'),
+      readAll<Expense>('expenses', 'date', 'desc'),
       readAll<InboxItem>('inbox', 'createdAt', 'desc'),
     ]);
 
-    const files = generateFiles(clients, projects, correspondence, quotes, invoices, inbox);
+    const files = generateFiles(
+      clients,
+      projects,
+      correspondence,
+      quotes,
+      invoices,
+      expenses,
+      inbox,
+    );
 
     let written = 0;
     onProgress?.({ phase: 'writing', written, total: files.length });
@@ -76,6 +88,7 @@ function generateFiles(
   correspondence: Correspondence[],
   quotes: Quote[],
   invoices: Invoice[],
+  expenses: Expense[],
   inbox: InboxItem[],
 ): VaultFile[] {
   const files: VaultFile[] = [];
@@ -92,7 +105,9 @@ function generateFiles(
   const clientById = new Map(clients.map((c) => [c.id, c]));
 
   for (const client of clients) {
-    files.push(clientFile(client, projects, quotes, invoices, correspondence));
+    files.push(
+      clientFile(client, projects, quotes, invoices, expenses, correspondence),
+    );
     for (const contact of client.contacts ?? []) {
       files.push(
         contactFile(
@@ -104,7 +119,7 @@ function generateFiles(
     }
   }
   for (const project of projects) {
-    files.push(projectFile(project, correspondence, quotes, invoices));
+    files.push(projectFile(project, correspondence, quotes, invoices, expenses));
   }
   for (const entry of correspondence) {
     const client = clientById.get(entry.clientId);
@@ -116,6 +131,17 @@ function generateFiles(
   }
   for (const invoice of invoices) {
     files.push(invoiceFile(invoice));
+  }
+  for (const expense of expenses) {
+    files.push(expenseFile(expense));
+  }
+  // One monthly digest per YYYY-MM that has any expenses.
+  const months = new Set<string>();
+  for (const e of expenses) {
+    if (e.date && e.date.length >= 7) months.add(e.date.slice(0, 7));
+  }
+  for (const month of months) {
+    files.push(expenseMonthSummaryFile(month, expenses));
   }
   for (const item of inbox) {
     files.push(inboxFile(item));

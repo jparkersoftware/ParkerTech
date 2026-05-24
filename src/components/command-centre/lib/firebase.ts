@@ -8,6 +8,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyABKgqY0rvtgO7e5Tqb4Amy9XeUUdRswNs',
@@ -21,6 +22,7 @@ const firebaseConfig = {
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 /** The single UID allowed to use this app. */
 export const ALLOWED_UID = 'vLqAisb7mAd93ZSF6Lq0IaS32hy2';

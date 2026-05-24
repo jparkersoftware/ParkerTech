@@ -26,7 +26,9 @@ export type IconName =
   | 'cloud'
   | 'refresh'
   | 'lightbulb'
-  | 'receipt';
+  | 'receipt'
+  | 'wallet'
+  | 'paperclip';
 
 const PATHS: Record<IconName, string> = {
   calendar:
@@ -70,6 +72,12 @@ const PATHS: Record<IconName, string> = {
   // A receipt with a torn / zig-zag bottom edge — Lucide-style.
   receipt:
     '<path d="M4 2v20l3-2 3 2 3-2 3 2 3-2 1 2V2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/>',
+  // A billfold wallet — Lucide-style.
+  wallet:
+    '<path d="M20 12V8H6a2 2 0 0 1 0-4h12v4"/><path d="M4 6v12a2 2 0 0 0 2 2h14v-4"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/>',
+  // Paperclip — Lucide-style.
+  paperclip:
+    '<path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>',
 };
 
 export default function Icon({

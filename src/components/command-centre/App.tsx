@@ -15,6 +15,8 @@ import QuotePrint from './routes/QuotePrint';
 import Invoices from './routes/Invoices';
 import InvoiceDetail from './routes/InvoiceDetail';
 import InvoicePrint from './routes/InvoicePrint';
+import Expenses from './routes/Expenses';
+import ExpenseDetail from './routes/ExpenseDetail';
 import Correspondence from './routes/Correspondence';
 import Inbox from './routes/Inbox';
 import Settings from './routes/Settings';
@@ -58,6 +60,8 @@ function Gate() {
             <Route path="quotes/:id" element={<QuoteDetail />} />
             <Route path="invoices" element={<Invoices />} />
             <Route path="invoices/:id" element={<InvoiceDetail />} />
+            <Route path="expenses" element={<Expenses />} />
+            <Route path="expenses/:id" element={<ExpenseDetail />} />
             <Route path="correspondence" element={<Correspondence />} />
             <Route path="settings" element={<Settings />} />
           </Route>

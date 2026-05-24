@@ -262,6 +262,58 @@ export type Invoice = {
   updatedAt: Timestamp;
 };
 
+export const EXPENSE_CATEGORIES = [
+  'travel',
+  'subscriptions',
+  'equipment',
+  'software',
+  'office',
+  'professional-services',
+  'marketing',
+  'other',
+] as const;
+export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
+
+export const EXPENSE_CATEGORY_LABEL: Record<ExpenseCategory, string> = {
+  travel: 'Travel',
+  subscriptions: 'Subscriptions',
+  equipment: 'Equipment',
+  software: 'Software',
+  office: 'Office',
+  'professional-services': 'Professional services',
+  marketing: 'Marketing',
+  other: 'Other',
+};
+
+export type ExpenseAttachment = {
+  id: string;
+  storagePath: string;       // e.g. expenses/2026/03/<expenseId>/<uuid>.pdf
+  downloadUrl: string;       // resolved getDownloadURL value (cached)
+  fileName: string;
+  contentType: string;       // image/jpeg | image/png | application/pdf
+  sizeBytes: number;
+  uploadedAt: Timestamp;
+};
+
+export type Expense = {
+  id: string;
+  date: string;              // ISO YYYY-MM-DD (the expense date, NOT created)
+  description: string;       // "Train to St Mary's"
+  amount: number;            // gross GBP, 2dp
+  vatAmount?: number;        // optional, if Joseph wants to reclaim VAT later
+  category: ExpenseCategory;
+  vendor?: string;           // "Trainline", "Anthropic"
+  clientId?: string;
+  clientName?: string;
+  projectId?: string;
+  projectTitle?: string;
+  billable: boolean;         // default false — for rebillable expenses later
+  notes?: string;
+  attachments: ExpenseAttachment[];
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
 export type InboxItem = {
   id: string;
   text: string;

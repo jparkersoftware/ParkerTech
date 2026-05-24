@@ -1,5 +1,6 @@
 import {
   CORRESPONDENCE_TYPE_LABEL,
+  EXPENSE_CATEGORY_LABEL,
   INVOICE_STATUS_LABEL,
   MILESTONE_STATUS_LABEL,
   PROJECT_STATUS_LABEL,
@@ -7,6 +8,7 @@ import {
   type Client,
   type Contact,
   type Correspondence,
+  type Expense,
   type InboxItem,
   type Invoice,
   type Project,
@@ -28,12 +30,14 @@ export function clientFile(
   projects: Project[],
   quotes: Quote[],
   invoices: Invoice[],
+  expenses: Expense[],
   correspondence: Correspondence[],
 ): VaultFile {
   const slug = entitySlug(client.name);
   const clientProjects = projects.filter((p) => p.clientId === client.id);
   const clientQuotes = quotes.filter((q) => q.clientId === client.id);
   const clientInvoices = invoices.filter((i) => i.clientId === client.id);
+  const clientExpenses = expenses.filter((e) => e.clientId === client.id);
   const clientCorr = correspondence.filter((c) => c.clientId === client.id);
 
   const frontmatter = yamlFrontmatter({
@@ -88,6 +92,16 @@ export function clientFile(
     body.push('');
   }
 
+  if (clientExpenses.length > 0) {
+    body.push('## Expenses', '');
+    for (const e of clientExpenses) {
+      body.push(
+        `- [[${expensePath(e)}]] · ${e.date} · ${EXPENSE_CATEGORY_LABEL[e.category]} · ${GBP.format(e.amount)}`,
+      );
+    }
+    body.push('');
+  }
+
   if (clientCorr.length > 0) {
     body.push('## Correspondence', '');
     for (const c of clientCorr.slice(0, 30)) {
@@ -110,11 +124,13 @@ export function projectFile(
   correspondence: Correspondence[],
   quotes: Quote[],
   invoices: Invoice[],
+  expenses: Expense[],
 ): VaultFile {
   const slug = entitySlug(project.title);
   const projCorr = correspondence.filter((c) => c.projectId === project.id);
   const projQuotes = quotes.filter((q) => q.projectId === project.id);
   const projInvoices = invoices.filter((i) => i.projectId === project.id);
+  const projExpenses = expenses.filter((e) => e.projectId === project.id);
 
   const frontmatter = yamlFrontmatter({
     type: 'project',
@@ -187,6 +203,16 @@ export function projectFile(
       const { total } = invoiceTotals(inv);
       body.push(
         `- [[Invoices/${inv.number}]] · ${INVOICE_STATUS_LABEL[inv.status]} · ${GBP.format(total)}`,
+      );
+    }
+    body.push('');
+  }
+
+  if (projExpenses.length > 0) {
+    body.push('## Expenses', '');
+    for (const e of projExpenses) {
+      body.push(
+        `- [[${expensePath(e)}]] · ${e.date} · ${EXPENSE_CATEGORY_LABEL[e.category]} · ${GBP.format(e.amount)}`,
       );
     }
     body.push('');
@@ -453,6 +479,140 @@ export function invoiceFile(invoice: Invoice): VaultFile {
     path: `Invoices/${invoice.number}.md`,
     content: frontmatter + body.join('\n'),
     message: `invoice: ${invoice.number}`,
+  };
+}
+
+/**
+ * Vault-relative path (no .md extension) for an expense. Mirrored on the web
+ * side by ExpenseDetail.tsx so the "Open in Obsidian" deep link lines up.
+ *
+ * Pattern: `Expenses/{YYYY-MM-DD}-{vendor-slug}-{id6}`
+ */
+export function expensePath(expense: Expense): string {
+  const vendor = entitySlug(expense.vendor ?? 'expense');
+  const id6 = expense.id.slice(0, 6);
+  return `Expenses/${expense.date}-${vendor}-${id6}`;
+}
+
+export function expenseFile(expense: Expense): VaultFile {
+  const path = `${expensePath(expense)}.md`;
+
+  const frontmatter = yamlFrontmatter({
+    type: 'expense',
+    id: expense.id,
+    date: expense.date,
+    amount: expense.amount,
+    vat_amount: expense.vatAmount ?? '',
+    category: expense.category,
+    vendor: expense.vendor ?? '',
+    client:
+      expense.clientName
+        ? `[[Clients/${entitySlug(expense.clientName)}]]`
+        : '',
+    project:
+      expense.projectId && expense.projectTitle
+        ? `[[Projects/${entitySlug(expense.projectTitle)}]]`
+        : '',
+    billable: expense.billable,
+    source: 'command-centre',
+  });
+
+  const body: string[] = [
+    `# ${expense.description || 'Expense'}`,
+    '',
+    `${expense.date} · ${EXPENSE_CATEGORY_LABEL[expense.category]} · ${GBP.format(expense.amount)}`,
+  ];
+  if (expense.vendor) {
+    body[body.length - 1] += ` · ${expense.vendor}`;
+  }
+  body.push('');
+
+  if (expense.notes) body.push('## Notes', '', expense.notes, '');
+
+  const attachments = expense.attachments ?? [];
+  if (attachments.length > 0) {
+    body.push('## Attachments', '');
+    for (const att of attachments) {
+      const sizeKb = Math.max(1, Math.round(att.sizeBytes / 1024));
+      body.push(
+        `- [${att.fileName}](${att.downloadUrl}) (${att.contentType}, ${sizeKb} KB)`,
+      );
+    }
+    body.push('');
+  }
+
+  return {
+    path,
+    content: frontmatter + body.join('\n'),
+    message: `expense: ${expense.date} ${expense.vendor ?? expense.description}`.slice(0, 80),
+  };
+}
+
+/**
+ * Monthly digest — one file per YYYY-MM that has any expenses. Useful when
+ * the accountant asks "what did you spend in March".
+ */
+export function expenseMonthSummaryFile(
+  yyyymm: string,
+  expenses: Expense[],
+): VaultFile {
+  const monthExpenses = expenses
+    .filter((e) => e.date.slice(0, 7) === yyyymm)
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  const total = monthExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+
+  const byCat = new Map<string, { count: number; total: number }>();
+  for (const e of monthExpenses) {
+    const cur = byCat.get(e.category) ?? { count: 0, total: 0 };
+    cur.count += 1;
+    cur.total += Number(e.amount) || 0;
+    byCat.set(e.category, cur);
+  }
+
+  const frontmatter = yamlFrontmatter({
+    type: 'expense-summary',
+    month: yyyymm,
+    total,
+    count: monthExpenses.length,
+    source: 'command-centre',
+  });
+
+  const body: string[] = [
+    `# Expenses · ${yyyymm}`,
+    '',
+    `Total: **${GBP.format(total)}** across ${monthExpenses.length} expense${monthExpenses.length === 1 ? '' : 's'}.`,
+    '',
+  ];
+
+  if (monthExpenses.length > 0) {
+    body.push('## Items', '');
+    body.push('| Date | Description | Vendor | Category | Amount |');
+    body.push('| --- | --- | --- | --- | ---:|');
+    for (const e of monthExpenses) {
+      body.push(
+        `| ${e.date} | [[${expensePath(e)}\\|${mdEscape(e.description || '—')}]] | ${mdEscape(e.vendor ?? '—')} | ${EXPENSE_CATEGORY_LABEL[e.category as keyof typeof EXPENSE_CATEGORY_LABEL] ?? e.category} | ${GBP.format(e.amount)} |`,
+      );
+    }
+    body.push('');
+
+    body.push('## By category', '');
+    const ordered = Array.from(byCat.entries()).sort((a, b) => b[1].total - a[1].total);
+    for (const [cat, stat] of ordered) {
+      const label =
+        EXPENSE_CATEGORY_LABEL[cat as keyof typeof EXPENSE_CATEGORY_LABEL] ?? cat;
+      body.push(`- **${label}** — ${stat.count} · ${GBP.format(stat.total)}`);
+    }
+    body.push('');
+
+    body.push(`**Grand total: ${GBP.format(total)}**`, '');
+  }
+
+  return {
+    path: `Expenses/_summary-${yyyymm}.md`,
+    content: frontmatter + body.join('\n'),
+    message: `expense summary: ${yyyymm}`,
   };
 }
 
