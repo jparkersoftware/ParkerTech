@@ -66,6 +66,10 @@ export const site = {
         items: ['Staff absence & cover', 'Performance management', 'Power BI dashboards', 'Wonde & MIS integration'],
       },
       {
+        group: 'Cloud & infrastructure',
+        items: ['Cloud modernisation', 'Chromebook rollouts', 'Google Workspace setup', 'Network refresh'],
+      },
+      {
         group: 'How I work',
         items: ['Bespoke to your school', 'Ready-made products', 'Built with teacher input', 'Mindful of school data'],
       },
