@@ -622,6 +622,28 @@ server.tool(
 );
 
 server.tool(
+  'delete_task',
+  'Hard-delete a task from a project. Permanent — there is no undo. Requires confirm:true. For archiving completed work, use update_task done:true instead; for restructures, prefer closing tasks with a [SUPERSEDED] note so the history stays visible.',
+  {
+    projectId: z.string(),
+    taskId: z.string(),
+    confirm: z.literal(true).describe('Must be set to true to acknowledge the deletion is irreversible.'),
+  },
+  async ({ projectId, taskId }) => {
+    const ref = db.collection('projects').doc(projectId);
+    const snap = await ref.get();
+    if (!snap.exists) return err(`No project with id "${projectId}".`);
+    const tasks = (snap.data()?.tasks ?? []) as Record<string, unknown>[];
+    const idx = tasks.findIndex((t) => t.id === taskId);
+    if (idx < 0) return err(`No task with id "${taskId}" in this project.`);
+    const removed = tasks[idx]!;
+    const next = tasks.filter((_, i) => i !== idx);
+    await ref.update({ tasks: next, updatedAt: FieldValue.serverTimestamp() });
+    return ok({ ok: true, deletedTitle: removed.title ?? null });
+  },
+);
+
+server.tool(
   'add_correspondence',
   'Log a meeting, call, email or note. Required: client, type, title, date. Optional: link to a project, contact IDs to tag, short summary body, and full verbatim transcript.',
   {
