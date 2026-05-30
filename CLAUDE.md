@@ -60,7 +60,7 @@ When adding a new MCP tool: copy the structure of an existing one in `index.ts` 
 - **cc-mcp hook paths are absolute** in `~/.claude/settings.json` (`/Users/jelst/Documents/ParkerTech Portfolio/cc-mcp/hooks/*`). If you move this repo, update those paths.
 - **The vault is the long-term memory.** When you make a substantive change here, consider whether a Knowledge note in the vault would help future sessions. cc-mcp's `vault_write_knowledge` is the tool.
 - **Don't paste secrets** into cc-mcp source or commits. Firebase Admin uses Application Default Credentials.
-- **cc-mcp has no `update_correspondence` tool** (known gap, captured in vault `Knowledge/Systems/CC-correspondencetoproject-linkage-gap`). Existing correspondence entries can't be retroactively re-linked to projects via MCP — UI only.
+- **No project rename/delete or task-delete via MCP.** `update_correspondence`, `update_task`, `update_invoice`, `update_expense`, `update_feature_request` all exist; project structural changes (rename / merge / hard-delete) are UI-only. `mark_project_completed` archives; `update_task` can only close (no delete).
 
 ## Where state lives
 
