@@ -53,7 +53,7 @@ export const site = {
     paragraphs: [
       "I'm Joseph. I spent a decade teaching in schools, so I know the Sunday evenings lost to marking, the clunky systems that fight you instead of helping, and the quiet wish that someone would just build the tool you actually needed.",
       "Eventually I decided to build it myself. I left the classroom to focus on technology full-time, and now I create software for schools — designed around how they really work, by someone who's been on the other side of the staffroom door.",
-      'Some of what I build are products any school can pick up and use, like ParkerMarker and VocMark. The rest is bespoke — intranets, data dashboards and automations built around a single school and the people who run it: leadership, admin and data teams as much as teachers. The aim never changes: less time lost to admin, more time for the work that matters.',
+      'Some of what I build are products any school can pick up and use, like ParkerMarker and VocMark. The rest is bespoke — intranets, data dashboards and automations built around individual schools and trusts, and the people who run them: leadership, admin and data teams as much as teachers. The aim never changes: less time lost to admin, more time for the work that matters.',
     ],
     // The "What I can help with" card. Adjust the groups and items freely.
     capabilities: [
