@@ -1625,11 +1625,17 @@ server.tool(
     ensureWritable(relPath);
     mkdirSync(dirname(full), { recursive: true });
 
+    const nowIso = new Date().toISOString();
+    const created =
+      (existsSync(full) ? readFrontmatterValue(readFileSync(full, 'utf-8'), 'created') : null) ??
+      nowIso;
+
     const fm: string[] = ['---'];
     fm.push(`type: knowledge`);
     fm.push(`category: ${category}`);
     fm.push(`title: ${JSON.stringify(title)}`);
-    fm.push(`updated: ${new Date().toISOString()}`);
+    fm.push(`created: ${created}`);
+    fm.push(`updated: ${nowIso}`);
     if (tags.length) fm.push(`tags: [${tags.map((t) => JSON.stringify(t)).join(', ')}]`);
     if (related.length)
       fm.push(`related:\n${related.map((r) => `  - "[[${r}]]"`).join('\n')}`);
@@ -1666,14 +1672,15 @@ server.tool(
     ensureWritable(relPath);
     mkdirSync(dirname(full), { recursive: true });
 
-    const date = new Date().toISOString().slice(0, 10);
-    const section = `\n## ${sectionHeading} — ${date}\n\n${body}\n`;
+    const nowIso = new Date().toISOString();
+    const stamp = `${nowIso.slice(0, 16)}Z`;
+    const section = `\n## ${sectionHeading} — ${stamp}\n\n${body}\n`;
 
     if (existsSync(full)) {
-      const current = readFileSync(full, 'utf-8');
+      const current = bumpFrontmatterTimestamps(readFileSync(full, 'utf-8'), nowIso);
       writeFileSync(full, `${current.trimEnd()}\n${section}`);
     } else {
-      const fm = `---\ntype: knowledge\ncategory: ${category}\ntitle: ${JSON.stringify(title)}\nupdated: ${new Date().toISOString()}\nsource: claude-code\n---\n\n# ${title}\n${section}`;
+      const fm = `---\ntype: knowledge\ncategory: ${category}\ntitle: ${JSON.stringify(title)}\ncreated: ${nowIso}\nupdated: ${nowIso}\nsource: claude-code\n---\n\n# ${title}\n${section}`;
       writeFileSync(full, fm);
     }
     tryCommitVault(`knowledge: append ${category}/${title}`);
@@ -1805,6 +1812,35 @@ server.tool(
   },
 );
 
+function readFrontmatterValue(content: string, key: string): string | null {
+  if (!content.startsWith('---')) return null;
+  const end = content.indexOf('\n---', 3);
+  const fm = end === -1 ? content : content.slice(0, end);
+  const m = fm.match(new RegExp(`^${key}:\\s*(.+)$`, 'm'));
+  return m ? m[1]!.trim() : null;
+}
+
+// Refresh `updated:` and ensure a `created:` exists in a note's frontmatter,
+// preserving the original `created:` value. Used so appends re-stamp the note.
+function bumpFrontmatterTimestamps(content: string, nowIso: string): string {
+  if (!content.startsWith('---')) return content;
+  const end = content.indexOf('\n---', 3);
+  if (end === -1) return content;
+  let fm = content.slice(0, end);
+  const rest = content.slice(end);
+  if (/^updated:.*$/m.test(fm)) {
+    fm = fm.replace(/^updated:.*$/m, `updated: ${nowIso}`);
+  } else {
+    fm = `${fm}\nupdated: ${nowIso}`;
+  }
+  if (!/^created:.*$/m.test(fm)) {
+    fm = /^updated:/m.test(fm)
+      ? fm.replace(/^updated:/m, `created: ${nowIso}\nupdated:`)
+      : `${fm}\ncreated: ${nowIso}`;
+  }
+  return fm + rest;
+}
+
 function parseTitle(content: string, fallbackName: string): string {
   const match = content.match(/^#\s+(.+)$/m);
   if (match) return match[1]!.trim();
@@ -1895,13 +1931,15 @@ server.tool(
     ensureWritable(relPath);
     mkdirSync(dirname(full), { recursive: true });
 
+    const nowIso = new Date().toISOString();
     const entry = `\n## ${heading} — ${time}\n\n${body}\n`;
     if (existsSync(full)) {
-      writeFileSync(full, `${readFileSync(full, 'utf-8').trimEnd()}\n${entry}`);
+      const current = bumpFrontmatterTimestamps(readFileSync(full, 'utf-8'), nowIso);
+      writeFileSync(full, `${current.trimEnd()}\n${entry}`);
     } else {
       writeFileSync(
         full,
-        `---\ntype: daily\ndate: ${date}\nsource: claude-code\n---\n\n# ${date}\n${entry}`,
+        `---\ntype: daily\ndate: ${date}\ncreated: ${nowIso}\nupdated: ${nowIso}\nsource: claude-code\n---\n\n# ${date}\n${entry}`,
       );
     }
     tryCommitVault(`daily: ${date} ${heading}`);
