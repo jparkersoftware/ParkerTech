@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import Icon, { type IconName } from '../components/Icon';
 
-const NAV_ITEMS: { to: string; label: string; icon: IconName; end?: boolean }[] = [
+export const NAV_ITEMS: { to: string; label: string; icon: IconName; end?: boolean }[] = [
   { to: '/', label: 'Dashboard', icon: 'home', end: true },
   { to: '/inbox', label: 'Inbox', icon: 'inbox' },
   { to: '/clients', label: 'Clients', icon: 'users' },

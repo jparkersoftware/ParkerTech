@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { signOutNow, useAuth } from '../auth/AuthProvider';
 import SideNav from './SideNav';
+import MobileNav from './MobileNav';
 import SyncIndicator from '../components/SyncIndicator';
 import CommandPalette from '../components/CommandPalette';
 
@@ -43,17 +44,18 @@ export default function AppShell() {
             <kbd>⌘K</kbd>
           </button>
           <div className="flex items-center gap-3">
-            <p className="text-xs text-[var(--text-dim)]">{email}</p>
+            <p className="hidden text-xs text-[var(--text-dim)] sm:block">{email}</p>
             <SyncIndicator />
             <button type="button" onClick={() => signOutNow()} className="cc-btn-ghost">
               Sign out
             </button>
           </div>
         </header>
-        <main className="flex-1 px-8 py-10">
+        <main className="flex-1 px-4 py-6 pb-28 md:px-8 md:py-10">
           <Outlet />
         </main>
       </div>
+      <MobileNav />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </div>
   );
