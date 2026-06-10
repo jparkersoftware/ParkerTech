@@ -18,10 +18,14 @@ import type {
   Project,
 } from '../lib/types';
 import StatusPill from '../components/StatusPill';
-import CorrespondenceFeed from '../components/CorrespondenceFeed';
 import QuotesFeed from '../components/QuotesFeed';
 import InvoicesFeed from '../components/InvoicesFeed';
 import ExpensesFeed from '../components/ExpensesFeed';
+import {
+  BriefStrip,
+  ClientTimeline,
+  useClientRecords,
+} from '../components/ClientBrief';
 import Icon from '../components/Icon';
 import ObsidianLink from '../components/ObsidianLink';
 import { entitySlug } from '../lib/vaultMarkdown';
@@ -30,6 +34,7 @@ export default function ClientDetail() {
   const { id = '' } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [client, setClient] = useState<Client | null | undefined>(undefined);
+  const records = useClientRecords(id);
 
   useEffect(() => watchClient(id, setClient), [id]);
 
@@ -63,9 +68,16 @@ export default function ClientDetail() {
 
       <DetailsSection client={client} onDelete={handleDeleteClient} />
 
+      <BriefStrip records={records} />
+
       <div className="grid gap-8 lg:grid-cols-[minmax(0,_2fr)_minmax(0,_1fr)]">
         <div className="space-y-8">
           <ContactsSection client={client} />
+
+          <section>
+            <SectionHead title="Timeline" icon="activity" />
+            <ClientTimeline records={records} />
+          </section>
         </div>
         <aside className="space-y-8">
           <ProjectsForClient clientId={client.id} />
@@ -83,11 +95,6 @@ export default function ClientDetail() {
           <section>
             <SectionHead title="Expenses" icon="wallet" />
             <ExpensesFeed scope="client" id={client.id} />
-          </section>
-
-          <section>
-            <SectionHead title="Correspondence" icon="message" />
-            <CorrespondenceFeed scope="client" id={client.id} />
           </section>
         </aside>
       </div>
