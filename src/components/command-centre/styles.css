@@ -2015,3 +2015,11 @@ li:last-child > .cc-vault-k-row {
   width: 18px;
   height: 18px;
 }
+
+/* Custom .cc-mobile-nav display rule outranks Tailwind's md:hidden in the
+   cascade (same specificity, later in file) — hide it explicitly. */
+@media (min-width: 768px) {
+  .cc-mobile-nav {
+    display: none;
+  }
+}
