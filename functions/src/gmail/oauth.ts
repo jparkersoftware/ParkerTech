@@ -80,10 +80,12 @@ export const gmailOAuthCallback = onRequest(
       const { tokens } = await oauth2Client.getToken(code);
       oauth2Client.setCredentials(tokens);
 
-      // Pull the connected email so we can show it in the UI.
-      const oauth2 = google.oauth2({ version: 'v2', auth: oauth2Client });
-      const userinfo = await oauth2.userinfo.get();
-      const email = userinfo.data.email ?? '';
+      // Pull the connected email so we can show it in the UI. Gmail's own
+      // getProfile works with gmail.readonly alone; the userinfo endpoint
+      // would need an extra identity scope.
+      const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
+      const profile = await gmail.users.getProfile({ userId: 'me' });
+      const email = profile.data.emailAddress ?? '';
 
       const db = getFirestore();
       await db.collection('integrations').doc('gmail').set(
