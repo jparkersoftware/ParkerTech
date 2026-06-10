@@ -10,8 +10,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   approveCandidate,
-  emailAddress,
-  emailDomain,
+  guessClientFromCandidate,
+  matchContactsForCandidate,
   skipCandidate,
   watchPendingCandidates,
   type EmailCandidate,
@@ -310,30 +310,3 @@ function candidatePrefill(c: EmailCandidate): Correspondence {
   } as unknown as Correspondence;
 }
 
-function guessClientFromCandidate(
-  c: EmailCandidate,
-  clients: Client[],
-): string | undefined {
-  const domains = new Set<string>();
-  for (const addr of [c.from, ...c.to, ...c.cc]) {
-    const d = emailDomain(addr);
-    if (d) domains.add(d);
-  }
-  for (const client of clients) {
-    for (const contact of client.contacts ?? []) {
-      if (!contact.email) continue;
-      const d = emailDomain(contact.email);
-      if (d && domains.has(d)) return client.id;
-    }
-  }
-  return undefined;
-}
-
-function matchContactsForCandidate(c: EmailCandidate, client: Client): string[] {
-  const addresses = new Set(
-    [c.from, ...c.to, ...c.cc].map((a) => emailAddress(a)),
-  );
-  return (client.contacts ?? [])
-    .filter((contact) => contact.email && addresses.has(contact.email.toLowerCase()))
-    .map((contact) => contact.id);
-}

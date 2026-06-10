@@ -141,6 +141,43 @@ export async function purgeOldCandidates(daysOld: number): Promise<number> {
 }
 
 /**
+ * Guess which client an email candidate belongs to by matching the
+ * sender/recipient domains against client contact emails. Used to preselect
+ * the client in approve flows (queue cards + dashboard triage).
+ */
+export function guessClientFromCandidate(
+  c: EmailCandidate,
+  clients: { id: string; contacts?: { email?: string }[] }[],
+): string | undefined {
+  const domains = new Set<string>();
+  for (const addr of [c.from, ...c.to, ...c.cc]) {
+    const d = emailDomain(addr);
+    if (d) domains.add(d);
+  }
+  for (const client of clients) {
+    for (const contact of client.contacts ?? []) {
+      if (!contact.email) continue;
+      const d = emailDomain(contact.email);
+      if (d && domains.has(d)) return client.id;
+    }
+  }
+  return undefined;
+}
+
+/** Contact ids on the client whose emails appear in the candidate headers. */
+export function matchContactsForCandidate(
+  c: EmailCandidate,
+  client: { contacts?: { id: string; email?: string }[] },
+): string[] {
+  const addresses = new Set(
+    [c.from, ...c.to, ...c.cc].map((a) => emailAddress(a)),
+  );
+  return (client.contacts ?? [])
+    .filter((contact) => contact.email && addresses.has(contact.email.toLowerCase()))
+    .map((contact) => contact.id);
+}
+
+/**
  * Extract the bare email address from a Gmail "Name <addr@host>" string.
  * Returns the input as-is if no angle-brackets are present.
  */

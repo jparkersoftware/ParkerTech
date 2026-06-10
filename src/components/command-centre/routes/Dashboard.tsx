@@ -4,7 +4,9 @@ import { watchClients } from '../lib/clients';
 import { watchProjects } from '../lib/projects';
 import { watchCorrespondence } from '../lib/correspondence';
 import { GBP, watchQuotes, quoteTotals } from '../lib/quotes';
+import { watchInvoices, invoiceTotals } from '../lib/invoices';
 import { createInboxItem } from '../lib/inbox';
+import TriageStrip from '../components/TriageStrip';
 import {
   formatLastContact,
   staleRelationships,
@@ -14,6 +16,7 @@ import {
   normaliseProjectStatus,
   type Client,
   type Correspondence,
+  type Invoice,
   type Project,
   type Quote,
   type Task,
@@ -47,11 +50,13 @@ export default function Dashboard() {
   const [clients, setClients] = useState<Client[]>([]);
   const [correspondence, setCorrespondence] = useState<Correspondence[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   useEffect(() => watchProjects(setProjects), []);
   useEffect(() => watchClients(setClients), []);
   useEffect(() => watchCorrespondence(setCorrespondence), []);
   useEffect(() => watchQuotes(setQuotes), []);
+  useEffect(() => watchInvoices(setInvoices), []);
 
   const derived = useMemo(() => derive(projects ?? []), [projects]);
   const stale = useMemo(
@@ -63,6 +68,7 @@ export default function Dashboard() {
     [derived.overdue, derived.dueToday, stale],
   );
   const pipeline = useMemo(() => computePipeline(quotes), [quotes]);
+  const owed = useMemo(() => computeOwed(invoices), [invoices]);
   const activity = useMemo(
     () => recentActivity(projects ?? [], correspondence, quotes),
     [projects, correspondence, quotes],
@@ -82,8 +88,11 @@ export default function Dashboard() {
     <div>
       <header className="cc-page-head">
         <div>
-          <p className="cc-eyebrow">Today · {formatTodayLong()}</p>
-          <h1 className="cc-page-title mt-2">Dashboard</h1>
+          <p className="cc-eyebrow">{formatTodayLong()}</p>
+          <h1 className="cc-page-title mt-2">{greeting()}</h1>
+          <p className="cc-today-summary">
+            {summaryLine(derived.overdue.length, derived.dueToday.length, owed.outstanding)}
+          </p>
         </div>
       </header>
 
@@ -95,10 +104,12 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
+          <TriageStrip clients={clients} />
+
           <FocusSection items={focus} />
 
           <StatRow
-            clients={clients.length}
+            owed={owed}
             activeProjects={derived.activeProjects.length}
             openTasks={derived.openTaskCount}
             overdueTasks={derived.overdue.length}
@@ -284,13 +295,13 @@ function FocusRow({ item, onClick }: { item: FocusItem; onClick: () => void }) {
 // ── Stats ────────────────────────────────────────────────────────
 
 function StatRow({
-  clients,
+  owed,
   activeProjects,
   openTasks,
   overdueTasks,
   pipeline,
 }: {
-  clients: number;
+  owed: { outstanding: number; overdueCount: number };
   activeProjects: number;
   openTasks: number;
   overdueTasks: number;
@@ -298,7 +309,13 @@ function StatRow({
 }) {
   return (
     <div className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-      <Stat icon="users" label="Clients" value={clients} />
+      <Stat
+        icon="pound"
+        label="Owed to you"
+        value={GBP.format(owed.outstanding)}
+        sub={owed.overdueCount > 0 ? `${owed.overdueCount} overdue` : undefined}
+        tone={owed.overdueCount > 0 ? 'danger' : owed.outstanding > 0 ? 'accent' : 'default'}
+      />
       <Stat icon="briefcase" label="Active projects" value={activeProjects} />
       <Stat icon="check" label="Open tasks" value={openTasks} />
       <Stat
@@ -795,5 +812,37 @@ function formatTodayLong(): string {
     day: 'numeric',
     month: 'long',
   });
+}
+
+function greeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning, Joseph';
+  if (h < 18) return 'Good afternoon, Joseph';
+  return 'Good evening, Joseph';
+}
+
+/** One honest sentence about the day. */
+function summaryLine(overdue: number, dueToday: number, owed: number): string {
+  const parts: string[] = [];
+  if (overdue > 0) parts.push(`${overdue} overdue`);
+  if (dueToday > 0) parts.push(`${dueToday} due today`);
+  if (owed > 0) parts.push(`${GBP.format(owed)} owed to you`);
+  if (parts.length === 0) return 'Nothing urgent on the books — a clear run at deep work.';
+  return parts.join(' · ');
+}
+
+function computeOwed(invoices: Invoice[]): {
+  outstanding: number;
+  overdueCount: number;
+} {
+  const today = isoToday();
+  let outstanding = 0;
+  let overdueCount = 0;
+  for (const inv of invoices) {
+    if (inv.status !== 'sent') continue;
+    outstanding += invoiceTotals(inv).total;
+    if (inv.dueDate && inv.dueDate < today) overdueCount += 1;
+  }
+  return { outstanding, overdueCount };
 }
 
