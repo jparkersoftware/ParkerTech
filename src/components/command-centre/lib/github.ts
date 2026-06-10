@@ -26,9 +26,12 @@ export async function pingRepo(cfg: GithubConfig): Promise<void> {
 }
 
 /**
- * Create or overwrite a file in the repo. Returns the new content sha.
- * Tries create first; on 422 (sha required), fetches the current sha and
- * retries as an update.
+ * Create or overwrite a file in the repo.
+ * Tries create first; on 422/409 (file exists / sha stale), fetches the
+ * current sha and retries. The repo is also pushed to by the Obsidian Git
+ * plugin on Joseph's Mac, so the sha can go stale between our fetch and PUT —
+ * CC is authoritative for the files it generates, so we re-fetch and retry
+ * (last writer wins) a few times before giving up.
  */
 export async function upsertFile(
   cfg: GithubConfig,
@@ -43,17 +46,18 @@ export async function upsertFile(
     branch: cfg.branch,
   };
 
+  const MAX_ATTEMPTS = 4;
   let res = await fetch(url, {
     method: 'PUT',
     headers: { ...authHeaders(cfg.pat), 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
 
-  if (res.status === 422 || res.status === 409) {
-    // File already exists — need the current sha to update it.
+  for (let attempt = 1; (res.status === 422 || res.status === 409) && attempt < MAX_ATTEMPTS; attempt++) {
+    // File exists or our sha went stale — fetch the current sha and retry.
     const existing = await fetch(
-      `${url}?ref=${encodeURIComponent(cfg.branch)}`,
-      { headers: authHeaders(cfg.pat) },
+      `${url}?ref=${encodeURIComponent(cfg.branch)}&t=${Date.now()}`,
+      { headers: authHeaders(cfg.pat), cache: 'no-store' },
     );
     if (!existing.ok) {
       const errBody = await existing.text().catch(() => '');
@@ -65,6 +69,7 @@ export async function upsertFile(
       return;
     }
     body.sha = data.sha;
+    if (attempt > 1) await sleep(400 * attempt); // brief backoff if someone is racing us
     res = await fetch(url, {
       method: 'PUT',
       headers: { ...authHeaders(cfg.pat), 'Content-Type': 'application/json' },
@@ -76,6 +81,10 @@ export async function upsertFile(
     const errBody = await res.text().catch(() => '');
     throw new Error(`GitHub ${res.status}: ${shortErr(errBody)}`);
   }
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 function authHeaders(pat: string): HeadersInit {
