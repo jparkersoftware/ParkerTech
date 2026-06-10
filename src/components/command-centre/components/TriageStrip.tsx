@@ -12,6 +12,7 @@ import {
   approveCandidate,
   guessClientFromCandidate,
   matchContactsForCandidate,
+  skipAllPending,
   skipCandidate,
   watchPendingCandidates,
   type EmailCandidate,
@@ -93,6 +94,22 @@ export default function TriageStrip({ clients }: Props) {
           {candidates.length} waiting
           {sessionDone > 0 && ` · ${sessionDone} done`}
         </span>
+        <button
+          type="button"
+          className="cc-triage-all"
+          onClick={async () => {
+            if (
+              !confirm(
+                `Skip all ${candidates.length} pending emails? Anything already handled in Gmail can go — approved ones stay logged.`,
+              )
+            )
+              return;
+            const n = await skipAllPending();
+            setSessionDone((s) => s + n);
+          }}
+        >
+          Skip all
+        </button>
         <button
           type="button"
           className="cc-triage-all"

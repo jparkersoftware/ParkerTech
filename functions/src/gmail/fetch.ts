@@ -7,6 +7,7 @@
  * UID gate without writing a bearer-token check ourselves.
  */
 import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { logger } from 'firebase-functions';
 import { google, gmail_v1 } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
@@ -42,7 +43,71 @@ export const gmailFetchPendingEmails = onCall(
     const clientDomains = sanitiseDomains(
       (request.data as { clientDomains?: unknown } | null)?.clientDomains,
     );
+    return runGmailFetch(days, clientDomains);
+  },
+);
 
+/**
+ * Scheduled pull every 6 hours. Unlike the manual button (which can sweep
+ * everything), this stays scoped to client-contact domains derived live from
+ * the clients collection, so the queue fills with relevant mail only.
+ */
+export const gmailScheduledFetch = onSchedule(
+  {
+    schedule: 'every 6 hours',
+    timeZone: 'Europe/London',
+    secrets: [GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_REDIRECT_URI],
+    timeoutSeconds: 300,
+    memory: '512MiB',
+  },
+  async () => {
+    const domains = await deriveClientDomains();
+    if (domains.length === 0) {
+      logger.info('Scheduled Gmail fetch skipped — no client contact domains');
+      return;
+    }
+    const res = await runGmailFetch(2, domains);
+    logger.info('Scheduled Gmail fetch done', {
+      fetched: res.fetched,
+      alreadyKnown: res.alreadyKnown,
+      errors: res.errors.length,
+    });
+  },
+);
+
+/** Free-mail domains that would match far too much if used as filters. */
+const GENERIC_DOMAINS = new Set([
+  'gmail.com',
+  'googlemail.com',
+  'outlook.com',
+  'hotmail.com',
+  'hotmail.co.uk',
+  'yahoo.com',
+  'yahoo.co.uk',
+  'icloud.com',
+  'me.com',
+  'live.com',
+  'live.co.uk',
+]);
+
+/** Client-contact email domains, straight from the clients collection. */
+async function deriveClientDomains(): Promise<string[]> {
+  const db = getFirestore();
+  const snap = await db.collection('clients').get();
+  const domains = new Set<string>();
+  for (const docSnap of snap.docs) {
+    const contacts = (docSnap.data().contacts ?? []) as { email?: string }[];
+    for (const c of contacts) {
+      const at = c.email?.lastIndexOf('@') ?? -1;
+      if (!c.email || at < 0) continue;
+      const d = c.email.slice(at + 1).toLowerCase().trim();
+      if (d && !GENERIC_DOMAINS.has(d)) domains.add(d);
+    }
+  }
+  return [...domains];
+}
+
+async function runGmailFetch(days: number, clientDomains: string[]): Promise<Result> {
     const db = getFirestore();
     const integrationRef = db.collection('integrations').doc('gmail');
     const integrationSnap = await integrationRef.get();
@@ -146,8 +211,7 @@ export const gmailFetchPendingEmails = onCall(
     );
 
     return { ok: true, fetched, alreadyKnown, errors };
-  },
-);
+}
 
 async function listMessageIds(
   gmail: gmail_v1.Gmail,
@@ -173,7 +237,9 @@ async function listMessageIds(
 }
 
 function buildGmailQuery(days: number, clientDomains: string[]): string {
-  const base = `newer_than:${days}d`;
+  // -from:me — Joseph's own sent replies aren't correspondence candidates;
+  // they were flooding the triage queue as "no client match".
+  const base = `newer_than:${days}d -from:me`;
   if (clientDomains.length === 0) return base;
   const domainPart = clientDomains
     .map((d) => `from:${d} OR to:${d}`)

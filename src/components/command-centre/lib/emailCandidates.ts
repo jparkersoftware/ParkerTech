@@ -124,6 +124,32 @@ export async function skipCandidate(
 }
 
 /**
+ * Skip every pending candidate in one go — for clearing a backlog (e.g. the
+ * first pull after an outage sweeps in weeks of already-handled mail).
+ * Batched writes, 400 per batch to stay under Firestore's 500 limit.
+ */
+export async function skipAllPending(reason = 'bulk-skip'): Promise<number> {
+  const { getDocs, writeBatch } = await import('firebase/firestore');
+  const snap = await getDocs(
+    query(collection(db, COL), where('status', '==', 'pending')),
+  );
+  let done = 0;
+  for (let i = 0; i < snap.docs.length; i += 400) {
+    const batch = writeBatch(db);
+    for (const d of snap.docs.slice(i, i + 400)) {
+      batch.update(d.ref, {
+        status: 'skipped',
+        skipReason: reason,
+        skippedAt: serverTimestamp(),
+      });
+      done += 1;
+    }
+    await batch.commit();
+  }
+  return done;
+}
+
+/**
  * Admin helper. Hard-deletes candidates older than N days regardless of
  * status — useful to keep the collection trim. Not wired into the UI yet.
  */

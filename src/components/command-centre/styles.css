@@ -2023,3 +2023,68 @@ li:last-child > .cc-vault-k-row {
     display: none;
   }
 }
+
+/* ── Phone polish (<640px) ──────────────────────────────────────── */
+
+@media (max-width: 639px) {
+  .cc-page-title {
+    font-size: 1.55rem;
+  }
+  .cc-page-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  .cc-today-summary {
+    font-size: 0.85rem;
+  }
+  /* Header: keep search compact, drop the kbd hint */
+  .cc-search-trigger kbd {
+    display: none;
+  }
+  .cc-search-trigger {
+    padding: 0.4rem 0.7rem;
+  }
+  /* Quick capture: drop the press-enter hint */
+  .cc-quick-hint {
+    display: none;
+  }
+  /* Focus + due rows: tighter, smaller badges */
+  .cc-focus-row,
+  .cc-due-row {
+    padding: 0.8rem 1rem;
+    gap: 0.65rem;
+  }
+  .cc-focus-row-label {
+    font-size: 0.6rem;
+    min-width: 0;
+  }
+  .cc-focus-row-badge,
+  .cc-due-date {
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+  .cc-focus-row-title,
+  .cc-task-title {
+    font-size: 0.9rem;
+  }
+  /* Triage card: full-width primary action feels better on touch */
+  .cc-triage-card {
+    padding: 1rem 1.1rem;
+  }
+  .cc-triage-actions {
+    flex-wrap: wrap;
+  }
+  .cc-triage-actions .cc-btn-primary {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+  /* Stat cards: tighter */
+  .cc-stat-value {
+    font-size: 1.3rem;
+  }
+  /* Timeline: less left rail */
+  .cc-timeline {
+    padding-left: 1.35rem;
+  }
+}

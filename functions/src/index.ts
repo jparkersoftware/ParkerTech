@@ -4,4 +4,4 @@
  * cost down — only the file actually invoked is loaded into memory.
  */
 export { gmailOAuthStart, gmailOAuthCallback } from './gmail/oauth';
-export { gmailFetchPendingEmails } from './gmail/fetch';
+export { gmailFetchPendingEmails, gmailScheduledFetch } from './gmail/fetch';

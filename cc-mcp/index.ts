@@ -27,7 +27,7 @@ import { randomUUID } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { homedir } from 'node:os';
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 
 const VAULT_ROOT = join(homedir(), 'Documents', 'Obsidian', 'ParkerTechFire');
 
@@ -1592,6 +1592,63 @@ server.tool(
       })
       .sort();
     return ok(entries);
+  },
+);
+
+server.tool(
+  'vault_search',
+  'Search the whole vault for a string (case-insensitive, fixed-string by default). THE preferred way to find what the vault knows about something — far cheaper than reading Knowledge/Index.md. Returns matching lines as "path:line:text".',
+  {
+    query: z.string().min(2).describe('Text to search for, e.g. "Wonde API" or "Vanessa"'),
+    folder: z
+      .string()
+      .default('')
+      .describe('Optional folder to scope the search, e.g. "Knowledge" or "Correspondence"'),
+    regex: z.boolean().default(false).describe('Treat query as a POSIX regex instead of a fixed string'),
+    maxResults: z.number().int().min(1).max(200).default(60),
+  },
+  async ({ query, folder, regex, maxResults }) => {
+    const root = vaultPath(folder || '.');
+    if (!existsSync(root)) return err(`No folder at ${folder}.`);
+    const args = [
+      '-r',
+      '-i',
+      '-n',
+      '--include=*.md',
+      '--exclude-dir=.git',
+      '--exclude-dir=.obsidian',
+      regex ? '-E' : '-F',
+      '-m',
+      '5', // max hits per file — keeps one chatty file from drowning results
+      query,
+      '.',
+    ];
+    let out = '';
+    try {
+      out = execFileSync('grep', args, {
+        cwd: root,
+        encoding: 'utf-8',
+        maxBuffer: 4 * 1024 * 1024,
+      });
+    } catch (e) {
+      const status = (e as { status?: number }).status;
+      if (status === 1) return ok({ matches: [], note: 'No matches.' });
+      return err(`Search failed: ${(e as Error).message}`);
+    }
+    const prefix = folder ? `${folder.replace(/\/$/, '')}/` : '';
+    const lines = out
+      .split('\n')
+      .filter(Boolean)
+      .map((l) => prefix + l.replace(/^\.\//, ''))
+      .map((l) => (l.length > 220 ? `${l.slice(0, 220)}…` : l));
+    const truncated = lines.length > maxResults;
+    return ok({
+      matches: lines.slice(0, maxResults),
+      totalFound: lines.length,
+      ...(truncated
+        ? { note: `Truncated to ${maxResults} of ${lines.length} lines — narrow the query or scope with folder.` }
+        : {}),
+    });
   },
 );
 
