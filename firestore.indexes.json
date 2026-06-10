@@ -39,6 +39,14 @@
         { "fieldPath": "projectId", "order": "ASCENDING" },
         { "fieldPath": "issueDate", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "emailCandidates",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "receivedAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []
