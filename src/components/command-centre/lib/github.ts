@@ -59,17 +59,23 @@ export async function upsertFile(
       `${url}?ref=${encodeURIComponent(cfg.branch)}&t=${Date.now()}`,
       { headers: authHeaders(cfg.pat), cache: 'no-store' },
     );
-    if (!existing.ok) {
+    if (existing.status === 404) {
+      // File doesn't exist — the 409 was branch-ref contention (rapid
+      // successive commits), not a sha problem. Back off and re-create.
+      delete body.sha;
+      await sleep(500 * attempt);
+    } else if (!existing.ok) {
       const errBody = await existing.text().catch(() => '');
       throw new Error(`GitHub ${existing.status} (fetch existing): ${shortErr(errBody)}`);
+    } else {
+      const data = (await existing.json()) as { sha: string; content?: string };
+      if (data.content && b64Equal(data.content, body.content as string)) {
+        // No actual change; skip the redundant write.
+        return;
+      }
+      body.sha = data.sha;
+      if (attempt > 1) await sleep(400 * attempt); // brief backoff if someone is racing us
     }
-    const data = (await existing.json()) as { sha: string; content?: string };
-    if (data.content && b64Equal(data.content, body.content as string)) {
-      // No actual change; skip the redundant write.
-      return;
-    }
-    body.sha = data.sha;
-    if (attempt > 1) await sleep(400 * attempt); // brief backoff if someone is racing us
     res = await fetch(url, {
       method: 'PUT',
       headers: { ...authHeaders(cfg.pat), 'Content-Type': 'application/json' },
