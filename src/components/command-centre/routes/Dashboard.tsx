@@ -7,6 +7,7 @@ import { GBP, watchQuotes, quoteTotals } from '../lib/quotes';
 import { watchInvoices, invoiceTotals } from '../lib/invoices';
 import { createInboxItem } from '../lib/inbox';
 import TriageStrip from '../components/TriageStrip';
+import { VaultDailyCard } from '../components/VaultPanels';
 import {
   formatLastContact,
   staleRelationships,
@@ -149,6 +150,8 @@ export default function Dashboard() {
               <ActivityFeed items={activity} />
             </Section>
           )}
+
+          <VaultDailyCard />
         </>
       )}
     </div>

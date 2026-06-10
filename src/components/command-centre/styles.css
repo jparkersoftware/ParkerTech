@@ -1915,3 +1915,55 @@ select.cc-input {
   margin-top: 0.55rem;
   white-space: nowrap;
 }
+
+/* ── Vault panels ───────────────────────────────────────────────── */
+
+.cc-vault-actions {
+  margin-left: auto;
+}
+.cc-vault-actions .cc-btn-ghost {
+  padding: 0.25rem 0.7rem;
+  font-size: 0.78rem;
+}
+.cc-vault-note {
+  padding: 1.1rem 1.35rem;
+  position: relative;
+}
+.cc-vault-pre {
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+.cc-vault-more {
+  margin-top: 0.6rem;
+  background: none;
+  border: none;
+  color: var(--accent-soft, #a294ff);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0;
+}
+.cc-vault-k-row {
+  display: block;
+  padding: 0.8rem 1.1rem;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s var(--ease);
+}
+.cc-vault-k-row:hover {
+  background: var(--surface-hover);
+}
+li:last-child > .cc-vault-k-row {
+  border-bottom: none;
+}
+.cc-vault-k-summary {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

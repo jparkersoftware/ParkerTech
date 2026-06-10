@@ -26,6 +26,7 @@ import {
   ClientTimeline,
   useClientRecords,
 } from '../components/ClientBrief';
+import { VaultKnowledgePanel } from '../components/VaultPanels';
 import Icon from '../components/Icon';
 import ObsidianLink from '../components/ObsidianLink';
 import { entitySlug } from '../lib/vaultMarkdown';
@@ -81,6 +82,8 @@ export default function ClientDetail() {
         </div>
         <aside className="space-y-8">
           <ProjectsForClient clientId={client.id} />
+
+          <VaultKnowledgePanel match={client.name} />
 
           <section>
             <SectionHead title="Quotes" icon="pound" />
