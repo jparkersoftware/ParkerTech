@@ -1,35 +1,27 @@
 # parkertech-cc-mcp
 
-A small **MCP server** that exposes the ParkerTech Command Centre (Firestore) to Claude Code as tools. Lets you sit at the terminal in your Obsidian vault and say things like *"add a task to the Wonde Integration project to chase Tom for sign-off, due Friday"* — Claude calls a tool, the change lands in Firestore, the website auto-sync regenerates the project's markdown file in the vault.
+A small **MCP server** that exposes Joseph's Obsidian vault (`~/Documents/Obsidian/ParkerTechFire`) to Claude as tools — search, read, and structured writes for Knowledge notes, Daily entries, and raw sources.
+
+> **History:** until 2026-07-02 this server also exposed the ParkerTech Command Centre (Firestore CRM). The CC was retired — see the vault note `Knowledge/Decisions/Drop-Command-Centre-vault-becomes-the-whole-brain-20260702.md`. The Firestore half was stripped in v0.2.0; the final data export lives at vault `Claude-Backup/firestore-final-export-2026-07-02.json`. (The pre-strip source is in git history.)
 
 ## Architecture in one sentence
 
-Claude Code calls tools over stdio → this Node process runs locally on your Mac → talks to Firestore via the Firebase Admin SDK using your `gcloud` Application Default Credentials → reads/writes the same documents the website does.
+Claude calls tools over stdio → this Node process runs locally on the Mac → reads/writes markdown in the vault working copy → vault writes auto-commit and push to the private GitHub repo.
 
 ## One-time setup
 
-### 1. Install gcloud + log in
-
-```bash
-brew install --cask google-cloud-sdk
-gcloud auth application-default login
-gcloud config set project parkertechfire
-```
-
-The login opens your browser; pick the Google account that owns the Firebase project (`jparkersoftware@gmail.com` or wherever ParkerTechFire lives). After this, credentials are cached at `~/.config/gcloud/` and the MCP server picks them up automatically.
-
-### 2. Install dependencies
+### 1. Install dependencies
 
 ```bash
 cd ~/Documents/ParkerTech\ Portfolio/cc-mcp
 npm install
 ```
 
-### 3. Wire Claude Code to the server
+### 2. Wire Claude to the server
 
-Add this stanza to your Claude Code MCP configuration. The exact file depends on how you run Claude Code:
+Add this stanza to your Claude MCP configuration:
 
-- **Claude Code CLI** — edit `~/.claude.json` (or whichever config it loads — `claude mcp add` may also work):
+- **Claude Code CLI** — edit `~/.claude.json` (or use `claude mcp add`):
   ```json
   {
     "mcpServers": {
@@ -42,50 +34,35 @@ Add this stanza to your Claude Code MCP configuration. The exact file depends on
   ```
 - **Claude Desktop** — edit `~/Library/Application Support/Claude/claude_desktop_config.json` with the same shape.
 
-Restart Claude Code after editing. Next time you launch `claude`, the tools become available.
+Restart Claude after editing.
 
-### 4. Sanity check
+### 3. Sanity check
 
 ```bash
 cd ~/Documents/Obsidian/ParkerTechFire
 claude
-> list my clients
+> search the vault for "Wonde"
 ```
 
-Claude should call the `list_clients` tool and respond with what's in Firestore. If you get a permission error, your `gcloud` login didn't pick the right Google account — re-run step 1 with the correct one.
+Claude should call `vault_search` and return matching note paths.
 
 ## Tool reference
 
-### Command Centre (Firestore)
-
-Reads:
-- `list_clients` — names + IDs + contact counts
-- `get_client` — full client by name or ID, plus their projects, last 10 correspondence entries, recent quotes
-- `list_projects` — across all clients, with optional status filter
-- `get_project` — full project including tasks, milestones, recent correspondence
-- `recent_correspondence` — filter by client/project, optional `includeTranscripts: true` for verbatim
-
-Writes (auto-sync back to the vault within 15s):
-- `add_task` — create a task on a project
-- `update_task` — mark done, change due date, etc.
-- `add_correspondence` — log a meeting / call / email / note (with optional verbatim transcript)
-- `add_inbox_item` — quick-capture for the Brain Dump Inbox
-- `toggle_checklist_item` — tick / untick a milestone success criterion
-
-### Vault (direct filesystem)
-
-For when Claude is running from a coding repo and doesn't have fs access to the vault:
+- `vault_search(query, folder?)` — grep the vault (fixed-string by default). **Use this first** — it's the cheap path (~0.5k tokens vs ~8k for scanning the index).
 - `vault_read(path)` — read a vault file
 - `vault_list(folder?)` — list entries in a vault folder
 - `vault_write_knowledge(category, title, body, tags?, related?)` — create or overwrite a Knowledge note. Categories: `Patterns | Decisions | Context | Mistakes | Systems | People | General`
 - `vault_append_knowledge(category, title, sectionHeading, body)` — grow a Knowledge note over time without overwriting
 - `vault_append_daily(heading, body)` — append a timestamped section to today's Daily journal
+- `vault_save_raw_source(...)` — file an unprocessed source into `raw/` for a later ingest pass
+- `vault_rebuild_index()` — regenerate `Knowledge/Index.md` after a batch of writes
+- `save_conversation_snapshot(...)` — save a structured transcript (used by `/save` and end-session flows on Desktop)
 
-All vault writes are sandboxed to `Knowledge/`, `Daily/`, and `Inbox/` — Claude cannot edit auto-synced Command Centre files. Writes auto-commit and push from the vault repo.
+Tool writes are sandboxed to `Knowledge/`, `Daily/`, `Inbox/`, and `raw/`. Other folders (`Clients/`, `Projects/`, `Correspondence/`, `Quotes/`) are Claude-authored too since the CC retirement, but via Claude Code's own file tools when running on the Mac — keep the existing file formats.
 
 ## Updating the server
 
-Edit `index.ts`. Claude Code re-runs the server fresh each launch (or you can restart Claude). No build step — `tsx` runs TypeScript directly.
+Edit `index.ts`. Type-check with `npx tsc --noEmit` before committing. Claude re-runs the server fresh each launch — no build step, `tsx` runs TypeScript directly.
 
 ## Auto-save every Claude session to the vault
 
@@ -120,8 +97,6 @@ The script has a shebang line so it can be invoked directly — no `npx`/`tsx` p
 
 After every Claude Code session ends (Ctrl-D, `/exit`, window close), you should see a new file appear under `Daily/Claude-Sessions/`. The hook is non-blocking and silent on success; warnings go to stderr if anything goes wrong (visible in Claude Code's debug log).
 
-## What's not here yet
+## What's next
 
-- **Update structured fields on clients/projects/quotes** (e.g. rename a client, change project status, edit a quote). Could be added; not yet exposed because Claude rarely needs to do those — they're more natural to do in the Command Centre UI.
-- **Bulk operations.** One tool call = one change. Fine for now.
-- **Authentication beyond ADC.** Single-user, single-Mac. If you ever want this to run somewhere else, swap ADC for a service-account key file (gitignored) or per-call Firebase Auth.
+- **Remote access** — the agreed end-state is an always-on remote vault MCP (public HTTPS + OAuth) serving Mac, Windows, and iPhone from the GitHub-backed vault; this local stdio server stays as the Mac fast path. See vault `Knowledge/Systems/Vault-on-two-machines-Mac-Windows-shared-remote-MCP-plan.md`.

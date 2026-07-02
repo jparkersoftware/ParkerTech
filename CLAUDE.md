@@ -3,7 +3,7 @@
 Two things live in this repo:
 
 1. **The ParkerTech public website** (`src/`, `public/`, `astro.config.mjs`, etc.) — Astro static site at `parkertech.co.uk`, hosted on GitHub Pages.
-2. **`cc-mcp/`** — the Model Context Protocol server that exposes Joseph's Command Centre (Firestore-backed CRM) to Claude.
+2. **`cc-mcp/`** — the Model Context Protocol server that exposes Joseph's Obsidian vault (persistent memory) to Claude. It historically also exposed the Command Centre (Firestore CRM), but **CC was retired 2026-07-02** — see vault `Knowledge/Decisions/Drop-Command-Centre-vault-becomes-the-whole-brain-20260702.md`. Only the `vault_*` tools matter now; the Firestore tools await removal.
 
 Joseph runs Claude from this dir most often. The **vault CLAUDE.md** at `/Users/jelst/Documents/Obsidian/ParkerTechFire/CLAUDE.md` is the wider operating manual — this CLAUDE.md is the repo-local layer.
 
@@ -60,7 +60,7 @@ When adding a new MCP tool: copy the structure of an existing one in `index.ts` 
 - **cc-mcp hook paths are absolute** in `~/.claude/settings.json` (`/Users/jelst/Documents/ParkerTech Portfolio/cc-mcp/hooks/*`). If you move this repo, update those paths.
 - **The vault is the long-term memory.** When you make a substantive change here, consider whether a Knowledge note in the vault would help future sessions. cc-mcp's `vault_write_knowledge` is the tool.
 - **Don't paste secrets** into cc-mcp source or commits. Firebase Admin uses Application Default Credentials.
-- **No project rename/delete or task-delete via MCP.** `update_correspondence`, `update_task`, `update_invoice`, `update_expense`, `update_feature_request` all exist; project structural changes (rename / merge / hard-delete) are UI-only. `mark_project_completed` archives; `update_task` can only close (no delete).
+- **Command Centre is retired (2026-07-02).** Don't use the cc-mcp Firestore tools (`add_task`, `add_correspondence`, `list_clients`, …) or propose CC features. Structured data (clients, projects, tasks, correspondence) is markdown in the vault. Firestore stays as a read-only safety net until ~Aug 2026, then gets deleted; final export archived at vault `Claude-Backup/firestore-final-export-2026-07-02.json`. Invoicing lives in Monzo.
 
 ## Where state lives
 
