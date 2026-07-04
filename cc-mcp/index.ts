@@ -25,8 +25,8 @@ import { execFileSync, execSync } from 'node:child_process';
 const VAULT_ROOT = join(homedir(), 'Documents', 'Obsidian', 'ParkerTechFire');
 
 const server = new McpServer({
-  name: 'parkertech-cc',
-  version: '0.2.0',
+  name: 'parkertech-vault',
+  version: '0.2.1',
 });
 
 // ── helpers ──────────────────────────────────────────────────────

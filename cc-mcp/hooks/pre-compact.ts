@@ -64,7 +64,7 @@ void (async function main() {
     lines.push('1. **Anonymise client schools** in portfolio copy — "a school", never the name.');
     lines.push('2. **Cavendish Monday.com is VIEW-ONLY** — never amend tasks/items on monday.com.');
     lines.push('3. **GDPR posture on PII** — passwords/keys/credentials get redacted, never paraphrased into Knowledge notes.');
-    lines.push('4. **Auto-synced vault files are read-only** — `Clients/`, `Projects/`, `People/`, `Correspondence/`, `Quotes/`. Use the `parkertech-cc` MCP tools to change those.');
+    lines.push('4. **Vault entity files are Claude-authored** (CC retired 2026-07-02) — edit `Clients/`, `Projects/`, `People/`, `Correspondence/`, `Quotes/` markdown directly, keeping the existing file formats. The old CC Firestore tools no longer exist.');
     lines.push('5. **Direct user requests > inferred intent** — when in doubt, ask.');
     lines.push('');
 

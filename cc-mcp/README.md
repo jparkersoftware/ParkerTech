@@ -1,4 +1,4 @@
-# parkertech-cc-mcp
+# parkertech-vault-mcp
 
 A small **MCP server** that exposes Joseph's Obsidian vault (`~/Documents/Obsidian/ParkerTechFire`) to Claude as tools — search, read, and structured writes for Knowledge notes, Daily entries, and raw sources.
 
@@ -25,7 +25,7 @@ Add this stanza to your Claude MCP configuration:
   ```json
   {
     "mcpServers": {
-      "parkertech-cc": {
+      "parkertech-vault": {
         "command": "npx",
         "args": ["-y", "tsx", "/Users/jelst/Documents/ParkerTech Portfolio/cc-mcp/index.ts"]
       }
