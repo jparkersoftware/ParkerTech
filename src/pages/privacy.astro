@@ -9,12 +9,16 @@ const { company } = site;
 // Falls back to the trading name until the registered details are filled in,
 // so the policy never names an entity that isn't recorded here.
 const controller = company.legalName || site.brand;
-const controllerDetail = [
-  company.number && `company no. ${company.number}`,
-  company.placeOfRegistration && `registered in ${company.placeOfRegistration}`,
-]
-  .filter(Boolean)
-  .join(', ');
+// Gated on the company number: claiming "registered in England and Wales"
+// without a name and number to back it up is worse than saying nothing.
+const controllerDetail = company.number
+  ? [
+      `company no. ${company.number}`,
+      company.placeOfRegistration && `registered in ${company.placeOfRegistration}`,
+    ]
+      .filter(Boolean)
+      .join(', ')
+  : '';
 ---
 
 <Layout
