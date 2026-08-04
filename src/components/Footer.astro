@@ -3,6 +3,18 @@ import { site } from '../data/site';
 import { projects } from '../data/projects';
 
 const year = new Date().getFullYear();
+const { company } = site;
+
+// Companies Act 2006 trading disclosures. Each line renders only when the
+// underlying detail is filled in, so the notice is never half-complete.
+const registration = [
+  company.number && `Company no. ${company.number}`,
+  company.placeOfRegistration && `Registered in ${company.placeOfRegistration}`,
+  company.vatNumber && `VAT no. ${company.vatNumber}`,
+].filter(Boolean) as string[];
+
+const showLegal = Boolean(company.legalName) && registration.length > 0;
+
 const sections = [
   { href: '/#projects', label: 'Projects' },
   { href: '/#about', label: 'About' },
@@ -21,8 +33,8 @@ const tools = projects.filter((p) => p.liveUrl);
           <span class="brand-word">Parker<span class="brand-accent">Tech</span></span>
         </a>
         <p class="footer-tagline">
-          Practical software and IT support for UK schools — from a developer
-          who spent a decade in the classroom.
+          Practical software and IT support for UK schools — from a company
+          founded by a developer who spent a decade in the classroom.
         </p>
         <a class="footer-cta" href={`mailto:${site.email}`}>{site.email}</a>
       </div>
@@ -47,8 +59,27 @@ const tools = projects.filter((p) => p.liveUrl);
       </div>
     </div>
 
+    {
+      showLegal && (
+        <div class="footer-legal">
+          <p class="footer-legal-name">{company.legalName}</p>
+          <p class="footer-legal-line">{registration.join(' · ')}</p>
+          {company.registeredOffice.length > 0 && (
+            <p class="footer-legal-line">
+              Registered office: {company.registeredOffice.join(', ')}
+            </p>
+          )}
+          {company.icoNumber && (
+            <p class="footer-legal-line">
+              ICO data protection register no. {company.icoNumber}
+            </p>
+          )}
+        </div>
+      )
+    }
+
     <div class="footer-bottom">
-      <p>© {year} {site.brand}. All rights reserved.</p>
+      <p>© {year} {company.legalName || site.brand}. All rights reserved.</p>
       <div class="footer-bottom-links">
         <a href="/command-centre/" rel="nofollow">Sign in</a>
         <a href="/privacy">Privacy &amp; cookies</a>
@@ -152,6 +183,23 @@ const tools = projects.filter((p) => p.liveUrl);
     color: var(--text);
   }
 
+  /* statutory company disclosures */
+  .footer-legal {
+    margin-top: clamp(2.5rem, 4.5vw, 3.5rem);
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    line-height: 1.65;
+  }
+  .footer-legal-name {
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .footer-legal-line {
+    margin-top: 0.15rem;
+  }
+
   .footer-bottom {
     display: flex;
     flex-wrap: wrap;
@@ -163,6 +211,12 @@ const tools = projects.filter((p) => p.liveUrl);
     border-top: 1px solid var(--border);
     color: var(--text-dim);
     font-size: 0.86rem;
+  }
+  /* the legal block already supplies the divider above the copyright row */
+  .footer-legal + .footer-bottom {
+    margin-top: 1.5rem;
+    padding-top: 0;
+    border-top: none;
   }
   .footer-bottom-links {
     display: flex;

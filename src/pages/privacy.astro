@@ -3,7 +3,18 @@ import Layout from '../layouts/Layout.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../data/site';
 
-const updated = 'May 2026';
+const updated = 'August 2026';
+const { company } = site;
+
+// Falls back to the trading name until the registered details are filled in,
+// so the policy never names an entity that isn't recorded here.
+const controller = company.legalName || site.brand;
+const controllerDetail = [
+  company.number && `company no. ${company.number}`,
+  company.placeOfRegistration && `registered in ${company.placeOfRegistration}`,
+]
+  .filter(Boolean)
+  .join(', ');
 ---
 
 <Layout
@@ -35,9 +46,19 @@ const updated = 'May 2026';
 
         <h2>Who we are</h2>
         <p>
-          ParkerTech is a small educational-technology business run by Joseph,
-          and is the data controller for this website. For any privacy question,
-          email <a href={`mailto:${site.email}`}>{site.email}</a>.
+          {controller}{controllerDetail && ` (${controllerDetail})`}
+          {company.legalName ? ' trades as ParkerTech and is' : ' is'} the data
+          controller for this website.
+          {
+            company.registeredOffice.length > 0 &&
+              ` Our registered office is ${company.registeredOffice.join(', ')}.`
+          }
+          {
+            company.icoNumber &&
+              ` We are registered with the Information Commissioner's Office under number ${company.icoNumber}.`
+          }
+          {' '}For any privacy question, email{' '}
+          <a href={`mailto:${site.email}`}>{site.email}</a>.
         </p>
 
         <h2>What we collect</h2>

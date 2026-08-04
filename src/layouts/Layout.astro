@@ -18,10 +18,34 @@ const pageTitle = title
 const canonical = new URL(Astro.url.pathname, Astro.site ?? site.url).href;
 const ogImage = new URL(ogImageProp ?? '/og-image.png', Astro.site ?? site.url).href;
 
+const { company } = site;
+
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: site.brand,
+  // Registered details are only advertised once they're actually filled in.
+  ...(company.legalName ? { legalName: company.legalName } : {}),
+  ...(company.number
+    ? {
+        identifier: {
+          '@type': 'PropertyValue',
+          propertyID: 'Companies House registration number',
+          value: company.number,
+        },
+      }
+    : {}),
+  ...(company.vatNumber ? { vatID: company.vatNumber } : {}),
+  ...(company.registeredOffice.length > 0
+    ? {
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: company.registeredOffice.slice(0, -1).join(', '),
+          postalCode: company.registeredOffice[company.registeredOffice.length - 1],
+          addressCountry: 'GB',
+        },
+      }
+    : {}),
   description: site.description,
   url: site.url,
   email: site.email,
