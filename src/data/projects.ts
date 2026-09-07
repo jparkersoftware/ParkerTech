@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────
- *  PROJECTS  —  the tools you've built, shown in the Projects grid
+ *  PROJECTS  —  the tools we've built, shown in the Projects grid
  * ─────────────────────────────────────────────────────────────
  *  To add a project, copy a block and edit the fields.
  *  To remove one, delete its block. The page updates automatically.
