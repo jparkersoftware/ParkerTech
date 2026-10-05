@@ -69,7 +69,7 @@ export const site = {
     /** VAT registration number — leave empty if not VAT registered. */
     vatNumber: '',
     /** ICO data protection register number — leave empty until registered. */
-    icoNumber: '',
+    icoNumber: 'ZC261692',
   },
 
   /* ── Homepage hero ────────────────────────────────────────── */
