@@ -29,39 +29,36 @@ import { site } from '../data/site';
   .consent {
     position: fixed;
     left: 50%;
-    bottom: clamp(1rem, 3vw, 1.75rem);
+    bottom: clamp(1rem, 3vw, 1.5rem);
     transform: translateX(-50%);
     z-index: 250;
-    width: min(540px, calc(100vw - 2rem));
+    width: min(560px, calc(100vw - 2rem));
     display: flex;
     align-items: center;
     gap: 1rem;
     flex-wrap: wrap;
     padding: 1rem 1.15rem;
-    border-radius: var(--radius-sm);
-    background: rgba(26, 26, 33, 0.92);
+    border-radius: var(--radius);
+    background: #fff;
     border: 1px solid var(--border-strong);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: var(--shadow-lg);
-    animation: consent-in 0.5s var(--ease) both;
+    box-shadow: var(--shadow);
   }
   .consent[hidden] {
     display: none;
   }
 
   .consent-text {
-    flex: 1 1 230px;
-    font-size: 0.86rem;
+    flex: 1 1 240px;
+    font-size: 0.9rem;
     line-height: 1.5;
     color: var(--text-muted);
   }
   .consent-text strong {
-    color: var(--text);
+    color: var(--heading);
     font-weight: 600;
   }
   .consent-text a {
-    color: var(--accent-bright);
+    color: var(--accent);
     text-decoration: underline;
     text-underline-offset: 2px;
   }
@@ -72,41 +69,29 @@ import { site } from '../data/site';
     flex-shrink: 0;
   }
   .consent-btn {
-    padding: 0.55rem 1.05rem;
-    border-radius: var(--radius-pill);
-    font-size: 0.85rem;
+    min-height: 40px;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
-    border: 1px solid transparent;
-    transition: transform 0.2s var(--ease), background-color 0.2s var(--ease),
-      border-color 0.2s var(--ease), color 0.2s var(--ease);
+    border: 1.5px solid transparent;
+    transition: background-color 0.15s var(--ease);
   }
   .consent-accept {
-    background: linear-gradient(135deg, #9685ff, #7d68ff);
+    background: var(--accent);
     color: #fff;
   }
   .consent-accept:hover {
-    transform: translateY(-2px);
+    background: var(--accent-hover);
   }
   .consent-decline {
-    background: transparent;
-    border-color: var(--border-strong);
-    color: var(--text-muted);
+    background: #fff;
+    border-color: var(--accent);
+    color: var(--accent);
   }
   .consent-decline:hover {
-    color: var(--text);
-    border-color: var(--accent);
-  }
-
-  @keyframes consent-in {
-    from {
-      opacity: 0;
-      transform: translateX(-50%) translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+    background: var(--accent-tint);
   }
 </style>
 

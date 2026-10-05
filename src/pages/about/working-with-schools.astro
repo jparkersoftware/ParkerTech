@@ -1,0 +1,120 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import PageHero from '../../components/PageHero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { site } from '../../data/site';
+
+const { credentials, company } = site;
+
+interface Credential {
+  label: string;
+  value: string;
+  note: string;
+}
+
+// The registered rows are built from the `company` block, so they can never
+// drift out of step with the statutory notice in the footer.
+const companyNote = [
+  company.number && `Company no. ${company.number}`,
+  company.placeOfRegistration && `registered in ${company.placeOfRegistration}`,
+]
+  .filter(Boolean)
+  .join(', ');
+
+const derived: Credential[] = [
+  {
+    label: 'Company',
+    value: company.number ? company.legalName : '',
+    note: companyNote && `${companyNote}.`,
+  },
+  {
+    label: 'VAT',
+    value: company.vatNumber && `VAT no. ${company.vatNumber}`,
+    note: 'VAT is shown separately on every invoice.',
+  },
+  {
+    label: 'Data protection',
+    value: company.icoNumber && `ICO no. ${company.icoNumber}`,
+    note: "Registered with the Information Commissioner's Office as a data controller.",
+  },
+];
+
+// Anything without a value is dropped — an unfinished row is worse than no row.
+const items: Credential[] = [...derived, ...credentials.items].filter((item) => item.value);
+---
+
+<Layout
+  title="Working with schools: data protection, DPA and invoicing"
+  description="Due diligence for school business managers and trusts: UK data hosting, data processing agreement, DPIA support, purchase orders and 30-day terms."
+>
+  <Nav />
+  <main id="main" tabindex="-1">
+    <PageHero
+      crumbs={[
+        { href: '/about', label: 'About' },
+        { href: '/about/working-with-schools', label: 'Working with schools' },
+      ]}
+      eyebrow="Due diligence"
+      title={credentials.title}
+      lead={credentials.intro}
+    />
+
+    <section class="section">
+      <div class="container">
+        <ul class="cred-grid">
+          {
+            items.map((item) => (
+              <li class="card cred">
+                <span class="cred-label">{item.label}</span>
+                <p class="cred-value">{item.value}</p>
+                {item.note && <p class="cred-note">{item.note}</p>}
+              </li>
+            ))
+          }
+        </ul>
+        <p class="cred-contact">
+          Need a document that isn't listed? Email
+          <a class="text-link" href={`mailto:${site.email}`}>{site.email}</a> and we will send it.
+        </p>
+      </div>
+    </section>
+
+    <CtaBand />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .cred-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: var(--gutter);
+  }
+  .cred-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .cred-value {
+    margin-top: 0.6rem;
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--heading);
+  }
+  .cred-note {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+  .cred-contact {
+    margin-top: 2rem;
+    color: var(--text-muted);
+  }
+</style>

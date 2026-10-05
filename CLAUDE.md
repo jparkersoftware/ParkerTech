@@ -12,7 +12,8 @@ Joseph runs Claude from this dir most often. The **vault CLAUDE.md** at `/Users/
 | Path | What | Notes |
 |---|---|---|
 | `src/` | Astro site source | TypeScript + React 19 + Tailwind 4 |
-| `src/data/site.ts` | Site content (name, role, contact, hero, bio, stats) | Edit here, no HTML needed |
+| `src/data/site.ts` | Company details, contact, hero, About, due diligence, testimonials | Edit here, no HTML needed. Empty strings don't render |
+| `src/data/services.ts`, `products.ts`, `projects.ts` | Service pages, product pages, case studies | Company voice only; keep client schools anonymous |
 | `public/` | Static assets served as-is | |
 | `dist/` | Build output (committed for GH Pages) | DO NOT hand-edit |
 | `astro.config.mjs` | Astro build config | |

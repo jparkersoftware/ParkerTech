@@ -1,0 +1,98 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import PageHero from '../../components/PageHero.astro';
+import CaseStudyCard from '../../components/CaseStudyCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { projects, categories } from '../../data/projects';
+---
+
+<Layout
+  title="Case studies: school software, data and IT projects"
+  description="Case studies of ParkerTech's work for UK schools: marking software, Power Platform workflows, Power BI dashboards from MIS data, and exam IT."
+>
+  <Nav />
+  <main id="main" tabindex="-1">
+    <PageHero
+      crumbs={[{ href: '/case-studies', label: 'Case studies' }]}
+      title="Case studies"
+      lead="Products and bespoke systems built for schools: the problem each one solved, what we built and what changed."
+    />
+    <section class="section">
+      <div class="container">
+        <!-- Filters only work with JavaScript, so they're revealed by the script -->
+        <div class="filters" id="filters" role="group" aria-label="Filter case studies" hidden>
+          <button type="button" class="chip" data-filter="All" aria-pressed="true">All</button>
+          {
+            categories.map((c) => (
+              <button type="button" class="chip" data-filter={c} aria-pressed="false">
+                {c}
+              </button>
+            ))
+          }
+        </div>
+        <p class="visually-hidden" id="filter-status" role="status" aria-live="polite"></p>
+        <div class="grid-3" id="case-grid">
+          {projects.map((project) => <CaseStudyCard project={project} level="h2" />)}
+        </div>
+      </div>
+    </section>
+    <CtaBand title="Interested in something similar?" />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .filters[hidden] {
+    display: none;
+  }
+  .chip {
+    min-height: 40px;
+    padding: 0.45rem 1rem;
+    border-radius: var(--radius-pill);
+    border: 1.5px solid var(--border-strong);
+    background: #fff;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    transition: background-color 0.15s var(--ease), border-color 0.15s var(--ease);
+  }
+  .chip:hover {
+    border-color: var(--accent);
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+</style>
+
+<script>
+  const bar = document.getElementById('filters') as HTMLElement;
+  const status = document.getElementById('filter-status') as HTMLElement;
+  const chips = Array.from(bar.querySelectorAll<HTMLButtonElement>('[data-filter]'));
+  const cards = Array.from(document.querySelectorAll<HTMLElement>('#case-grid [data-categories]'));
+
+  bar.hidden = false;
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const filter = chip.dataset.filter ?? 'All';
+      chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+      let shown = 0;
+      cards.forEach((card) => {
+        const match = filter === 'All' || (card.dataset.categories ?? '').split('|').includes(filter);
+        card.hidden = !match;
+        if (match) shown += 1;
+      });
+      status.textContent = `Showing ${shown} case ${shown === 1 ? 'study' : 'studies'}`;
+    });
+  });
+</script>

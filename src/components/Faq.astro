@@ -1,0 +1,73 @@
+---
+import Icon from './Icon.astro';
+
+/** Native <details> accordion, so it works with keyboard and without JavaScript. */
+interface Props {
+  items: { question: string; answer: string }[];
+  title?: string;
+}
+const { title = 'Common questions' } = Astro.props;
+// Questions without a confirmed answer are left out.
+const items = Astro.props.items.filter((item) => item.answer);
+---
+
+{
+  items.length > 0 && (
+    <section class="section section-alt">
+      <div class="container">
+        <h2>{title}</h2>
+        <div class="faq">
+          {items.map((item) => (
+            <details>
+              <summary>
+                {item.question}
+                <Icon name="chevron-down" size={20} class="faq-chevron" />
+              </summary>
+              <p>{item.answer}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .faq {
+    max-width: 820px;
+    margin-top: 1.75rem;
+    border-top: 1px solid var(--border-strong);
+  }
+  details {
+    border-bottom: 1px solid var(--border-strong);
+  }
+  summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 0;
+    font-weight: 600;
+    color: var(--heading);
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary:hover {
+    color: var(--accent);
+  }
+  .faq-chevron {
+    flex-shrink: 0;
+    transition: transform 0.15s var(--ease);
+  }
+  details[open] .faq-chevron {
+    transform: rotate(180deg);
+  }
+  details p {
+    padding-bottom: 1.25rem;
+    max-width: 68ch;
+    color: var(--text-muted);
+  }
+</style>

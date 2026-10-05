@@ -1,0 +1,116 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import PageHero from '../../components/PageHero.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
+import { products } from '../../data/products';
+---
+
+<Layout
+  title="School software products"
+  description="ParkerMarker, VocMark and PM Review: marking and feedback, BTEC marking software and staff appraisal for UK schools."
+>
+  <Nav />
+  <main id="main" tabindex="-1">
+    <PageHero
+      crumbs={[{ href: '/products', label: 'Products' }]}
+      title="Software products for schools"
+      lead="Three ready-made tools for marking, vocational assessment and staff appraisal. Each one started as a solution to a real school problem."
+    />
+    <section class="section">
+      <div class="container grid-3">
+        {
+          products.map((p) => (
+            <article class="card product">
+              <div class="product-head">
+                <img src={p.logo} alt="" width="44" height="44" />
+                <h2>
+                  <a href={`/products/${p.slug}`}>{p.name}</a>
+                </h2>
+              </div>
+              <p class="product-tagline">{p.tagline}</p>
+              <dl class="product-facts">
+                <div>
+                  <dt>Who it's for</dt>
+                  <dd>{p.audienceLine}</dd>
+                </div>
+                <div>
+                  <dt>Pricing</dt>
+                  <dd>{p.pricing || 'On request, for departments, schools and trusts.'}</dd>
+                </div>
+              </dl>
+              <div class="product-actions">
+                <a class="btn btn-primary" href={`/products/${p.slug}`}>
+                  About {p.name}
+                </a>
+                <a class="btn btn-secondary" href={p.liveUrl} target="_blank" rel="noopener noreferrer">
+                  Visit product site
+                  <Icon name="arrow-up-right" size={16} />
+                  <span class="visually-hidden">(opens in new tab)</span>
+                </a>
+                <a class="text-link" href="/contact?topic=Software%20products">Ask for a demo</a>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+    <CtaBand />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .product {
+    display: flex;
+    flex-direction: column;
+  }
+  .product-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .product-head h2 {
+    font-size: 1.625rem;
+  }
+  .product-head a:hover {
+    color: var(--accent);
+  }
+  .product-tagline {
+    margin-top: 0.75rem;
+    font-weight: 600;
+    color: var(--teal);
+  }
+  .product-facts {
+    margin-top: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+  .product-facts dt {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .product-facts dd {
+    margin-top: 0.2rem;
+    color: var(--text-muted);
+  }
+  .product-actions {
+    margin-top: auto;
+    padding-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+  .product-actions .text-link {
+    align-self: center;
+    margin-top: 0.25rem;
+    font-weight: 600;
+  }
+</style>

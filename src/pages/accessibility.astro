@@ -1,0 +1,103 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import { site } from '../data/site';
+
+const prepared = '4 October 2026';
+---
+
+<Layout
+  title="Accessibility statement"
+  description="Accessibility statement for the ParkerTech website: how accessible it is, known limitations and how to report a problem."
+>
+  <Nav />
+  <main id="main" class="legal" tabindex="-1">
+    <div class="container legal-inner">
+      <Breadcrumbs items={[{ href: '/accessibility', label: 'Accessibility statement' }]} />
+      <h1>Accessibility statement for parkertech.co.uk</h1>
+
+      <div class="prose legal-body">
+        <p>
+          This website is run by {site.brand}. We want as many people as possible to be able to use
+          it. For example, that means you should be able to:
+        </p>
+        <ul>
+          <li>zoom in up to 400% without the text spilling off the screen</li>
+          <li>navigate the whole website using just a keyboard</li>
+          <li>navigate most of the website using a screen reader</li>
+          <li>change colours, contrast levels and fonts using your browser or device settings</li>
+        </ul>
+        <p>We have also made the text as simple as possible to understand.</p>
+
+        <h2>How accessible this website is</h2>
+        <p>
+          We aim to meet the Web Content Accessibility Guidelines (WCAG) 2.2 at level AA. We know some
+          parts of the website are not fully accessible:
+        </p>
+        <ul>
+          <li>
+            some product images are illustrations of software screens; each has a text description,
+            but the data shown in them is example data
+          </li>
+          <li>
+            our product websites (ParkerMarker, VocMark and PM Review) are separate services and are
+            not covered by this statement
+          </li>
+        </ul>
+
+        <h2>Feedback and contact information</h2>
+        <p>
+          If you need information on this website in a different format, or you find a problem not
+          listed on this page, email <a href={`mailto:${site.email}`}>{site.email}</a>. We will reply
+          within 1–2 working days.
+        </p>
+
+        <h2>Technical information about this website's accessibility</h2>
+        <p>
+          {site.brand} is committed to making its website accessible. Text meets WCAG 2.2 AA contrast
+          ratios, every form field has a visible label, focus is clearly shown, and the site honours
+          reduced-motion settings.
+        </p>
+
+        <h2>How we tested this website</h2>
+        <p>
+          This statement was prepared on {prepared}. It is based on our own testing of the website
+          with a keyboard and automated accessibility checks. We will review it when the website
+          changes significantly.
+        </p>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .legal {
+    padding-block: clamp(1.5rem, 3vw, 2rem) clamp(3.5rem, 8vw, 6rem);
+  }
+  .legal-inner {
+    max-width: calc(68ch + 2 * var(--gutter));
+  }
+  .legal h1 {
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+  }
+  .legal-body {
+    margin-top: 1.5rem;
+  }
+  .legal-body h2 {
+    font-size: 1.375rem;
+    margin-top: 2.25rem;
+    margin-bottom: 0.75rem;
+  }
+  .legal-body ul {
+    margin-block: 0.85rem 1rem;
+    padding-left: 1.25rem;
+    list-style: disc;
+    color: var(--text-muted);
+  }
+  .legal-body li + li {
+    margin-top: 0.4rem;
+  }
+</style>

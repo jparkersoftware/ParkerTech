@@ -1,56 +1,36 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 ---
 
 <Layout title="Page not found">
-  <main class="notfound">
-    <div class="notfound-glow" aria-hidden="true"></div>
-    <p class="notfound-code grad-text">404</p>
-    <h1>This page wandered off.</h1>
-    <p class="notfound-text">
-      The page you're looking for doesn't exist or has moved.
-    </p>
-    <a class="btn btn-primary" href="/">Back to home</a>
+  <Nav />
+  <main id="main" class="notfound" tabindex="-1">
+    <div class="container">
+      <p class="eyebrow">Error 404</p>
+      <h1>Page not found</h1>
+      <p class="notfound-text">
+        The page you are looking for does not exist or has moved. Our old project pages now live
+        under case studies.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="/">Go to the homepage</a>
+        <a class="btn btn-secondary" href="/case-studies">See case studies</a>
+      </div>
+    </div>
   </main>
+  <Footer />
 </Layout>
 
 <style>
   .notfound {
-    position: relative;
-    min-height: 100svh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    gap: 0.6rem;
-    padding: 2rem;
-    overflow: hidden;
-  }
-  .notfound-glow {
-    position: absolute;
-    width: 460px;
-    height: 460px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(125, 104, 255, 0.34), transparent 68%);
-    filter: blur(120px);
-    z-index: 0;
-  }
-  .notfound > *:not(.notfound-glow) {
-    position: relative;
-    z-index: 1;
-  }
-  .notfound-code {
-    font-family: var(--font-display);
-    font-size: clamp(5rem, 18vw, 9rem);
-    font-weight: 700;
-    line-height: 1;
-  }
-  .notfound h1 {
-    font-size: clamp(1.6rem, 4vw, 2.4rem);
+    padding-block: clamp(4rem, 12vw, 8rem);
   }
   .notfound-text {
+    margin-block: 1rem 2rem;
+    max-width: 52ch;
+    font-size: 1.125rem;
     color: var(--text-muted);
-    margin-bottom: 1.4rem;
   }
 </style>

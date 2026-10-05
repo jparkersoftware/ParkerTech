@@ -1,28 +1,253 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Nav from '../components/Nav.astro';
-import Hero from '../components/Hero.astro';
-import Marquee from '../components/Marquee.astro';
-import About from '../components/About.astro';
-import Projects from '../components/Projects.astro';
-import Services from '../components/Services.astro';
-import Testimonial from '../components/Testimonial.astro';
-import Credentials from '../components/Credentials.astro';
-import Contact from '../components/Contact.astro';
 import Footer from '../components/Footer.astro';
+import Icon from '../components/Icon.astro';
+import BrowserFrame from '../components/BrowserFrame.astro';
+import TrustStrip from '../components/TrustStrip.astro';
+import ServiceCards from '../components/ServiceCards.astro';
+import CaseStudyCard from '../components/CaseStudyCard.astro';
+import Testimonials from '../components/Testimonials.astro';
+import ProcessSteps from '../components/ProcessSteps.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { site } from '../data/site';
+import { projects, projectBySlug } from '../data/projects';
+import { products } from '../data/products';
+
+// One product and two bespoke builds.
+const featured = ['parkermarker', 'staff-leave-request-system', 'leadership-data-dashboards']
+  .map(projectBySlug)
+  .filter((p) => p !== undefined);
+
+const heroFacts = [
+  `${projects.length} school projects delivered`,
+  `${products.length} live products`,
+  'UK-hosted data',
+];
 ---
 
 <Layout>
   <Nav />
   <main id="main" tabindex="-1">
-    <Hero />
-    <Marquee />
-    <About />
-    <Projects />
-    <Services />
-    <Testimonial />
-    <Credentials />
-    <Contact />
+    <section class="hero">
+      <div class="container hero-grid">
+        <div class="hero-text">
+          <h1>{site.hero.title}</h1>
+          <p class="hero-sub">{site.hero.subtext}</p>
+          <div class="btn-row">
+            <a class="btn btn-primary" href="/contact">Talk to us</a>
+            <a class="btn btn-secondary" href="/case-studies">See case studies</a>
+          </div>
+          <ul class="hero-facts">
+            {heroFacts.map((fact) => <li><Icon name="check" size={16} />{fact}</li>)}
+          </ul>
+        </div>
+        <div class="hero-visual">
+          <BrowserFrame
+            src="/projects/pmreview.webp"
+            alt="PM Review appraisal dashboard showing review progress by status and line manager"
+            eager
+            class="hero-shot-main"
+          />
+          <BrowserFrame
+            src="/projects/parkermarker.svg"
+            alt="ParkerMarker Assessment Analysis screen with marks per question, colour-coded by score"
+            eager
+            class="hero-shot-inset"
+          />
+        </div>
+      </div>
+    </section>
+
+    <TrustStrip />
+
+    <section class="section" id="services">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Services</span>
+          <h2>Three ways we help schools</h2>
+          <p class="section-intro">
+            Ready-made products, bespoke systems built on the platforms you already use, and the IT
+            support underneath it all.
+          </p>
+        </div>
+        <ServiceCards />
+      </div>
+    </section>
+
+    <section class="section section-dark" aria-labelledby="outcomes-title">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">Results</span>
+          <h2 id="outcomes-title">What changes for schools</h2>
+        </div>
+        <ul class="outcomes">
+          {
+            site.outcomes.map((o) => (
+              <li>
+                <p class="outcome-head">{o.headline}</p>
+                <p class="outcome-text">{o.text}</p>
+                <a class="outcome-link" href={o.href}>
+                  Read the case study
+                  <Icon name="arrow-right" size={16} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="case-studies">
+      <span id="projects" aria-hidden="true"></span>
+      <div class="container">
+        <div class="section-head-row">
+          <div class="section-head">
+            <span class="eyebrow">Case studies</span>
+            <h2>Recent work for schools</h2>
+          </div>
+          <a class="see-all" href="/case-studies">
+            All {projects.length} case studies <Icon name="arrow-right" size={16} />
+          </a>
+        </div>
+        <div class="grid-3">
+          {featured.map((project) => <CaseStudyCard project={project} />)}
+        </div>
+      </div>
+    </section>
+
+    <Testimonials />
+    <ProcessSteps />
+    <CtaBand id="contact" />
   </main>
   <Footer />
 </Layout>
+
+<style>
+  .hero {
+    padding-block: clamp(3rem, 7vw, 5.5rem);
+    background: linear-gradient(180deg, var(--bg-alt), #fff);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: clamp(2.5rem, 5vw, 4rem);
+    align-items: center;
+  }
+  .hero-text h1 {
+    max-width: 18ch;
+  }
+  .hero-sub {
+    margin-top: 1.25rem;
+    max-width: 58ch;
+    font-size: 1.1875rem;
+    color: var(--text-muted);
+  }
+  .hero-text .btn-row {
+    margin-top: 2rem;
+  }
+  .hero-facts {
+    margin-top: 1.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .hero-facts li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .hero-facts :global(svg) {
+    color: var(--teal);
+  }
+
+  /* screenshot composition: appraisal dashboard with marking grid inset */
+  .hero-visual {
+    position: relative;
+    padding-bottom: 18%;
+  }
+  .hero-visual :global(.hero-shot-main) {
+    width: 92%;
+  }
+  .hero-visual :global(.hero-shot-inset) {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 58%;
+  }
+
+  /* outcomes band */
+  .outcomes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--gutter);
+  }
+  .outcomes li {
+    display: flex;
+    flex-direction: column;
+    padding-top: 1.25rem;
+    border-top: 2px solid #3b82f6;
+  }
+  .outcome-head {
+    font-family: var(--font-serif);
+    font-size: clamp(1.625rem, 1.2rem + 1.2vw, 2rem);
+    font-weight: 600;
+    line-height: 1.2;
+    color: #fff;
+  }
+  .outcome-text {
+    margin-top: 0.6rem;
+    color: var(--on-dark-muted);
+  }
+  .outcome-link {
+    margin-top: auto;
+    padding-top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    color: #93c5fd;
+  }
+  .outcome-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .outcome-link:focus-visible {
+    outline-color: #93c5fd;
+  }
+
+  .section-head-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin-bottom: clamp(2rem, 4vw, 3rem);
+  }
+  .section-head-row .section-head {
+    margin-bottom: 0;
+  }
+  .see-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .see-all:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (max-width: 900px) {
+    .hero-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .outcomes {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

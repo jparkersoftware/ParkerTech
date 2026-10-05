@@ -1,0 +1,52 @@
+---
+/** A product screenshot in a simple browser window frame. */
+interface Props {
+  src: string;
+  alt: string;
+  /** Load eagerly for the largest image above the fold. */
+  eager?: boolean;
+  class?: string;
+}
+const { src, alt, eager = false, class: className } = Astro.props;
+---
+
+<figure class:list={['frame', className]}>
+  <div class="frame-bar" aria-hidden="true">
+    <span></span><span></span><span></span>
+  </div>
+  <img
+    src={src}
+    alt={alt}
+    loading={eager ? 'eager' : 'lazy'}
+    fetchpriority={eager ? 'high' : undefined}
+    decoding="async"
+  />
+</figure>
+
+<style>
+  .frame {
+    margin: 0;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: #fff;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .frame-bar {
+    display: flex;
+    gap: 6px;
+    padding: 10px 12px;
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
+  }
+  .frame-bar span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border-strong);
+  }
+  .frame img {
+    width: 100%;
+    height: auto;
+  }
+</style>

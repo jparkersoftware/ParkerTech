@@ -1,0 +1,83 @@
+---
+import { services } from '../data/services';
+import Icon from './Icon.astro';
+
+interface Props {
+  level?: 'h2' | 'h3';
+}
+const { level = 'h3' } = Astro.props;
+const Heading = level;
+---
+
+<div class="grid-3">
+  {
+    services.map((s) => (
+      <article class="card svc-card">
+        <span class="svc-icon">
+          <Icon name={s.icon} size={24} />
+        </span>
+        <Heading class="svc-title">{s.navLabel}</Heading>
+        <p>{s.summary}</p>
+        <a class="svc-link" href={`/services/${s.slug}`}>
+          Find out more<span class="visually-hidden"> about {s.navLabel}</span>
+          <Icon name="arrow-right" size={16} />
+        </a>
+      </article>
+    ))
+  }
+</div>
+
+<style>
+  .svc-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  }
+  .svc-card:hover {
+    border-color: var(--accent-line);
+    box-shadow: var(--shadow);
+  }
+  .svc-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius);
+    background: var(--accent-tint);
+    color: var(--accent);
+  }
+  .svc-title {
+    margin-top: 1.1rem;
+    font-size: 1.375rem;
+  }
+  .svc-card p {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+  }
+  .svc-link {
+    margin-top: auto;
+    padding-top: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .svc-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .svc-card:hover .svc-link {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .svc-card:has(.svc-link:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .svc-link:focus-visible {
+    outline: none;
+  }
+</style>

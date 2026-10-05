@@ -1,0 +1,62 @@
+---
+import { site } from '../data/site';
+
+/** The closing call to action on every service and case-study page. */
+interface Props {
+  title?: string;
+  text?: string;
+  id?: string;
+}
+const {
+  title = 'Talk to us about your school',
+  text = `Tell us what you need and we will come back with next steps. ${site.responseTime}`,
+  id,
+} = Astro.props;
+---
+
+<section class="cta-band" id={id}>
+  <div class="container cta-inner">
+    <div>
+      <h2>{title}</h2>
+      <p>{text}</p>
+    </div>
+    <div class="btn-row">
+      <a class="btn btn-primary cta-primary" href="/contact">Talk to us</a>
+      <a class="btn btn-secondary" href={`mailto:${site.email}`}>Email us</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta-band {
+    background: var(--accent-deep);
+    color: #fff;
+    padding-block: clamp(3rem, 6vw, 4.5rem);
+  }
+  .cta-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem 3rem;
+  }
+  .cta-band h2 {
+    color: #fff;
+  }
+  .cta-band p {
+    margin-top: 0.6rem;
+    max-width: 60ch;
+    color: #dbeafe;
+  }
+  /* white primary button on the blue band */
+  .cta-band .cta-primary {
+    background: #fff;
+    color: var(--accent-deep);
+  }
+  .cta-band .cta-primary:hover {
+    background: var(--accent-tint);
+  }
+  .cta-band :focus-visible {
+    outline-color: #fff;
+  }
+</style>

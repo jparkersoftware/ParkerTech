@@ -1,0 +1,69 @@
+---
+import { site } from '../data/site';
+
+interface Props {
+  /** Trail below Home. The last item is the current page and isn't linked. */
+  items: { href: string; label: string }[];
+}
+
+const trail = [{ href: '/', label: 'Home' }, ...Astro.props.items];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: trail.map((item, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: item.label,
+    item: new URL(item.href, site.url).href,
+  })),
+};
+---
+
+<nav class="crumbs" aria-label="Breadcrumb">
+  <ol>
+    {
+      trail.map((item, i) =>
+        i < trail.length - 1 ? (
+          <li>
+            <a href={item.href}>{item.label}</a>
+            <span class="crumbs-sep" aria-hidden="true">›</span>
+          </li>
+        ) : (
+          <li aria-current="page">{item.label}</li>
+        )
+      )
+    }
+  </ol>
+</nav>
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
+
+<style>
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+  .crumbs li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .crumbs a {
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-decoration-color: var(--border-strong);
+    text-underline-offset: 3px;
+  }
+  .crumbs a:hover {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+  .crumbs [aria-current] {
+    color: var(--text);
+    font-weight: 500;
+  }
+</style>

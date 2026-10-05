@@ -1,32 +1,46 @@
 /**
  * ─────────────────────────────────────────────────────────────
- *  SITE CONFIG  —  edit this file to update most of your website
+ *  SITE CONFIG  —  edit this file to update most of the website
  * ─────────────────────────────────────────────────────────────
- *  Anything marked "TODO" is a placeholder you should replace.
+ *  Voice rule: ParkerTech is the subject of every sentence. Joseph is
+ *  named only on the founder profile and in testimonials.
+ *
+ *  Anything left as an empty string is simply not rendered, so the site
+ *  never shows a half-finished placeholder. Fill a value in and it appears.
  */
 
 export const site = {
-  /** Brand name shown in the nav and footer. */
+  /** Brand name shown in the header and footer. */
   brand: 'ParkerTech',
 
-  /** Founder's name. */
-  owner: 'Joseph',
+  /** Founder — used on the founder profile and in structured data only. */
+  founder: 'Joseph Parker',
 
   /** Short description of what the company does. */
-  role: 'Software & IT support for UK schools',
+  role: 'Software, data and IT support for UK schools',
 
-  /** Contact email — where enquiries are sent. */
-  email: 'joseph@parkertech.co.uk',
+  /** Public contact address (a role inbox that forwards to Joseph). */
+  email: 'hello@parkertech.co.uk',
 
-  /** Where you're based. */
-  location: 'United Kingdom',
+  /** TODO: a UK landline or VoIP number — not a personal mobile. */
+  phone: '',
+
+  /** Where the company is based. */
+  location: 'Rochester, Kent',
 
   /** Live site URL — keep in sync with astro.config.mjs. */
   url: 'https://parkertech.co.uk',
 
+  /** Homepage <title> (the brand is appended automatically). */
+  title: 'School software, MIS data and IT support for UK schools',
+
   /** Used for the <meta name="description"> tag and social previews. */
   description:
-    'ParkerTech solves the technology problems in education — practical software and IT support for UK schools, from a company founded by a developer who spent a decade teaching.',
+    'ParkerTech delivers school software, MIS integration, Power Platform builds and IT support for UK schools and trusts. UK-hosted, PO-friendly, founded by a former teacher.',
+
+  /** Response-time promise, shown on the contact page and in the form. */
+  // The word joiner (\u2060) keeps "1–2" from breaking across lines.
+  responseTime: 'We reply within 1–\u20602 working days.',
 
   /* ── Company details ──────────────────────────────────────── */
   // Legally required on the website under the Companies Act 2006 trading
@@ -50,55 +64,173 @@ export const site = {
     icoNumber: '',
   },
 
-  /* ── Supplier credentials ─────────────────────────────────── */
+  /* ── Homepage hero ────────────────────────────────────────── */
+  hero: {
+    title: 'Software, data and IT support built for UK schools.',
+    subtext:
+      'ParkerTech builds school software, integrates MIS data and runs IT projects for schools and trusts across the UK. Founded by a former teacher, so every tool is designed around how schools actually work.',
+  },
+
+  /* ── Trust strip (directly under the hero) ────────────────── */
+  // Only list things that are true today. Add Cyber Essentials here once certified.
+  trust: [
+    { icon: 'shield', label: 'UK-hosted data' },
+    { icon: 'file', label: 'Purchase orders accepted' },
+    { icon: 'lock', label: 'DPA provided' },
+    { icon: 'cap', label: 'Founded by a former teacher' },
+  ],
+
+  /* ── Outcomes band ────────────────────────────────────────── */
+  // Every line here must be something ParkerTech can evidence. If a number
+  // can't be backed up, use a plain statement instead.
+  outcomes: [
+    {
+      headline: '2 hours → 20 minutes',
+      text: 'Time to mark a class set of 30 books in the Kent secondary pilot that ParkerMarker grew out of.',
+      href: '/case-studies/parkermarker',
+    },
+    {
+      headline: 'Paper to digital',
+      text: 'Paper and email leave requests replaced with one approval flow that routes each request to the right person.',
+      href: '/case-studies/staff-leave-request-system',
+    },
+    {
+      headline: 'One scripted run',
+      text: 'Locked-down exam accounts created, collected and reset the same way every exam season, not by hand.',
+      href: '/case-studies/exam-account-deployment',
+    },
+  ],
+
+  /* ── How we work (homepage and About) ─────────────────────── */
+  process: [
+    {
+      title: 'Discovery call',
+      text: 'A free 30-minute call to understand the problem, the people involved and what a good result looks like.',
+    },
+    {
+      title: 'Scoped proposal',
+      text: 'A written scope with a fixed price or day rate, so your finance team knows the cost before work starts.',
+    },
+    {
+      title: 'Build and pilot',
+      text: 'We build in stages and pilot with the staff who will use it, adjusting as we go.',
+    },
+    {
+      title: 'Handover and support',
+      text: 'Training for the people using it, and support once it is live.',
+    },
+  ],
+
+  /* ── About: the company ───────────────────────────────────── */
+  about: {
+    title: 'Built by people who have worked in schools.',
+    intro: [
+      'ParkerTech was founded by Joseph Parker, who combined a decade of teaching with IT management and software development to build tools schools would actually use. Today the company delivers ready-made products, bespoke builds and IT support for schools and multi-academy trusts.',
+      'ParkerTech is based in Rochester, Kent, and works with schools and trusts across the UK. Every project runs to a written scope and is invoiced against a purchase order.',
+    ],
+    beliefs: [
+      {
+        title: 'School technology works better when its makers know the job.',
+        text: 'Every product and build starts from how a school actually runs: the timetable, the cover list, the marking pile and the data return. Tools are designed with the staff who will use them, not handed over at the end.',
+      },
+      {
+        title: 'Less time on admin, more time for the work that matters.',
+        text: 'The measure of a good system is the time it gives back to teachers, leaders and support staff. If a tool adds clicks without removing work, it has not done its job.',
+      },
+    ],
+  },
+
+  /* ── About: founder profile ───────────────────────────────── */
+  // The only page where first-person copy appears — as pull-quotes.
+  founderProfile: {
+    name: 'Joseph Parker',
+    role: 'Founder, ParkerTech',
+    /** TODO: path to an 800×800 headshot in public/, e.g. '/people/joseph-parker.jpg'. */
+    photo: '',
+    bio: [
+      'Joseph Parker founded ParkerTech after a decade teaching in schools, including geography and vocational BTEC courses. He brings that classroom experience together with school IT management and software development.',
+      'Several ParkerTech products began as tools he built for colleagues: a comment-bank spreadsheet that cut marking a class set from two hours to twenty minutes grew into ParkerMarker, and a marking aid for a colleague new to BTEC became VocMark. He left the classroom to work on school technology full-time.',
+      "Joseph leads ParkerTech's product, bespoke build and IT support work, with a focus on assessment, school operations data, and the Microsoft and Google platforms schools already run on.",
+    ],
+    quotes: [
+      'ParkerMarker began as a survival tactic. In my first years of teaching, a single class set of thirty geography books took about two hours to mark.',
+      'I know the Sunday evenings lost to marking, the clunky systems that fight you instead of helping, and the quiet wish that someone would just build the tool you actually needed.',
+    ],
+  },
+
+  /* ── Working with schools: due diligence ──────────────────── */
   // The things a school business manager or trust procurement team checks
-  // before raising a purchase order. Each row renders only if it has a value.
+  // before raising a purchase order. A row with an empty `value` is skipped,
+  // so nothing unverified ever appears on the page.
   credentials: {
-    title: 'Straightforward to work with.',
+    title: 'Working with schools',
     intro:
-      'Schools and trusts have to do their due diligence before they can raise a purchase order. Here is everything you need in one place — and if your finance team needs something that is not listed, just ask.',
-    // The Company and Data protection rows are built automatically from the
-    // `company` block above. These are the rest — a row with an empty `value`
-    // is skipped, so nothing unverified ever appears on the page.
+      'Schools and trusts need to complete due diligence before raising a purchase order. Everything a finance team or data protection officer usually asks for is below. If something is missing, email us and we will send it.',
+    // The Company, VAT and ICO rows are built automatically from the
+    // `company` block above. These are the rest.
     items: [
-      {
-        label: 'Insurance',
-        // e.g. '£1m professional indemnity' — leave empty until the policy is in place.
-        value: '',
-        note: 'Certificates available to your finance team on request.',
-      },
-      {
-        label: 'Safeguarding',
-        // e.g. 'Enhanced DBS' — leave empty until the check is on file.
-        value: '',
-        note: 'Certificate available to share before any on-site work.',
-      },
       {
         label: 'Data hosting',
         value: 'UK-based',
         note: 'Pupil and staff data stays in the UK, under a written data processing agreement.',
       },
       {
+        label: 'Data processing agreement',
+        value: 'Provided as standard',
+        note: 'A written DPA is in place before we handle any pupil or staff data. Ask us for a copy to review.',
+      },
+      {
+        label: 'GDPR and DPIAs',
+        value: 'DPIA support',
+        note: 'We can help your data protection officer complete a DPIA for any system we build or supply.',
+      },
+      {
         label: 'Invoicing',
         value: 'Purchase orders welcome',
         note: 'Invoices raised against your PO number, on 30-day terms.',
       },
+      {
+        label: 'Insurance',
+        // TODO: e.g. '£1m public liability · £1m professional indemnity'.
+        value: '',
+        note: 'Certificates available to your finance team on request.',
+      },
+      {
+        label: 'Safeguarding',
+        // TODO: e.g. 'Enhanced DBS, on the Update Service'.
+        value: '',
+        note: 'Certificate available to share before any on-site work.',
+      },
+      {
+        label: 'Cyber Essentials',
+        // TODO: fill in only once certified.
+        value: '',
+        note: '',
+      },
+      {
+        label: 'Support',
+        // TODO: support hours and response times, e.g. 'Mon–Fri, 8am–5pm term time'.
+        value: '',
+        note: '',
+      },
+      {
+        label: 'Cancellation',
+        // TODO: notice period for ongoing support or licences.
+        value: '',
+        note: '',
+      },
+      {
+        label: 'References',
+        value: 'Available on request',
+        note: 'We can put you in touch with school leaders we have worked with.',
+      },
     ],
   },
 
-  /* ── Hero section ─────────────────────────────────────────── */
-  hero: {
-    // The headline renders as:  {titleLead} {titleAccent in colour} {titleTail}
-    titleLead: 'Practical software and IT support',
-    titleAccent: 'for UK schools.',
-    titleTail: '',
-    subtext:
-      "ParkerTech was founded by Joseph — a developer and former teacher with a decade in the classroom. We build practical software for schools, on a simple idea: school technology works better when the person writing the code has actually done the job.",
-  },
-
   /* ── Contact form ─────────────────────────────────────────── */
-  // Web3Forms access key — form submissions are emailed straight to you,
-  // and the visitor stays on the site. (This key is safe to be public.)
+  // Web3Forms access key — submissions are emailed to the address the key
+  // was created with (set in the Web3Forms dashboard, not here).
+  // This key is safe to be public.
   web3formsKey: 'f065eb0f-00c9-482f-be79-a75e1d7b013b',
 
   /* ── Analytics ────────────────────────────────────────────── */
@@ -106,72 +238,15 @@ export const site = {
   // accepts the cookie-consent banner.
   googleAnalyticsId: 'G-ZPJ0JW0GRV',
 
-  /* ── About section ────────────────────────────────────────── */
-  about: {
-    paragraphs: [
-      "I'm Joseph. I spent a decade teaching in schools, so I know the Sunday evenings lost to marking, the clunky systems that fight you instead of helping, and the quiet wish that someone would just build the tool you actually needed.",
-      "Eventually I decided to build it myself. I left the classroom to focus on technology full-time, and now I create software for schools — designed around how they really work, by someone who's been on the other side of the staffroom door.",
-      'That became ParkerTech. Some of what we build are products any school can pick up and use, like ParkerMarker and VocMark. The rest is bespoke — intranets, data dashboards and automations built around individual schools and trusts, and the people who run them: leadership, admin and data teams as much as teachers. The aim never changes: less time lost to admin, more time for the work that matters.',
-    ],
-    // The "What we can help with" card. Adjust the groups and items freely.
-    capabilities: [
-      {
-        group: 'Assessment & marking',
-        items: ['Marking automation', 'AI-assisted grading', 'Vocational coursework (BTEC)', 'Feedback & moderation'],
-      },
-      {
-        group: 'School operations & data',
-        items: ['Staff absence & cover', 'Performance management', 'Power BI dashboards', 'Wonde & MIS integration'],
-      },
-      {
-        group: 'Cloud & infrastructure',
-        items: ['Cloud modernisation', 'Chromebook rollouts', 'Google Workspace setup', 'Network refresh'],
-      },
-      {
-        group: 'How we work',
-        items: ['Bespoke to your school', 'Ready-made products', 'Built with teacher input', 'Mindful of school data'],
-      },
-    ],
-  },
-
-  /* ── IT support section ───────────────────────────────────── */
-  // TODO: refine the wording below to match the IT services you offer.
-  itSupport: {
-    title: 'We keep school IT running, too.',
-    intro:
-      'Building software is only part of it. Alongside the products, we help schools with the technology underneath the day — from the everyday fixes to the long-term plan.',
-    services: [
-      {
-        title: 'Everyday IT support',
-        description:
-          'A dependable point of contact for the issues that stall a school day — accounts, devices, access and the rest — handled quickly and without the fuss.',
-      },
-      {
-        title: 'Cloud & infrastructure',
-        description:
-          'Planning and delivering modern, cloud-first infrastructure, so schools run on systems that are resilient, secure and straightforward to manage.',
-      },
-      {
-        title: 'IT strategy & systems',
-        description:
-          'Helping school leaders make sensible, well-structured technology decisions — with proper processes behind them, not guesswork.',
-      },
-      {
-        title: 'MIS migration & setup',
-        description:
-          'Moving schools onto Arbor with full data migration from their previous MIS, then configuring it to fit — including assessment setup for individual schools and multi-academy trusts.',
-      },
-    ],
-  },
-
   /* ── Testimonials ─────────────────────────────────────────── */
+  // Aim for three, with at least one from a trust-level contact.
   testimonials: [
     {
       quote:
         "The standard of Joseph's work is exceptional. He has expertly supported the school to automate a wide range of systems and processes that have resulted in significant efficiency improvements, whilst freeing up leaders to work strategically and be that all important visible presence around the school. No task has proven too small or insurmountable for Joseph, and the quality of creativity, support and guidance he has provided is simply outstanding. Thank you Joseph.",
       name: 'Dan Walton',
       role: 'Associate Headteacher & Ofsted Inspector',
-      org: "St John's Catholic Comprehensive",
+      context: "On ParkerTech's work at St John's Catholic Comprehensive",
     },
   ],
 };

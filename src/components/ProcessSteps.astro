@@ -1,0 +1,78 @@
+---
+import { site } from '../data/site';
+
+interface Props {
+  title?: string;
+  intro?: string;
+}
+const {
+  title = 'How a project runs',
+  intro = 'Four steps from first conversation to live system, so you know what happens next and what it will cost.',
+} = Astro.props;
+---
+
+<section class="section" id="how-we-work">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">How we work</span>
+      <h2>{title}</h2>
+      <p class="section-intro">{intro}</p>
+    </div>
+    <ol class="steps">
+      {
+        site.process.map((step, i) => (
+          <li class="step">
+            <span class="step-num" aria-hidden="true">
+              {i + 1}
+            </span>
+            <h3>{step.title}</h3>
+            <p>{step.text}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--gutter);
+    counter-reset: step;
+  }
+  .step {
+    position: relative;
+    padding-top: 1.25rem;
+    border-top: 2px solid var(--border);
+  }
+  .step-num {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+  }
+  .step h3 {
+    margin-top: 1rem;
+    font-size: 1.25rem;
+  }
+  .step p {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 900px) {
+    .steps {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 560px) {
+    .steps {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

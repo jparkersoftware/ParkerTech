@@ -1,0 +1,31 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import PageHero from '../../components/PageHero.astro';
+import ServiceCards from '../../components/ServiceCards.astro';
+import ProcessSteps from '../../components/ProcessSteps.astro';
+import CtaBand from '../../components/CtaBand.astro';
+---
+
+<Layout
+  title="Services for UK schools and trusts"
+  description="School software products, bespoke Power Platform and Power BI builds, Wonde/MIS integration, and IT support and Arbor MIS migration for UK schools and trusts."
+>
+  <Nav />
+  <main id="main" tabindex="-1">
+    <PageHero
+      crumbs={[{ href: '/services', label: 'Services' }]}
+      title="Services for schools and trusts"
+      lead="Ready-made products, bespoke systems built on the platforms you already use, and the IT support underneath it all."
+    />
+    <section class="section">
+      <div class="container">
+        <ServiceCards level="h2" />
+      </div>
+    </section>
+    <ProcessSteps />
+    <CtaBand />
+  </main>
+  <Footer />
+</Layout>

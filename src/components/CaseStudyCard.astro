@@ -1,0 +1,147 @@
+---
+import type { Project } from '../data/projects';
+import { serviceBySlug } from '../data/services';
+import Icon from './Icon.astro';
+
+interface Props {
+  project: Project;
+  /** Heading level, so cards sit correctly in each page's outline. */
+  level?: 'h2' | 'h3';
+}
+const { project, level = 'h3' } = Astro.props;
+const Heading = level;
+const fit = project.coverFit ?? 'cover';
+const icon = serviceBySlug(project.service).icon;
+---
+
+<article class="cs-card" data-categories={project.categories.join('|')}>
+  <div class="cs-cover" data-fit={fit}>
+    {
+      project.cover ? (
+        <img src={project.cover} alt="" loading="lazy" decoding="async" />
+      ) : (
+        <div class="cs-cover-fallback" aria-hidden="true">
+          <Icon name={icon} size={40} />
+        </div>
+      )
+    }
+  </div>
+  <div class="cs-body">
+    <div class="cs-meta">
+      <span class="badge" data-kind={project.kind}>{project.kind}</span>
+      <span class="cs-client">{project.client.type}</span>
+    </div>
+    <Heading class="cs-title">{project.title}</Heading>
+    <p class="cs-outcome">{project.outcome}</p>
+    <a class="cs-link" href={`/case-studies/${project.slug}`}>
+      View case study<span class="visually-hidden">: {project.title}</span>
+      <Icon name="arrow-right" size={16} />
+    </a>
+  </div>
+</article>
+
+<style>
+  .cs-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  }
+  .cs-card:hover {
+    border-color: var(--accent-line);
+    box-shadow: var(--shadow);
+  }
+  .cs-card[hidden] {
+    display: none;
+  }
+
+  .cs-cover {
+    aspect-ratio: 16 / 10;
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .cs-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+  }
+  .cs-cover[data-fit='contain'] img {
+    object-fit: contain;
+    padding: 1rem;
+  }
+  .cs-cover-fallback {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    color: var(--accent);
+    background:
+      radial-gradient(var(--accent-line) 1px, transparent 1px) 0 0 / 18px 18px,
+      var(--accent-tint);
+  }
+  .cs-cover-fallback :global(svg) {
+    padding: 14px;
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius);
+    background: #fff;
+    border: 1px solid var(--accent-line);
+  }
+
+  .cs-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem 1.4rem 1.4rem;
+  }
+  .cs-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+  }
+  .cs-client {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .cs-title {
+    margin-top: 0.75rem;
+    font-size: 1.375rem;
+  }
+  .cs-outcome {
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+  }
+  .cs-link {
+    margin-top: auto;
+    padding-top: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  /* the whole card is clickable through the link */
+  .cs-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .cs-card:hover .cs-link {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .cs-card:has(.cs-link:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .cs-link:focus-visible {
+    outline: none;
+  }
+</style>

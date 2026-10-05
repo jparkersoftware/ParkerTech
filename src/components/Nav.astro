@@ -1,45 +1,90 @@
 ---
 import { site } from '../data/site';
+import { services } from '../data/services';
 import Icon from './Icon.astro';
 
+const path = Astro.url.pathname;
+const isActive = (prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
+
 const links = [
-  { id: 'projects', label: 'Projects' },
-  { id: 'about', label: 'About' },
-  { id: 'it-support', label: 'IT support' },
-  { id: 'contact', label: 'Contact' },
+  { href: '/products', label: 'Products' },
+  { href: '/case-studies', label: 'Case studies' },
+  { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
 ];
 ---
 
-<header class="nav" id="site-nav" data-state="top">
+<header class="nav" id="site-nav">
   <div class="container nav-inner">
-    <a class="brand" href="/#top" aria-label={`${site.brand} — home`}>
-      <span class="brand-word">Parker<span class="brand-accent">Tech</span></span>
+    <a class="brand" href="/" aria-label={`${site.brand} home`}>
+      Parker<span class="brand-accent">Tech</span>
     </a>
 
     <nav class="nav-links" aria-label="Primary">
-      {links.map((l) => <a href={`/#${l.id}`} data-navlink={l.id}>{l.label}</a>)}
+      <div class="nav-drop" data-drop>
+        <button
+          class="nav-link nav-drop-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="services-menu"
+          aria-current={isActive('/services') ? 'true' : undefined}
+        >
+          Services <Icon name="chevron-down" size={16} class="nav-chevron" />
+        </button>
+        <ul class="nav-drop-menu" id="services-menu" hidden>
+          {
+            services.map((s) => (
+              <li>
+                <a href={`/services/${s.slug}`} aria-current={path === `/services/${s.slug}` ? 'page' : undefined}>
+                  <span class="nav-drop-icon"><Icon name={s.icon} size={18} /></span>
+                  {s.navLabel}
+                </a>
+              </li>
+            ))
+          }
+          <li class="nav-drop-all">
+            <a href="/services">All services</a>
+          </li>
+        </ul>
+      </div>
+      {
+        links.map((l) => (
+          <a class="nav-link" href={l.href} aria-current={isActive(l.href) ? 'page' : undefined}>
+            {l.label}
+          </a>
+        ))
+      }
     </nav>
 
     <div class="nav-actions">
-      <a class="btn btn-primary nav-cta" href="/#contact">Get in touch</a>
+      <a class="btn btn-primary nav-cta" href="/contact">Talk to us</a>
       <button
         class="nav-toggle"
         id="nav-toggle"
+        type="button"
         aria-label="Open menu"
         aria-expanded="false"
         aria-controls="mobile-menu"
       >
-        <span class="nav-toggle-icon nav-toggle-open"><Icon name="menu" size={22} /></span>
-        <span class="nav-toggle-icon nav-toggle-close"><Icon name="close" size={22} /></span>
+        <span class="nav-toggle-open"><Icon name="menu" size={22} /></span>
+        <span class="nav-toggle-close"><Icon name="close" size={22} /></span>
       </button>
     </div>
   </div>
 
   <div class="mobile-menu" id="mobile-menu" hidden>
-    <nav aria-label="Mobile">
-      {links.map((l) => <a href={`/#${l.id}`} data-mobilelink>{l.label}</a>)}
+    <nav class="container" aria-label="Mobile">
+      <p class="mobile-group">Services</p>
+      {
+        services.map((s) => (
+          <a class="mobile-sub" href={`/services/${s.slug}`}>
+            {s.navLabel}
+          </a>
+        ))
+      }
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+      <a class="btn btn-primary" href="/contact">Talk to us</a>
     </nav>
-    <a class="btn btn-primary" href="/#contact" data-mobilelink>Get in touch</a>
   </div>
 </header>
 
@@ -48,133 +93,169 @@ const links = [
     position: sticky;
     top: 0;
     z-index: 100;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-inner {
     height: var(--nav-h);
     display: flex;
     align-items: center;
-    transition: background-color 0.3s var(--ease), border-color 0.3s var(--ease),
-      backdrop-filter 0.3s var(--ease), box-shadow 0.3s var(--ease);
-    border-bottom: 1px solid transparent;
-  }
-  .nav[data-state='scrolled'] {
-    background: rgba(19, 19, 24, 0.78);
-    backdrop-filter: blur(16px) saturate(1.3);
-    -webkit-backdrop-filter: blur(16px) saturate(1.3);
-    border-bottom-color: var(--border);
-    box-shadow: 0 8px 30px -16px rgba(0, 0, 0, 0.7);
-  }
-
-  .nav-inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     gap: 1.5rem;
-    width: 100%;
   }
 
-  /* brand */
   .brand {
-    font-family: var(--font-display);
+    font-family: var(--font-sans);
     font-weight: 800;
-    font-size: 1.32rem;
-    letter-spacing: -0.035em;
+    font-size: 1.375rem;
+    letter-spacing: -0.03em;
+    color: var(--heading);
+    flex-shrink: 0;
   }
   .brand-accent {
-    background: linear-gradient(120deg, #a294ff, #7d68ff);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--accent);
   }
 
-  /* desktop links */
+  /* desktop links, centred */
   .nav-links {
+    flex: 1;
     display: flex;
-    gap: 0.35rem;
-    margin-inline-start: auto;
+    justify-content: center;
+    align-items: center;
+    gap: 0.25rem;
   }
-  .nav-links a {
-    position: relative;
-    padding: 0.5rem 0.85rem;
-    border-radius: var(--radius-pill);
-    color: var(--text-muted);
-    font-size: 0.95rem;
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius-sm);
+    background: none;
+    border: 0;
+    font-size: 0.98rem;
     font-weight: 500;
-    transition: color 0.2s var(--ease), background-color 0.2s var(--ease);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 0.15s var(--ease), background-color 0.15s var(--ease);
   }
-  .nav-links a:hover {
-    color: var(--text);
-    background: var(--fill);
+  .nav-link:hover {
+    color: var(--heading);
+    background: var(--bg-alt);
   }
-  .nav-links a[data-active='true'] {
-    color: var(--accent-deep);
+  .nav-link[aria-current] {
+    color: var(--accent);
   }
-  .nav-links a[data-active='true']::after {
+  .nav-chevron {
+    transition: transform 0.15s var(--ease);
+  }
+  .nav-drop-toggle[aria-expanded='true'] .nav-chevron {
+    transform: rotate(180deg);
+  }
+
+  /* services dropdown */
+  .nav-drop {
+    position: relative;
+  }
+  .nav-drop-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    min-width: 280px;
+    padding: 0.5rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  /* bridges the gap under the button so hover doesn't drop out */
+  .nav-drop-menu::before {
     content: '';
     position: absolute;
-    left: 50%;
-    bottom: 0.1rem;
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    transform: translateX(-50%);
-    background: var(--accent);
+    left: 0;
+    right: 0;
+    top: -0.6rem;
+    height: 0.6rem;
+  }
+  .nav-drop-menu[hidden] {
+    display: none;
+  }
+  .nav-drop-menu a {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .nav-drop-menu a:hover,
+  .nav-drop-menu a[aria-current] {
+    background: var(--accent-tint);
+    color: var(--accent);
+  }
+  .nav-drop-icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-tint);
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .nav-drop-all {
+    margin-top: 0.25rem;
+    padding-top: 0.25rem;
+    border-top: 1px solid var(--border);
+  }
+  .nav-drop-all a {
+    color: var(--accent);
+    font-size: 0.9rem;
   }
 
   .nav-actions {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    margin-inline-start: auto;
   }
   .nav-cta {
-    --btn-pad-y: 0.6rem;
-    --btn-pad-x: 1.15rem;
-    font-size: 0.9rem;
+    min-height: 42px;
+    padding: 0.55rem 1.1rem;
+    font-size: 0.95rem;
   }
 
   /* mobile toggle */
   .nav-toggle {
     display: none;
-    position: relative;
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    background: var(--surface);
-    border: 1px solid var(--border-strong);
-    cursor: pointer;
-    color: var(--text);
-  }
-  .nav-toggle-icon {
-    position: absolute;
-    inset: 0;
-    display: grid;
+    width: 44px;
+    height: 44px;
     place-items: center;
-    transition: opacity 0.18s var(--ease), transform 0.18s var(--ease);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    border: 1px solid var(--border-strong);
+    color: var(--heading);
+    cursor: pointer;
   }
   .nav-toggle-close {
-    opacity: 0;
-    transform: rotate(-45deg);
+    display: none;
   }
   .nav[data-menu='open'] .nav-toggle-open {
-    opacity: 0;
-    transform: rotate(45deg);
+    display: none;
   }
   .nav[data-menu='open'] .nav-toggle-close {
-    opacity: 1;
-    transform: rotate(0);
+    display: block;
   }
 
-  /* mobile menu panel */
   .mobile-menu {
     position: absolute;
-    top: var(--nav-h);
+    top: 100%;
     left: 0;
     right: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-    padding: 1rem clamp(1.25rem, 5vw, 2.5rem) 1.5rem;
-    background: rgba(20, 20, 26, 0.98);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    max-height: calc(100svh - var(--nav-h));
+    overflow-y: auto;
+    background: #fff;
     border-bottom: 1px solid var(--border);
     box-shadow: var(--shadow);
   }
@@ -184,28 +265,39 @@ const links = [
   .mobile-menu nav {
     display: flex;
     flex-direction: column;
+    padding-block: 0.5rem 1.25rem;
   }
-  .mobile-menu nav a {
-    padding: 0.85rem 0.5rem;
+  .mobile-menu a:not(.btn) {
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--border);
     font-size: 1.05rem;
     font-weight: 500;
-    color: var(--text-muted);
-    border-bottom: 1px solid var(--border);
-  }
-  .mobile-menu nav a:hover {
     color: var(--text);
   }
+  .mobile-group {
+    padding: 0.85rem 0 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .mobile-menu a.mobile-sub {
+    padding-left: 1rem;
+    font-size: 1rem;
+    color: var(--text-muted);
+  }
   .mobile-menu .btn {
-    margin-top: 0.9rem;
+    margin-top: 1rem;
   }
 
-  @media (max-width: 720px) {
+  @media (max-width: 960px) {
     .nav-links,
     .nav-cta {
       display: none;
     }
     .nav-toggle {
-      display: block;
+      display: grid;
     }
   }
 </style>
@@ -215,13 +307,6 @@ const links = [
   const toggle = document.getElementById('nav-toggle') as HTMLButtonElement;
   const menu = document.getElementById('mobile-menu') as HTMLElement;
 
-  // Solidify the nav background once the page is scrolled.
-  const onScroll = () => {
-    nav.dataset.state = window.scrollY > 24 ? 'scrolled' : 'top';
-  };
-  onScroll();
-  window.addEventListener('scroll', onScroll, { passive: true });
-
   // Mobile menu open / close.
   const setMenu = (open: boolean) => {
     nav.dataset.menu = open ? 'open' : 'closed';
@@ -230,29 +315,53 @@ const links = [
     toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
   };
   toggle.addEventListener('click', () => setMenu(menu.hidden));
-  menu.querySelectorAll('[data-mobilelink]').forEach((link) => {
-    link.addEventListener('click', () => setMenu(false));
+
+  // Services dropdown: click or keyboard to toggle, Escape or focus leaving
+  // to close, and hover to open on devices with a pointer.
+  document.querySelectorAll<HTMLElement>('[data-drop]').forEach((drop) => {
+    const button = drop.querySelector('button') as HTMLButtonElement;
+    const list = drop.querySelector('ul') as HTMLElement;
+    const set = (open: boolean) => {
+      list.hidden = !open;
+      button.setAttribute('aria-expanded', String(open));
+    };
+
+    // A mouse click on a menu that hover has just opened shouldn't close it;
+    // keyboard activation (detail === 0) always toggles.
+    let hoverOpen = false;
+    button.addEventListener('click', (event) => {
+      if (hoverOpen && event.detail > 0) return;
+      set(list.hidden);
+    });
+    drop.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !list.hidden) {
+        set(false);
+        button.focus();
+      }
+    });
+    drop.addEventListener('focusout', (event) => {
+      if (!drop.contains(event.relatedTarget as Node | null)) set(false);
+    });
+    document.addEventListener('click', (event) => {
+      if (!drop.contains(event.target as Node)) set(false);
+    });
+
+    if (window.matchMedia('(hover: hover)').matches) {
+      drop.addEventListener('mouseenter', () => {
+        hoverOpen = true;
+        set(true);
+      });
+      drop.addEventListener('mouseleave', () => {
+        hoverOpen = false;
+        set(false);
+      });
+    }
   });
 
-  // Highlight the nav link for the section currently in view.
-  const navLinks = document.querySelectorAll<HTMLAnchorElement>('[data-navlink]');
-  const sections = ['projects', 'about', 'it-support', 'contact']
-    .map((id) => document.getElementById(id))
-    .filter((el): el is HTMLElement => el !== null);
-
-  if ('IntersectionObserver' in window && sections.length) {
-    const spy = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            navLinks.forEach((link) => {
-              link.dataset.active = String(link.dataset.navlink === entry.target.id);
-            });
-          }
-        });
-      },
-      { rootMargin: '-45% 0px -50% 0px' }
-    );
-    sections.forEach((section) => spy.observe(section));
-  }
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !menu.hidden) {
+      setMenu(false);
+      toggle.focus();
+    }
+  });
 </script>

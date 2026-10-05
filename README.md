@@ -33,30 +33,40 @@ The page reloads automatically as you edit files.
 
 ## 2. Editing your content
 
-Almost everything you'll want to change lives in two files — **no HTML needed**:
+Almost everything you'll want to change lives in four data files — **no HTML needed**:
 
 ### `src/data/site.ts`
 
-Your name, role, contact email, hero text, bio paragraphs, stats, and the
-"What I can help with" list. Every placeholder is marked with a `TODO` comment.
+Company details (the statutory footer), contact email and phone, hero text,
+trust strip, outcomes, how-we-work steps, About and founder copy, the
+working-with-schools due-diligence list and testimonials.
+
+### `src/data/services.ts`
+
+The three service pages under `/services/` — what we do, who it's for,
+typical engagements, pricing basis and FAQs.
+
+### `src/data/products.ts`
+
+The three product pages under `/products/` — features, audience, origin,
+pricing, trial and data-protection lines.
 
 ### `src/data/projects.ts`
 
-Your projects. Each project is a block of text — copy a block to add one,
-delete a block to remove one. The page updates automatically. A project with
-a `liveUrl` gets a "Visit" button; one without is shown as a case study.
+The case studies under `/case-studies/` — client, challenge, what we built,
+result and technology. Copy a block to add one; the index, filters and
+related-case-study links update automatically.
 
-> Look for `TODO` comments throughout both files — they mark every value
-> you should replace with your real information.
+> Any value left as an empty string is simply not shown, so nothing
+> unconfirmed reaches the live site. Look for `TODO` comments — they mark
+> every value still waiting on real information.
 
 ---
 
 ## 3. Set up the contact form (Web3Forms)
 
-The contact form submits straight to your inbox **without the visitor leaving
-the site** — it just needs a free Web3Forms access key. **Until you add one,
-the form falls back to opening the visitor's email app**, so the site still
-works in the meantime.
+The enquiry form on `/contact` submits straight to your inbox **without the
+visitor leaving the site** — it just needs a free Web3Forms access key.
 
 1. Go to [web3forms.com](https://web3forms.com) and enter the email address you
    want enquiries sent to. No account or password needed — they email you an
@@ -66,7 +76,7 @@ works in the meantime.
    web3formsKey: 'your-access-key-here',
    ```
 3. Rebuild / redeploy. That's it — form submissions now arrive in your inbox,
-   and the visitor sees a "Message sent" confirmation without ever leaving the
+   and the visitor sees an "Enquiry sent" confirmation without ever leaving the
    page. Free plan: 250 submissions/month.
 
 ---
@@ -194,14 +204,22 @@ GitHub rebuilds and redeploys automatically within a minute or two.
 public/            Static files copied as-is (favicon, CNAME, robots.txt)
 src/
   data/
-    site.ts        ← your details, hero text, bio, capabilities
-    projects.ts    ← the projects shown in the Projects grid
-  components/      Page sections (Nav, Hero, About, Projects, Contact, Footer)
+    site.ts        ← company details, hero, About, due diligence, testimonials
+    services.ts    ← the three service pages
+    products.ts    ← the three product pages
+    projects.ts    ← the case studies
+  components/      Shared blocks (Nav, Footer, PageHero, CaseStudyCard, CtaBand, …)
   layouts/
     Layout.astro   The HTML shell shared by every page
   pages/
-    index.astro    The home page (assembles the sections)
+    index.astro    The home page
+    services/      Services index + [slug] template
+    products/      Products index + [slug] template
+    case-studies/  Case-study index (with filters) + [slug] template
+    about/         Company, founder profile, working with schools
+    contact.astro  Enquiry form and contact details
     404.astro      The "page not found" page
+astro.config.mjs   Includes redirects from the old /projects/* URLs
   styles/
     global.css     Design tokens (colours, fonts) and shared styles
 .github/workflows/

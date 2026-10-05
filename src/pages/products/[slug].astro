@@ -1,0 +1,277 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import BrowserFrame from '../../components/BrowserFrame.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
+import { products, type Product } from '../../data/products';
+import { site } from '../../data/site';
+
+export function getStaticPaths() {
+  return products.map((product) => ({ params: { slug: product.slug }, props: { product } }));
+}
+
+const { product } = Astro.props as { product: Product };
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: product.name,
+  description: product.summary,
+  applicationCategory: 'EducationalApplication',
+  operatingSystem: 'Web browser',
+  url: product.liveUrl,
+  image: new URL(product.image.src, site.url).href,
+  publisher: { '@id': `${site.url}/#organization` },
+};
+---
+
+<Layout
+  title={product.pageTitle}
+  description={product.summary}
+  ogImage={`/og/${product.slug}.png`}
+  schema={[schema]}
+>
+  <Nav />
+  <main id="main" tabindex="-1">
+    <section class="product-hero">
+      <div class="container">
+        <Breadcrumbs
+          items={[
+            { href: '/products', label: 'Products' },
+            { href: `/products/${product.slug}`, label: product.name },
+          ]}
+        />
+        <div class="product-hero-grid">
+          <div>
+            <div class="product-name">
+              <img src={product.logo} alt="" width="52" height="52" />
+              <span class="badge" data-kind="Product">Product</span>
+            </div>
+            <h1>{product.name}</h1>
+            <p class="product-tagline">{product.tagline}</p>
+            <p class="product-summary">{product.summary}</p>
+            <div class="btn-row">
+              <a class="btn btn-primary" href={product.liveUrl} target="_blank" rel="noopener noreferrer">
+                Visit product site
+                <Icon name="arrow-up-right" size={16} />
+                <span class="visually-hidden">(opens in new tab)</span>
+              </a>
+              <a class="btn btn-secondary" href="/contact?topic=Software%20products">Ask for a demo</a>
+            </div>
+          </div>
+          <BrowserFrame src={product.image.src} alt={product.image.alt} eager />
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <h2>What it does</h2>
+        </div>
+        <ul class="grid-3 features">
+          {
+            product.features.map((f) => (
+              <li class="card">
+                <h3>{f.title}</h3>
+                <p>{f.text}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container split">
+        <div>
+          <h2>Who it's for</h2>
+          <ul class="who-list">
+            {
+              product.audience.map((a) => (
+                <li>
+                  <strong>{a.role}</strong>
+                  <span>{a.text}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div>
+          <h2>Where it came from</h2>
+          <p class="origin">{product.origin}</p>
+          <a class="text-link" href={`/case-studies/${product.caseStudy}`}>Read the {product.name} case study</a>
+        </div>
+      </div>
+    </section>
+
+    {
+      product.gallery && (
+        <section class="section">
+          <div class="container">
+            <div class="section-head">
+              <h2>A closer look</h2>
+            </div>
+            <div class="grid-2">
+              {product.gallery.map((shot) => (
+                <figure class="shot">
+                  <BrowserFrame src={shot.src} alt={shot.caption} />
+                  <figcaption>{shot.caption}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <section class:list={['section', { 'section-alt': product.gallery }]}>
+      <div class="container">
+        <div class="section-head">
+          <h2>Pricing and data protection</h2>
+        </div>
+        <dl class="terms">
+          <div class="card">
+            <dt>Pricing</dt>
+            <dd>{product.pricing || 'Pricing is available on request for departments, schools and trusts.'}</dd>
+          </div>
+          {
+            product.trial && (
+              <div class="card">
+                <dt>Trial</dt>
+                <dd>{product.trial}</dd>
+              </div>
+            )
+          }
+          {
+            product.dataProtection && (
+              <div class="card">
+                <dt>Data protection</dt>
+                <dd>{product.dataProtection}</dd>
+              </div>
+            )
+          }
+        </dl>
+      </div>
+    </section>
+
+    <CtaBand
+      title={`Talk to us about ${product.name}`}
+      text={`Ask for a demo, pricing for your school, or help getting started. ${site.responseTime}`}
+    />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .product-hero {
+    padding-block: clamp(1.5rem, 3vw, 2rem) clamp(3rem, 6vw, 4.5rem);
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
+  }
+  .product-hero-grid {
+    margin-top: clamp(1.75rem, 4vw, 2.75rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: clamp(2rem, 5vw, 3.5rem);
+    align-items: center;
+  }
+  .product-name {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .product-tagline {
+    margin-top: 0.6rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--teal);
+  }
+  .product-summary {
+    margin-top: 1rem;
+    max-width: 60ch;
+    color: var(--text-muted);
+  }
+  .product-hero .btn-row {
+    margin-top: 1.75rem;
+  }
+
+  .features h3 {
+    font-size: 1.25rem;
+  }
+  .features p {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(2.5rem, 6vw, 5rem);
+  }
+  .who-list {
+    margin-top: 1.5rem;
+  }
+  .who-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--border-strong);
+  }
+  .who-list li:first-child {
+    border-top: 1px solid var(--border-strong);
+  }
+  .who-list strong {
+    color: var(--heading);
+  }
+  .who-list span {
+    color: var(--text-muted);
+  }
+  .origin {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    max-width: 60ch;
+    color: var(--text-muted);
+  }
+  .split .text-link {
+    font-weight: 600;
+  }
+
+  .shot {
+    margin: 0;
+  }
+  .shot figcaption {
+    margin-top: 0.6rem;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+
+  .terms {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--gutter);
+  }
+  .terms dt {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .terms dd {
+    margin-top: 0.5rem;
+    color: var(--text);
+  }
+
+  @media (max-width: 900px) {
+    .product-hero-grid,
+    .split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

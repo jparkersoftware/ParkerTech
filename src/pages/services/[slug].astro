@@ -1,0 +1,186 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+import PageHero from '../../components/PageHero.astro';
+import CaseStudyCard from '../../components/CaseStudyCard.astro';
+import Faq from '../../components/Faq.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { services, sharedFaqs, type Service } from '../../data/services';
+import { projects } from '../../data/projects';
+import { site } from '../../data/site';
+
+export function getStaticPaths() {
+  return services.map((service) => ({ params: { slug: service.slug }, props: { service } }));
+}
+
+const { service } = Astro.props as { service: Service };
+const related = projects.filter((p) => p.service === service.slug).slice(0, 3);
+const faqs = [...service.faqs, ...sharedFaqs];
+---
+
+<Layout title={service.title} description={service.metaDescription}>
+  <Nav />
+  <main id="main" tabindex="-1">
+    <PageHero
+      crumbs={[
+        { href: '/services', label: 'Services' },
+        { href: `/services/${service.slug}`, label: service.navLabel },
+      ]}
+      eyebrow="Services"
+      title={service.title}
+      lead={service.intro}
+      image={service.image}
+    >
+      <div class="btn-row">
+        <a class="btn btn-primary" href="/contact">Talk to us</a>
+        <a class="btn btn-secondary" href={`mailto:${site.email}`}>Email us</a>
+      </div>
+    </PageHero>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <h2>What we do</h2>
+        </div>
+        <ul class="grid-3 what-list">
+          {
+            service.whatWeDo.map((item) => (
+              <li class="card">
+                <h3>{item.title}</h3>
+                <p>{item.text}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container split">
+        <div>
+          <h2>Who it is for</h2>
+          <ul class="who-list">
+            {
+              service.whoFor.map((item) => (
+                <li>
+                  <strong>{item.role}</strong>
+                  <span>{item.text}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div>
+          <h2>Typical engagements</h2>
+          <ul class="engagements">
+            {
+              service.engagements.map((e) => (
+                <li class="card">
+                  <h3>{e.title}</h3>
+                  <p>{e.text}</p>
+                  {e.duration && <p class="duration">Typical duration: {e.duration}</p>}
+                </li>
+              ))
+            }
+          </ul>
+          <p class="pricing">
+            {
+              service.pricingBasis
+                ? `Pricing: ${service.pricingBasis}.`
+                : 'Every engagement is scoped and quoted in writing after a free discovery call.'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    {
+      related.length > 0 && (
+        <section class="section">
+          <div class="container">
+            <div class="section-head">
+              <h2>Related case studies</h2>
+            </div>
+            <div class="grid-3">
+              {related.map((project) => (
+                <CaseStudyCard project={project} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <Faq items={faqs} />
+    <CtaBand />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  .what-list h3 {
+    font-size: 1.25rem;
+  }
+  .what-list p {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    gap: clamp(2.5rem, 6vw, 5rem);
+  }
+  .who-list {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .who-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--border-strong);
+  }
+  .who-list li:first-child {
+    border-top: 1px solid var(--border-strong);
+  }
+  .who-list strong {
+    color: var(--heading);
+  }
+  .who-list span {
+    color: var(--text-muted);
+  }
+
+  .engagements {
+    margin-top: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .engagements h3 {
+    font-size: 1.2rem;
+  }
+  .engagements p {
+    margin-top: 0.4rem;
+    color: var(--text-muted);
+  }
+  .engagements .duration {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-deep);
+  }
+  .pricing {
+    margin-top: 1.25rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  @media (max-width: 900px) {
+    .split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
