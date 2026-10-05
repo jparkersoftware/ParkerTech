@@ -55,12 +55,21 @@ const { company } = site;
             <li>
               <Icon name="map-pin" size={20} />
               <span>
-                <span class="details-label">
-                  {company.registeredOffice.length > 0 ? 'Registered office' : 'Based in'}
-                </span>
-                {company.registeredOffice.length > 0 ? company.registeredOffice.join(', ') : site.location}
+                <span class="details-label">Based in</span>
+                {site.location}
               </span>
             </li>
+            {
+              company.registeredOffice.length > 0 && (
+                <li>
+                  <Icon name="file" size={20} />
+                  <span>
+                    <span class="details-label">Registered office</span>
+                    {company.registeredOffice.join(', ')}
+                  </span>
+                </li>
+              )
+            }
             <li>
               <Icon name="clock" size={20} />
               <span>

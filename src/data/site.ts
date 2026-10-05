@@ -51,13 +51,21 @@ export const site = {
   // never shows a half-finished or placeholder legal notice.
   company: {
     /** Full registered name exactly as held at Companies House. */
-    legalName: '',
+    legalName: 'Parker Tech Ltd',
     /** Companies House registration number. */
-    number: '',
+    number: '17350197',
     /** e.g. 'England and Wales'. */
     placeOfRegistration: 'England and Wales',
-    /** Registered office address, one line per row. */
-    registeredOffice: [] as string[],
+    /** Registered office address, one line per row (postcode last). */
+    registeredOffice: [
+      'Suite 2 Second Floor North',
+      'The Fitted Rigging House',
+      'Anchor Wharf',
+      'The Historic Dockyard',
+      'Chatham',
+      'Kent',
+      'ME4 4TZ',
+    ] as string[],
     /** VAT registration number — leave empty if not VAT registered. */
     vatNumber: '',
     /** ICO data protection register number — leave empty until registered. */
