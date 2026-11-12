@@ -114,7 +114,12 @@ import { site } from '../data/site';
 
       const w = window as any;
       w.dataLayer = w.dataLayer || [];
-      const gtag = (...args: unknown[]) => w.dataLayer.push(args);
+      // gtag.js only recognises `arguments` objects, not arrays, so this must
+      // stay a normal function (an arrow/rest-args version silently sends nothing).
+      function gtag(..._args: unknown[]) {
+        // eslint-disable-next-line prefer-rest-params
+        w.dataLayer.push(arguments);
+      }
       gtag('js', new Date());
       gtag('config', gaId);
     };
